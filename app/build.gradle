@@ -38,14 +38,17 @@ dependencies {
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.3.0'
 
     def lifecycle_version = "2.2.0"
-    def arch_version = "2.1.0"
 
-    //Retrofit
+     //Retrofit
     implementation 'com.squareup.retrofit2:retrofit:2.9.0'
+    //Gson
+    implementation 'com.squareup.retrofit2:converter-gson:2.9.0'
 
     //MVVM
-    // ViewModel
     implementation "androidx.lifecycle:lifecycle-viewmodel:$lifecycle_version"
-    // LiveData
     implementation "androidx.lifecycle:lifecycle-livedata:$lifecycle_version"
+    implementation "androidx.lifecycle:lifecycle-extensions:$lifecycle_version"
+
+
+
 }
