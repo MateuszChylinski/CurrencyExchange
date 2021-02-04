@@ -10,11 +10,12 @@ import com.example.currencyexchange.Model.CurrencyModel;
 import com.example.currencyexchange.Repository.CurrencyRepository;
 
 import java.util.List;
+import java.util.Map;
 
 public class CurrencyViewModel extends AndroidViewModel {
 
     private CurrencyRepository mRepository;
-    private MutableLiveData<CurrencyModel> mCurrencyRateData;
+    private MutableLiveData<Map<String, Float>> mCurrencyRateData;
 
     public CurrencyViewModel(@NonNull Application application) {
         super(application);
@@ -22,7 +23,7 @@ public class CurrencyViewModel extends AndroidViewModel {
         mCurrencyRateData = mRepository.getCurrentExchangeRates();
     }
 
-    public MutableLiveData<CurrencyModel> getCurrencyRateData(){
+    public MutableLiveData<Map<String, Float>> getCurrencyRateData() {
         return mCurrencyRateData;
     }
 }

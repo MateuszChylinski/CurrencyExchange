@@ -3,13 +3,16 @@ package com.example.currencyexchange.Model;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class CurrencyModel {
 
+    @SerializedName("base")
     private String base;
+    @SerializedName("date")
     private String date;
-    private List<Currencies> currenciesList = null;
 
     public String getBase() {
         return base;
@@ -19,11 +22,14 @@ public class CurrencyModel {
         return date;
     }
 
-    public List<Currencies> getCurrenciesList() {
+    @SerializedName("rates")
+    private HashMap<String, Float> currenciesList = null;
+
+    public HashMap<String, Float> getCurrenciesList() {
         return currenciesList;
     }
 
-    class Currencies {
+    public class Currencies {
 
         @SerializedName("CAD")
         @Expose
@@ -121,5 +127,133 @@ public class CurrencyModel {
         @SerializedName("MYR")
         @Expose
         public float mYR;
+
+        public float getcAD() {
+            return cAD;
+        }
+
+        public float gethKD() {
+            return hKD;
+        }
+
+        public float getiSK() {
+            return iSK;
+        }
+
+        public float getpHP() {
+            return pHP;
+        }
+
+        public float getdKK() {
+            return dKK;
+        }
+
+        public float gethUF() {
+            return hUF;
+        }
+
+        public float getcZK() {
+            return cZK;
+        }
+
+        public float getaUD() {
+            return aUD;
+        }
+
+        public float getrON() {
+            return rON;
+        }
+
+        public float getsEK() {
+            return sEK;
+        }
+
+        public float getiDR() {
+            return iDR;
+        }
+
+        public float getiNR() {
+            return iNR;
+        }
+
+        public float getbRL() {
+            return bRL;
+        }
+
+        public float getrUB() {
+            return rUB;
+        }
+
+        public float gethRK() {
+            return hRK;
+        }
+
+        public float getjPY() {
+            return jPY;
+        }
+
+        public float gettHB() {
+            return tHB;
+        }
+
+        public float getcHF() {
+            return cHF;
+        }
+
+        public float getsGD() {
+            return sGD;
+        }
+
+        public float getpLN() {
+            return pLN;
+        }
+
+        public float getbGN() {
+            return bGN;
+        }
+
+        public float gettRY() {
+            return tRY;
+        }
+
+        public float getcNY() {
+            return cNY;
+        }
+
+        public float getnOK() {
+            return nOK;
+        }
+
+        public float getnZD() {
+            return nZD;
+        }
+
+        public float getzAR() {
+            return zAR;
+        }
+
+        public float getuSD() {
+            return uSD;
+        }
+
+        public float getmXN() {
+            return mXN;
+        }
+
+        public float getiLS() {
+            return iLS;
+        }
+
+        public float getgBP() {
+            return gBP;
+        }
+
+        public float getkRW() {
+            return kRW;
+        }
+
+        public float getmYR() {
+            return mYR;
+        }
     }
 }
