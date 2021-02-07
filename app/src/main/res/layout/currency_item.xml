@@ -9,8 +9,8 @@
 
     <ImageView
         android:id="@+id/currency_flag"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="64dp"
+        android:layout_height="64dp"
         android:src="@mipmap/ic_launcher"
         android:layout_weight="30"/>
 
