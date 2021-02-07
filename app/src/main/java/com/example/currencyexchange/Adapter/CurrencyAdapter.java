@@ -11,6 +11,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.currencyexchange.Model.CurrencyModel;
+import com.example.currencyexchange.Picasso.CurrencyFlag;
 import com.example.currencyexchange.R;
 
 import java.util.ArrayList;
@@ -21,6 +22,7 @@ import java.util.Map;
 import static android.content.ContentValues.TAG;
 
 public class CurrencyAdapter extends RecyclerView.Adapter<CurrencyAdapter.CurrencyViewHolder> {
+    private CurrencyFlag mCurrencyFlag = new CurrencyFlag();
 
     private Map<String, Float> mCurrencyData = new HashMap<>();
 
@@ -44,6 +46,8 @@ public class CurrencyAdapter extends RecyclerView.Adapter<CurrencyAdapter.Curren
             if (index == position) {
                 holder.mCurrencyName.setText(map.getKey());
                 holder.mCurrencyRate.setText(String.valueOf(map.getValue()));
+
+                mCurrencyFlag.setCurrencyFlag(holder.mCurrencyFlag, map.getKey());
             }
             index++;
         }
