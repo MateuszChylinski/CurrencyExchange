@@ -1,4 +1,4 @@
-package com.example.currencyexchange.API
+package com.example.currencyexchange.APIs
 
 import com.example.currencyexchange.Model.CurrencyModel
 import retrofit2.Call
@@ -16,7 +16,6 @@ interface ApiServices {
 
     companion object {
         private const val url = "https://api.apilayer.com/"
-
 
         var apiServices: ApiServices? = null
         fun getInstance(): ApiServices {

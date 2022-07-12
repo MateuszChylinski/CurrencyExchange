@@ -1,4 +1,4 @@
-package com.example.currencyexchange.ViewModel
+package com.example.currencyexchange.ViewModels
 
 import android.content.ContentValues.TAG
 import android.util.Log
@@ -10,7 +10,6 @@ import retrofit2.Response
 
 class CurrencyViewModel constructor(private val currencyRepository: CurrencyRepository) :
     ViewModel() {
-
     val currencyRatesList = MutableLiveData<CurrencyModel>()
     val errorMessage = MutableLiveData<String>()
 
@@ -24,7 +23,7 @@ class CurrencyViewModel constructor(private val currencyRepository: CurrencyRepo
                 currencyRatesList.postValue(response.body())
             }
             override fun onFailure(call: retrofit2.Call<CurrencyModel>, t: Throwable) {
-                Log.d(TAG, "onFailure: ERROR@@@@@@@@@@@@@@@@@@@@@@@@@@")
+                Log.d(TAG, "onFailure: ERROR")
                 errorMessage.postValue(t.message)
             }
         })

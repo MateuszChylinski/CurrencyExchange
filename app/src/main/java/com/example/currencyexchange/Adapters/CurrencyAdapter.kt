@@ -1,4 +1,4 @@
-package com.example.currencyexchange.Adapter
+package com.example.currencyexchange.Adapters
 
 import android.view.LayoutInflater
 import android.view.View
