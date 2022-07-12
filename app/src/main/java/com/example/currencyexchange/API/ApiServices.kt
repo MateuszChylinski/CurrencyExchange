@@ -16,6 +16,8 @@ interface ApiServices {
 
     companion object {
         private const val url = "https://api.apilayer.com/"
+
+
         var apiServices: ApiServices? = null
         fun getInstance(): ApiServices {
             if (apiServices == null) {
