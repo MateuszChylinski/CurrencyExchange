@@ -1,4 +1,4 @@
-package com.example.currencyexchange.API
+package com.example.currencyexchange.APIs
 
 import com.example.currencyexchange.Model.CurrencyModel
 import retrofit2.Call
@@ -14,9 +14,17 @@ interface ApiServices {
         @Query("apikey") apikey: String
     ): Call<CurrencyModel>
 
+    @GET("/fixer/convert")
+    fun convertCurrency(
+        @Query("to") to: String,
+        @Query("from") from: String,
+        @Query("amount") amount: Double?,
+        @Query("apikey") apiKey: String
+    ): Call<CurrencyModel>
+
+
     companion object {
         private const val url = "https://api.apilayer.com/"
-
 
         var apiServices: ApiServices? = null
         fun getInstance(): ApiServices {

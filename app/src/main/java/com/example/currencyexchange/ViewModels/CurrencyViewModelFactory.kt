@@ -1,10 +1,7 @@
-package com.example.currencyexchange.ViewModel
+package com.example.currencyexchange.ViewModels
 
-import android.content.ContentValues.TAG
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import com.example.currencyexchange.Model.CurrencyModel
 import com.example.currencyexchange.Repository.CurrencyRepository
 import java.lang.IllegalArgumentException
 
