@@ -14,6 +14,15 @@ interface ApiServices {
         @Query("apikey") apikey: String
     ): Call<CurrencyModel>
 
+    @GET("/fixer/convert")
+    fun convertCurrency(
+        @Query("to") to: String,
+        @Query("from") from: String,
+        @Query("amount") amount: Double?,
+        @Query("apikey") apiKey: String
+    ): Call<CurrencyModel>
+
+
     companion object {
         private const val url = "https://api.apilayer.com/"
 
