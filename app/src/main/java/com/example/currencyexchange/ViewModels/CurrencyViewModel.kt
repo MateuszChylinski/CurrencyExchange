@@ -47,8 +47,6 @@ class CurrencyViewModel constructor(private val currencyRepository: CurrencyRepo
             }
         })
     }
-
-
 }
 
 

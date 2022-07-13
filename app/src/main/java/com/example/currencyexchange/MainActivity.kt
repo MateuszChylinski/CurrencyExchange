@@ -27,7 +27,7 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        fetchFromViewModel()
+//        fetchFromViewModel()
         test()
 
 
@@ -44,22 +44,23 @@ class MainActivity : AppCompatActivity() {
         viewPager.adapter = fragmentsAdapter
     }
 
-    private fun fetchFromViewModel() {
-        val mRecyclerView = findViewById<RecyclerView>(R.id.rv_test)
-        val mAdapter = CurrencyAdapter()
-        mRecyclerView.layoutManager = LinearLayoutManager(this)
-
-        mViewModel =
-            ViewModelProvider(this, CurrencyViewModelFactory(CurrencyRepository(mRetrofitService)))
-                .get(CurrencyViewModel::class.java)
-        mViewModel.fetchLatestRates()
-        mViewModel.currencyRatesList.observe(this, Observer {
-            mAdapter.setData(it.rates)
-            mRecyclerView.adapter = mAdapter
-        })
-        mViewModel.errorMessage.observe(this, Observer {
-        })
-    }
+//    TODO - move this fun to the latest rates fragment. It doesn't belong here anymore
+//    private fun fetchFromViewModel() {
+//        val mRecyclerView = findViewById<RecyclerView>(R.id.rv_test)
+//        val mAdapter = CurrencyAdapter()
+//        mRecyclerView.layoutManager = LinearLayoutManager(this)
+//
+//        mViewModel =
+//            ViewModelProvider(this, CurrencyViewModelFactory(CurrencyRepository(mRetrofitService)))
+//                .get(CurrencyViewModel::class.java)
+//        mViewModel.fetchLatestRates()
+//        mViewModel.currencyRatesList.observe(this, Observer {
+//            mAdapter.setData(it.rates)
+//            mRecyclerView.adapter = mAdapter
+//        })
+//        mViewModel.errorMessage.observe(this, Observer {
+//        })
+//    }
 
 
 }
