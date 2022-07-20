@@ -4,21 +4,23 @@ import android.content.ContentValues.TAG
 import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import com.example.currencyexchange.Model.CurrencyModel
-import com.example.currencyexchange.Repository.CurrencyRepository
+import androidx.lifecycle.ViewModelProvider
+import com.example.currencyexchange.Models.CurrencyModel
+import com.example.currencyexchange.Repository.CurrencyRetrofitRepository
 import retrofit2.Call
 import retrofit2.Response
+import java.lang.IllegalArgumentException
 
-class CurrencyViewModel constructor(private val currencyRepository: CurrencyRepository) :
+class CurrencyRetrofitViewModel constructor(private val CurrencyRetrofitRepository: CurrencyRetrofitRepository) :
     ViewModel() {
 
     val latestCurrencyRates = MutableLiveData<CurrencyModel>()
     val convertCurrencyData = MutableLiveData<CurrencyModel>()
-
     val errorMessage = MutableLiveData<String>()
 
+
     fun fetchLatestRates() {
-        val response = currencyRepository.fetchLatestRates()
+        val response = CurrencyRetrofitRepository.fetchLatestRates()
         response.enqueue(object : retrofit2.Callback<CurrencyModel> {
             override fun onResponse(
                 call: retrofit2.Call<CurrencyModel>, response: Response<CurrencyModel>
@@ -34,7 +36,7 @@ class CurrencyViewModel constructor(private val currencyRepository: CurrencyRepo
     }
 
     fun convertCurrency() {
-        val response = currencyRepository.convertCurrency()
+        val response = CurrencyRetrofitRepository.convertCurrency()
         response.enqueue(object : retrofit2.Callback<CurrencyModel> {
             override fun onResponse(call: Call<CurrencyModel>, response: Response<CurrencyModel>) {
                 if (response.isSuccessful) {
@@ -46,6 +48,16 @@ class CurrencyViewModel constructor(private val currencyRepository: CurrencyRepo
                 errorMessage.postValue(t.message)
             }
         })
+    }
+}
+
+class CurrencyViewModelFactory(private val repository: CurrencyRetrofitRepository): ViewModelProvider.Factory {
+    override fun <T : ViewModel> create(modelClass: Class<T>): T {
+        if (modelClass.isAssignableFrom(CurrencyRetrofitViewModel::class.java)) {
+            @Suppress("UNCHECKED_CAST")
+            return CurrencyRetrofitViewModel(repository) as T
+        }
+        throw IllegalArgumentException("Unknown retrofit ViewModel")
     }
 }
 
