@@ -1,6 +1,6 @@
-package com.example.currencyexchange.APIs
+package com.example.currencyexchange.API
 
-import com.example.currencyexchange.Model.CurrencyModel
+import com.example.currencyexchange.Models.CurrencyModel
 import retrofit2.Call
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory

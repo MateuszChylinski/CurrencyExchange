@@ -7,37 +7,50 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProvider
-import com.example.currencyexchange.APIs.ApiServices
+import androidx.fragment.app.activityViewModels
+import androidx.fragment.app.viewModels
+import com.example.currencyexchange.API.ApiServices
+import com.example.currencyexchange.Application.CurrencyApplication
+import com.example.currencyexchange.Models.CurrencyDatabaseModel
 import com.example.currencyexchange.R
-import com.example.currencyexchange.Repository.CurrencyRepository
-import com.example.currencyexchange.ViewModels.CurrencyViewModel
-import com.example.currencyexchange.ViewModels.CurrencyViewModelFactory
+import com.example.currencyexchange.ViewModels.CurrencyDatabaseFactory
+import com.example.currencyexchange.ViewModels.CurrencyDatabaseViewModel
 
 class Conversion : Fragment() {
-    private lateinit var mViewModel: CurrencyViewModel
+
     private val mRetrofitService = ApiServices.getInstance()
+    private var mCurrenciesList = mutableListOf<String>()
+    private val mViewModel: CurrencyDatabaseViewModel by activityViewModels{
+        CurrencyDatabaseFactory((activity?.application as CurrencyApplication).repository)
+    }
+
+
+
+
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?): View? {
 
-        test()
-
+        testObserve()
 
         return inflater.inflate(R.layout.fragment_conversion, container, false)
-
-    }
-    private fun test(){
-        mViewModel = ViewModelProvider(this, CurrencyViewModelFactory(CurrencyRepository(mRetrofitService)))
-            .get(CurrencyViewModel::class.java)
-        mViewModel.convertCurrency()
-        mViewModel.convertCurrencyData.observe(viewLifecycleOwner, Observer {
-            Log.i(TAG, "test: $it")
-        })
     }
 
+    private fun testObserve(){
+        val currency = CurrencyDatabaseModel("to test")
+        mViewModel.insertNewCurrency(currency)
+
+        mViewModel.allCurrencies.observe(viewLifecycleOwner){
+            curr -> curr.let {
+            Log.i(TAG, "testObserve: $it")
+        }
+        }
+
+//        currencyViewModel.allCurrencies.observe(this) {
+//            currency.let {
+//                Log.i(ContentValues.TAG, "onCreate: $it")
+//            }
+//        }
+    }
 }
-
-// TODO Fill spinners with all of the currencies from the api

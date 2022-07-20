@@ -1,6 +1,5 @@
-package com.example.currencyexchange.Model
+package com.example.currencyexchange.Models
 
-import com.google.gson.annotations.Expose
 import com.google.gson.annotations.SerializedName
 
 data class CurrencyModel(
