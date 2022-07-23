@@ -20,20 +20,6 @@ abstract class CurrencyDatabase() : RoomDatabase() {
     ) : RoomDatabase.Callback() {
         override fun onCreate(db: SupportSQLiteDatabase) {
             super.onCreate(db)
-            INSTANCE?.let { db ->
-                scope.launch {
-                    populateDB(db.getDAO())
-                }
-            }
-        }
-
-        suspend fun populateDB(currencyDAO: CurrencyDAO) {
-
-            val t1 = CurrencyDatabaseModel("Test currency")
-            currencyDAO.insertNewCurrency(t1)
-
-            val t2 = CurrencyDatabaseModel("Second test currency")
-            currencyDAO.insertNewCurrency(t2)
         }
     }
 
@@ -59,7 +45,5 @@ abstract class CurrencyDatabase() : RoomDatabase() {
             }
         }
     }
-
-
 }
 

@@ -9,6 +9,11 @@ import java.lang.IllegalArgumentException
 
 class CurrencyDatabaseViewModel(private val currencyDatabaseRepository: CurrencyDatabaseRepository) :
     ViewModel() {
+    val currencyNames = mutableListOf<CurrencyDatabaseModel>()
+
+    fun populateNames(name: String){
+        currencyNames.add(CurrencyDatabaseModel(name))
+    }
 
     fun insertNewCurrency(currencyDatabaseModel: CurrencyDatabaseModel) = viewModelScope.launch {
         currencyDatabaseRepository.insertNewCurrency(currencyDatabaseModel)
