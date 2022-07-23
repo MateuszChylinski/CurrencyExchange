@@ -18,20 +18,12 @@ import com.example.currencyexchange.ViewModels.CurrencyDatabaseViewModel
 
 class MainActivity : AppCompatActivity() {
 
-    private val mRetrofitService = ApiServices.getInstance()
-
-
-    val wordViewModel: CurrencyDatabaseViewModel by viewModels {
-        CurrencyDatabaseFactory((application as CurrencyApplication).repository)
-    }
-
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        test()
+        setupFragments()
     }
-    private fun test(){
+    private fun setupFragments(){
         val viewPager: ViewPager2 = findViewById(R.id.viewPager)
         val fragments: ArrayList<Fragment> = arrayListOf(
             Latest(),
@@ -43,5 +35,3 @@ class MainActivity : AppCompatActivity() {
         viewPager.adapter = fragmentsAdapter
     }
 }
-//TODO Call latest, then make a db which will contain all of the currencies names
-//TODO (if possible) make menu on top right where user can

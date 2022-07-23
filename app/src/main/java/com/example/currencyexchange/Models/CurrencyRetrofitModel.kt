@@ -4,20 +4,25 @@ import com.google.gson.annotations.SerializedName
 
 data class CurrencyModel(
     @SerializedName("success")
-    val success: String?,
+    val success: String,
     @SerializedName("timestamp")
-    val timestamp: String?,
+    val timestamp: String,
     @SerializedName("base")
-    val base: String?,
+    val base: String,
     @SerializedName("date")
-    val date: String?,
+    val date: String,
     @SerializedName("result")
-    val result: Double?,
+    val result: Double,
     @SerializedName("rates")
-    val rates: HashMap<String, Double>
+    val rates: Map<String, Rates>,
+    @SerializedName("start_date")
+    val startDate: String,
+    @SerializedName("end_date")
+    val endDAte: String
 )
 
 data class Query(
+
     @SerializedName("from")
     val from: String?,
     @SerializedName("to")
@@ -33,4 +38,14 @@ data class Info(
     val currencyRate: Double?
 )
 
+data class Rates(
+    @SerializedName("start_rate")
+    val startRate: Double,
+    @SerializedName("end_rate")
+    val endRate: Double,
+    @SerializedName("change")
+    val change: Double,
+    @SerializedName("change_pct")
+    val change_pct: Double
 
+)

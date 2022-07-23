@@ -1,6 +1,7 @@
 package com.example.currencyexchange.API
 
 import com.example.currencyexchange.Models.CurrencyModel
+import com.example.currencyexchange.Models.LatestRates
 import retrofit2.Call
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
@@ -12,14 +13,23 @@ interface ApiServices {
     fun getRatesData(
         @Query("base") base: String,
         @Query("apikey") apikey: String
-    ): Call<CurrencyModel>
+    ): Call<LatestRates>
 
     @GET("/fixer/convert")
     fun convertCurrency(
         @Query("to") to: String,
         @Query("from") from: String,
-        @Query("amount") amount: Double?,
+        @Query("amount") amount: Double,
         @Query("apikey") apiKey: String
+    ): Call<CurrencyModel>
+
+    @GET("/fixer/fluctuation")
+    fun getFluctuationData(
+        @Query("start_date") startDate: String,
+        @Query("end_date") endDate: String,
+        @Query("base") base: String,
+        @Query("symbols") symbol: String,
+        @Query("apikey") apikey: String
     ): Call<CurrencyModel>
 
 

@@ -6,6 +6,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.example.currencyexchange.Models.CurrencyModel
+import com.example.currencyexchange.Models.LatestRates
 import com.example.currencyexchange.Repository.CurrencyRetrofitRepository
 import retrofit2.Call
 import retrofit2.Response
@@ -14,18 +15,34 @@ import java.lang.IllegalArgumentException
 class CurrencyRetrofitViewModel constructor(private val CurrencyRetrofitRepository: CurrencyRetrofitRepository) :
     ViewModel() {
 
-    val latestCurrencyRates = MutableLiveData<CurrencyModel>()
+    val latestCurrencyRates = MutableLiveData<LatestRates>()
+    val fluctuationRates = MutableLiveData<CurrencyModel>()
     val convertCurrencyData = MutableLiveData<CurrencyModel>()
     val errorMessage = MutableLiveData<String>()
 
 
     fun fetchLatestRates() {
         val response = CurrencyRetrofitRepository.fetchLatestRates()
+        response.enqueue(object : retrofit2.Callback<LatestRates> {
+            override fun onResponse(
+                call: retrofit2.Call<LatestRates>, response: Response<LatestRates>
+            ) {
+                latestCurrencyRates.postValue(response.body())
+            }
+
+            override fun onFailure(call: retrofit2.Call<LatestRates>, t: Throwable) {
+                Log.d(TAG, "onFailure: LATEST RATES ERROR")
+                errorMessage.postValue(t.message)
+            }
+        })
+    }
+    fun fetchFluctuation(){
+        val response = CurrencyRetrofitRepository.fetchFluctuation()
         response.enqueue(object : retrofit2.Callback<CurrencyModel> {
             override fun onResponse(
                 call: retrofit2.Call<CurrencyModel>, response: Response<CurrencyModel>
             ) {
-                latestCurrencyRates.postValue(response.body())
+                fluctuationRates.postValue(response.body())
             }
 
             override fun onFailure(call: retrofit2.Call<CurrencyModel>, t: Throwable) {
@@ -50,6 +67,11 @@ class CurrencyRetrofitViewModel constructor(private val CurrencyRetrofitReposito
         })
     }
 }
+
+
+
+
+
 
 class CurrencyViewModelFactory(private val repository: CurrencyRetrofitRepository): ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
