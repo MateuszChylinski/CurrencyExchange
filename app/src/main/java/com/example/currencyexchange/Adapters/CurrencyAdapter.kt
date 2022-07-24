@@ -6,12 +6,13 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.example.currencyexchange.R
+import org.w3c.dom.Text
 
 class CurrencyAdapter() : RecyclerView.Adapter<CurrencyAdapter.ViewHolder>(){
-    private var mCurrencyData = HashMap<String, Double>()
+    private var data = HashMap<String, Double>()
 
-    fun setData(data: HashMap<String, Double>) {
-        this.mCurrencyData = data
+    fun setData(data: HashMap<String, Double>){
+        this.data = data
         notifyDataSetChanged()
     }
 
@@ -21,17 +22,16 @@ class CurrencyAdapter() : RecyclerView.Adapter<CurrencyAdapter.ViewHolder>(){
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        holder.currencyOrigin.text = mCurrencyData.keys.toTypedArray()[position]
-        holder.currencyValue.text = mCurrencyData.values.toTypedArray()[position].toString()
+        holder.currencyOrigin.text = data.keys.toTypedArray()[position]
+        holder.currencyValue.text = data.values.toTypedArray()[position].toString()
     }
 
     override fun getItemCount(): Int {
-        return mCurrencyData.size
+        return data.size
     }
 
     class ViewHolder(ItemView: View) : RecyclerView.ViewHolder(ItemView) {
-        val currencyOrigin: TextView = ItemView.findViewById(R.id.currency_origin)
-        val currencyValue: TextView = ItemView.findViewById(R.id.currency_value)
+        val currencyOrigin: TextView = ItemView.findViewById(R.id.latest_currency_origin)
+        val currencyValue: TextView = ItemView.findViewById(R.id.latest_currency_value)
     }
-
 }
