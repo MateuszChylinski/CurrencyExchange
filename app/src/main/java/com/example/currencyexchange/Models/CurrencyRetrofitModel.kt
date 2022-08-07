@@ -13,12 +13,15 @@ data class CurrencyModel(
     val date: String,
     @SerializedName("result")
     val result: Double,
-    @SerializedName("rates")
-    val rates: Map<String, Rates>,
+//    @SerializedName("rates")
+//    val rates: Rates,
     @SerializedName("start_date")
     val startDate: String,
     @SerializedName("end_date")
-    val endDAte: String
+    val endDAte: String,
+
+    val rates: Map<String, Test>
+
 )
 
 data class Query(
@@ -38,7 +41,9 @@ data class Info(
     val currencyRate: Double?
 )
 
-data class Rates(
+
+
+data class Test(
     @SerializedName("start_rate")
     val startRate: Double,
     @SerializedName("end_rate")
@@ -47,5 +52,4 @@ data class Rates(
     val change: Double,
     @SerializedName("change_pct")
     val change_pct: Double
-
 )

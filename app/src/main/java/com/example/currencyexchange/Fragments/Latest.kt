@@ -1,6 +1,5 @@
 package com.example.currencyexchange.Fragments
 
-import android.annotation.SuppressLint
 import android.content.ContentValues.TAG
 import android.os.Bundle
 import android.util.Log
@@ -9,11 +8,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
-import androidx.activity.viewModels
 import androidx.fragment.app.activityViewModels
-import androidx.fragment.app.viewModels
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -23,7 +18,6 @@ import com.example.currencyexchange.Adapters.CurrencyAdapter
 import com.example.currencyexchange.Application.CurrencyApplication
 import com.example.currencyexchange.Models.CurrencyDatabaseModel
 import com.example.currencyexchange.R
-import com.example.currencyexchange.Repository.CurrencyDatabaseRepository
 import com.example.currencyexchange.Repository.CurrencyRetrofitRepository
 import com.example.currencyexchange.ViewModels.CurrencyDatabaseFactory
 import com.example.currencyexchange.ViewModels.CurrencyDatabaseViewModel

@@ -7,6 +7,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.example.currencyexchange.Models.CurrencyModel
 import com.example.currencyexchange.Models.LatestRates
+import com.example.currencyexchange.Repository.CurrencyDatabaseRepository
 import com.example.currencyexchange.Repository.CurrencyRetrofitRepository
 import retrofit2.Call
 import retrofit2.Response
@@ -33,21 +34,24 @@ class CurrencyRetrofitViewModel constructor(private val CurrencyRetrofitReposito
             override fun onFailure(call: retrofit2.Call<LatestRates>, t: Throwable) {
                 Log.d(TAG, "onFailure: LATEST RATES ERROR")
                 errorMessage.postValue(t.message)
+                
             }
         })
     }
-    fun fetchFluctuation(){
-        val response = CurrencyRetrofitRepository.fetchFluctuation()
+    fun fetchFluctuation(startDate:String, endDate:String, baseCurrency:String){
+        val response = CurrencyRetrofitRepository.fetchFluctuation(startDate, endDate, baseCurrency)
         response.enqueue(object : retrofit2.Callback<CurrencyModel> {
             override fun onResponse(
                 call: retrofit2.Call<CurrencyModel>, response: Response<CurrencyModel>
             ) {
                 fluctuationRates.postValue(response.body())
+                Log.i(TAG, "onResponse: ${response.code()}")
             }
 
             override fun onFailure(call: retrofit2.Call<CurrencyModel>, t: Throwable) {
                 Log.d(TAG, "onFailure: LATEST RATES ERROR")
                 errorMessage.postValue(t.message)
+                Log.i(TAG, "onFailure: ${t.message}")
             }
         })
     }
@@ -73,7 +77,7 @@ class CurrencyRetrofitViewModel constructor(private val CurrencyRetrofitReposito
 
 
 
-class CurrencyViewModelFactory(private val repository: CurrencyRetrofitRepository): ViewModelProvider.Factory {
+class CurrencyViewModelFactory(val repository: CurrencyRetrofitRepository): ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(CurrencyRetrofitViewModel::class.java)) {
             @Suppress("UNCHECKED_CAST")

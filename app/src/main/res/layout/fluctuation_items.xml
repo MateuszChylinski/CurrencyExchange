@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:layout_marginTop="25dp">
+
+    <TextView
+        android:id="@+id/fluctuation_rv_foreign_currency"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+       android:text="Currency: USD"
+        android:textSize="18sp"/>
+    <TextView
+        android:id="@+id/fluctuation_rv_start_rate"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Start: 11.1111111"
+        android:textSize="18sp"/>
+    <TextView
+        android:id="@+id/fluctuation_rv_end_rate"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="End: 11.1111111"
+        android:textSize="18sp"/>
+    <TextView
+        android:id="@+id/fluctuation_rv_change"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="18sp"
+        android:text="Change: 00.0000"/>
+    <TextView
+        android:id="@+id/fluctuation_rv_change_pct"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="18sp"
+        android:text="Change pct: 00.0000000"/>
+
+</LinearLayout>

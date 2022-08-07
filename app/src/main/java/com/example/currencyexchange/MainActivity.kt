@@ -26,9 +26,9 @@ class MainActivity : AppCompatActivity() {
     private fun setupFragments(){
         val viewPager: ViewPager2 = findViewById(R.id.viewPager)
         val fragments: ArrayList<Fragment> = arrayListOf(
+            Fluctuation(),
             Latest(),
             Conversion(),
-            Fluctuation(),
             HistoricalRates()
         )
         val fragmentsAdapter = ViewPagerAdapter(fragments, this)
