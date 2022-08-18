@@ -13,13 +13,10 @@ data class CurrencyModel(
     val date: String,
     @SerializedName("result")
     val result: Double,
-//    @SerializedName("rates")
-//    val rates: Rates,
     @SerializedName("start_date")
     val startDate: String,
     @SerializedName("end_date")
     val endDAte: String,
-
     val rates: Map<String, Test>
 
 )

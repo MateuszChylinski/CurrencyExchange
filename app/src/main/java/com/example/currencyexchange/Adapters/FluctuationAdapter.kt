@@ -34,11 +34,13 @@ class FluctuationAdapter: RecyclerView.Adapter<FluctuationAdapter.ViewHolder>(){
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        holder.foreignCurrencyName.text = mCurrenciesNames[position]
-        holder.startRate.text = mCurrenciesStartRates[position].toString()
-        holder.endRate.text = mCurrenciesEndRates[position].toString()
-        holder.change.text = mCurrenciesChange[position].toString()
-        holder.changePct.text = mCurrenciesChangePct[position].toString()
+        holder.foreignCurrencyName.text = "Currency name: "+mCurrenciesNames[position]
+        holder.startRate.text = "Currency start rate: %.2f".format(mCurrenciesStartRates[position])
+        holder.endRate.text = "Currency end rate: %.2f".format(mCurrenciesEndRates[position])
+        holder.change.text = "Currency change: %.2f".format(mCurrenciesChange[position])
+        holder.changePct.text = "Currench change pct: %.2f".format(mCurrenciesChangePct[position])
+
+
     }
 
     override fun getItemCount(): Int {

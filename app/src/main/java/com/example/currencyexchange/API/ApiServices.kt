@@ -29,6 +29,7 @@ interface ApiServices {
         @Query("start_date") startDate: String,
         @Query("end_date") endDate: String,
         @Query("base") base: String,
+        @Query("symbols") symbols: String,
         @Query("apikey") apikey: String
     ): Call<CurrencyModel>
 

@@ -49,7 +49,7 @@ class Latest : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-
+//        TODO - disabled, due to testing toolbar.
         fetchFromViewModel()
 
         mBaseCurrencyTV = view.findViewById(R.id.latest_base)
@@ -59,7 +59,7 @@ class Latest : Fragment() {
         mRecyclerView?.adapter = mAdapter
 
     }
-    
+
     private fun fetchFromViewModel() {
         mViewModel =
             ViewModelProvider(
@@ -71,8 +71,9 @@ class Latest : Fragment() {
         mViewModel.fetchLatestRates()
         mViewModel.latestCurrencyRates.observe(viewLifecycleOwner, Observer {
 
-            mBaseCurrencyTV?.text = ("Base currency: "+it.baseCurrency)
+            mBaseCurrencyTV?.text = ("Base currency: " + it.baseCurrency)
             mAdapter?.setData(it.latestRates)
+//            Log.i(TAG, "fetchFromViewModel: \n${it.latestRates.keys}")
 
             val testIterator = it.latestRates.keys.iterator()
             while (testIterator.hasNext()) {
@@ -83,16 +84,16 @@ class Latest : Fragment() {
 
 
         mViewModel.errorMessage.observe(viewLifecycleOwner, Observer {
-            Log.i(TAG, "fetchFromViewModel: ERROR")
+//            Log.i(TAG, "fetchFromViewModel: ERROR")
         })
     }
 
-    private fun populateDB() {
-        if (currencyNames.size > 1) {
-            currencyNames.forEach {
-                val model = CurrencyDatabaseModel(it)
-                mDatabaseViewModel.insertNewCurrency(model)
-            }
+    private fun  populateDB(){
+        val currIterator = currencyNames.iterator()
+        while (currIterator.hasNext()){
+            val curr = CurrencyDatabaseModel(currIterator.next())
+//            Log.i(TAG, "populateDB: "+curr)
+            mDatabaseViewModel.insertNewCurrency(curr)
         }
     }
 }

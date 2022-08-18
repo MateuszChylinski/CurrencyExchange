@@ -17,6 +17,7 @@ class CurrencyRetrofitViewModel constructor(private val CurrencyRetrofitReposito
     ViewModel() {
 
     val latestCurrencyRates = MutableLiveData<LatestRates>()
+
     val fluctuationRates = MutableLiveData<CurrencyModel>()
     val convertCurrencyData = MutableLiveData<CurrencyModel>()
     val errorMessage = MutableLiveData<String>()
@@ -38,14 +39,14 @@ class CurrencyRetrofitViewModel constructor(private val CurrencyRetrofitReposito
             }
         })
     }
-    fun fetchFluctuation(startDate:String, endDate:String, baseCurrency:String){
-        val response = CurrencyRetrofitRepository.fetchFluctuation(startDate, endDate, baseCurrency)
+    fun fetchFluctuation(startDate:String, endDate:String, baseCurrency:String, symbols: String){
+        val response = CurrencyRetrofitRepository.fetchFluctuation(startDate, endDate, baseCurrency, symbols)
         response.enqueue(object : retrofit2.Callback<CurrencyModel> {
             override fun onResponse(
                 call: retrofit2.Call<CurrencyModel>, response: Response<CurrencyModel>
             ) {
-                fluctuationRates.postValue(response.body())
                 Log.i(TAG, "onResponse: ${response.code()}")
+                fluctuationRates.postValue(response.body())
             }
 
             override fun onFailure(call: retrofit2.Call<CurrencyModel>, t: Throwable) {
