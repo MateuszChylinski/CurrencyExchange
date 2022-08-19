@@ -2,6 +2,7 @@ package com.example.currencyexchange.API
 
 import com.example.currencyexchange.Models.CurrencyModel
 import com.example.currencyexchange.Models.LatestRates
+import com.example.currencyexchange.ViewModels.CurrencyRetrofitViewModel
 import retrofit2.Call
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
@@ -28,7 +29,7 @@ interface ApiServices {
         @Query("start_date") startDate: String,
         @Query("end_date") endDate: String,
         @Query("base") base: String,
-        @Query("symbols") symbol: String,
+        @Query("symbols") symbols: String,
         @Query("apikey") apikey: String
     ): Call<CurrencyModel>
 

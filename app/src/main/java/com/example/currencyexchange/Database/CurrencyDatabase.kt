@@ -15,15 +15,6 @@ abstract class CurrencyDatabase() : RoomDatabase() {
 
     abstract fun getDAO(): CurrencyDAO
 
-    private class CurrencyDatabaseCallback(
-        private val scope: CoroutineScope
-    ) : RoomDatabase.Callback() {
-        override fun onCreate(db: SupportSQLiteDatabase) {
-            super.onCreate(db)
-        }
-    }
-
-
     companion object {
         @Volatile
         private var INSTANCE: CurrencyDatabase? = null
@@ -44,6 +35,20 @@ abstract class CurrencyDatabase() : RoomDatabase() {
                 instance
             }
         }
+    }
+
+    private class CurrencyDatabaseCallback(
+        private val scope: CoroutineScope
+    ) : RoomDatabase.Callback() {
+        override fun onCreate(db: SupportSQLiteDatabase) {
+            super.onCreate(db)
+        }
+
+        /***  Since the api needs the base currency, that can be dynamically changed by using Spinner view,
+         *    The database have to
+         */
+
+
     }
 }
 

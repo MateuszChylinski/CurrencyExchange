@@ -1,6 +1,5 @@
 package com.example.currencyexchange.Fragments
 
-import android.annotation.SuppressLint
 import android.content.ContentValues.TAG
 import android.os.Bundle
 import android.util.Log
@@ -9,11 +8,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
-import androidx.activity.viewModels
 import androidx.fragment.app.activityViewModels
-import androidx.fragment.app.viewModels
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -23,7 +18,6 @@ import com.example.currencyexchange.Adapters.CurrencyAdapter
 import com.example.currencyexchange.Application.CurrencyApplication
 import com.example.currencyexchange.Models.CurrencyDatabaseModel
 import com.example.currencyexchange.R
-import com.example.currencyexchange.Repository.CurrencyDatabaseRepository
 import com.example.currencyexchange.Repository.CurrencyRetrofitRepository
 import com.example.currencyexchange.ViewModels.CurrencyDatabaseFactory
 import com.example.currencyexchange.ViewModels.CurrencyDatabaseViewModel
@@ -55,7 +49,7 @@ class Latest : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-
+//        TODO - disabled, due to testing toolbar.
         fetchFromViewModel()
 
         mBaseCurrencyTV = view.findViewById(R.id.latest_base)
@@ -65,7 +59,7 @@ class Latest : Fragment() {
         mRecyclerView?.adapter = mAdapter
 
     }
-    
+
     private fun fetchFromViewModel() {
         mViewModel =
             ViewModelProvider(
@@ -77,8 +71,9 @@ class Latest : Fragment() {
         mViewModel.fetchLatestRates()
         mViewModel.latestCurrencyRates.observe(viewLifecycleOwner, Observer {
 
-            mBaseCurrencyTV?.text = ("Base currency: "+it.baseCurrency)
+            mBaseCurrencyTV?.text = ("Base currency: " + it.baseCurrency)
             mAdapter?.setData(it.latestRates)
+//            Log.i(TAG, "fetchFromViewModel: \n${it.latestRates.keys}")
 
             val testIterator = it.latestRates.keys.iterator()
             while (testIterator.hasNext()) {
@@ -89,16 +84,16 @@ class Latest : Fragment() {
 
 
         mViewModel.errorMessage.observe(viewLifecycleOwner, Observer {
-            Log.i(TAG, "fetchFromViewModel: ERROR")
+//            Log.i(TAG, "fetchFromViewModel: ERROR")
         })
     }
 
-    private fun populateDB() {
-        if (currencyNames.size > 1) {
-            currencyNames.forEach {
-                val model = CurrencyDatabaseModel(it)
-                mDatabaseViewModel.insertNewCurrency(model)
-            }
+    private fun  populateDB(){
+        val currIterator = currencyNames.iterator()
+        while (currIterator.hasNext()){
+            val curr = CurrencyDatabaseModel(currIterator.next())
+//            Log.i(TAG, "populateDB: "+curr)
+            mDatabaseViewModel.insertNewCurrency(curr)
         }
     }
 }

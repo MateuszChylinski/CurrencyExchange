@@ -10,10 +10,10 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 interface CurrencyDAO {
 
+
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insertNewCurrency(databaseModel: CurrencyDatabaseModel)
 
-    @Query("SELECT * FROM currencies")
+    @Query("SELECT currency_name FROM currencies ORDER BY currency_name")
     fun getAllCurrencies(): Flow<List<CurrencyDatabaseModel>>
-
 }
