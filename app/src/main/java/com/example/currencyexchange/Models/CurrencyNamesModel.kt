@@ -6,12 +6,13 @@ import androidx.room.Ignore
 import androidx.room.PrimaryKey
 
 
-@Entity(tableName = "currencies")
-data class CurrencyDatabaseModel(
+@Entity(tableName = "currency_names")
+data class CurrencyNamesModel(
 
     @PrimaryKey
     @ColumnInfo(name = "currency_name")
-    val currency: String
+    val currency: String,
+
 ) {
     override fun toString(): String {
         return this.currency

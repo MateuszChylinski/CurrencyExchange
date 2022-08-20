@@ -6,11 +6,12 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.sqlite.db.SupportSQLiteDatabase
 import com.example.currencyexchange.DAO.CurrencyDAO
-import com.example.currencyexchange.Models.CurrencyDatabaseModel
+import com.example.currencyexchange.Models.BaseCurrencyModel
+import com.example.currencyexchange.Models.CurrencyNamesModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
-@Database(entities = arrayOf(CurrencyDatabaseModel::class), version = 1, exportSchema = false)
+@Database(entities = arrayOf(CurrencyNamesModel::class, BaseCurrencyModel::class), version = 1, exportSchema = false)
 abstract class CurrencyDatabase() : RoomDatabase() {
 
     abstract fun getDAO(): CurrencyDAO
@@ -42,13 +43,15 @@ abstract class CurrencyDatabase() : RoomDatabase() {
     ) : RoomDatabase.Callback() {
         override fun onCreate(db: SupportSQLiteDatabase) {
             super.onCreate(db)
+
+            INSTANCE.let { db ->
+                scope.launch {
+                    val baseCurrDao = db?.getDAO()
+                    val baseCurrencyModel = BaseCurrencyModel("EUR")
+                    baseCurrDao?.insertDefaultCurrency(baseCurrencyModel)
+                }
+            }
         }
-
-        /***  Since the api needs the base currency, that can be dynamically changed by using Spinner view,
-         *    The database have to
-         */
-
-
     }
 }
 
