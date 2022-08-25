@@ -1,17 +1,14 @@
 package com.example.currencyexchange.Fragments
 
-import android.content.ContentValues.TAG
-import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.util.SparseBooleanArray
+import android.view.GestureDetector
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
 import android.widget.AdapterView.OnItemClickListener
-import androidx.annotation.RequiresApi
-import androidx.core.util.keyIterator
 import androidx.core.view.get
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
@@ -21,29 +18,65 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.currencyexchange.API.ApiServices
 import com.example.currencyexchange.Adapters.FluctuationAdapter
 import com.example.currencyexchange.Application.CurrencyApplication
-import com.example.currencyexchange.Models.CurrencyDatabaseModel
+import com.example.currencyexchange.MainActivity
+import com.example.currencyexchange.Models.CurrencyNamesModel
 import com.example.currencyexchange.R
 import com.example.currencyexchange.Repository.CurrencyRetrofitRepository
-import com.example.currencyexchange.ViewModels.CurrencyDatabaseFactory
-import com.example.currencyexchange.ViewModels.CurrencyDatabaseViewModel
-import com.example.currencyexchange.ViewModels.CurrencyRetrofitViewModel
-import com.example.currencyexchange.ViewModels.CurrencyViewModelFactory
-import kotlinx.coroutines.NonDisposableHandle.parent
-import org.w3c.dom.Text
+import com.example.currencyexchange.ViewModels.*
 import java.text.SimpleDateFormat
 import java.util.*
-import kotlin.collections.ArrayList
 
 
 class Fluctuation : Fragment() {
-    var baseCurrencyTV: TextView? = null
+    private val TAG = "Fluctuation"
     val mDatabaseViewModel: CurrencyDatabaseViewModel by activityViewModels {
         CurrencyDatabaseFactory((activity?.application as CurrencyApplication).repository)
     }
 
-    //    TODO allocate views
-    var fluctuationTV: TextView? = null
+    // VARIABLES
+//    private var testGlobalCurr: String = ""
+    private var mBaseCurrency: String = ""
+    private var mFluctuationAdapter: FluctuationAdapter? = null
+
+    private var mIsTouched = false
+    private var mIsBaseChanged = false
+    private lateinit var mSpinnerAdapter: ArrayAdapter<CurrencyNamesModel>
+
+
+    private val currentCal = Calendar.getInstance()
+    private val minimalCal = Calendar.getInstance()
+    private var mToFullDate: String = "default"
+    private var mFromFullDate: String = "default"
+
+
+    private val mRetrofitServices = ApiServices.getInstance()
+    private lateinit var mViewModel: CurrencyRetrofitViewModel
+
+    private var mCurrenciesForCallback: MutableList<String> = mutableListOf()
+    private val mCurrenciesNames: MutableList<String> = mutableListOf()
+    private val mCurrenciesStartRate: MutableList<Double> = mutableListOf()
+    private val mCurrenciesEndRate: MutableList<Double> = mutableListOf()
+    private val mCurrenciesChange: MutableList<Double> = mutableListOf()
+    private val mCurrenciesChangePct: MutableList<Double> = mutableListOf()
+
+    private var mCheckedSymbols: SparseBooleanArray? = null
+    private var mIsChecked = false
+    private var mConcatenatedSymbols: String = ""
+    private val mCurrencyNamesFromVM: MutableList<CurrencyNamesModel> = mutableListOf()
+
+    // VIEWS
+
+    private var mChangeBaseCurrencyTV: TextView? = null
+    private var mBaseCurrencyTV: TextView? = null
+    private var mSelectSymbolsTV: TextView? = null
+    private var selectCurrToCallback: TextView? = null
+    private var mRecyclerView: RecyclerView? = null
+
+    var baseCurrencyTV: TextView? = null
+
+    //    var fluctuationTV: TextView? = null
     var selectBaseCurrency: Spinner? = null
+    var saveSymbols: Button? = null
 
 
     //  FROM
@@ -54,48 +87,11 @@ class Fluctuation : Fragment() {
     var fromDatePicker: DatePicker? = null
     var fromOk: Button? = null
 
-    private var mFromFullDate: String = "default"
-
     //  TO
     var toDateTV: TextView? = null
     var toCenterTV: TextView? = null
     var toDatePicker: DatePicker? = null
     var toOk: Button? = null
-
-    var saveSymbols: Button? = null
-
-    private var mToFullDate: String = "default"
-
-
-    private var mRecyclerView: RecyclerView? = null
-    private var mFluctuationAdapter: FluctuationAdapter? = null
-
-    private val currentCal = Calendar.getInstance()
-    private val minimalCal = Calendar.getInstance()
-
-    private val mRetrofitServices = ApiServices.getInstance()
-    private lateinit var mViewModel: CurrencyRetrofitViewModel
-
-    private val mCurrenciesNames: MutableList<String> = arrayListOf()
-    private val mCurrenciesStartRate: MutableList<Double> = arrayListOf()
-    private val mCurrenciesEndRate: MutableList<Double> = arrayListOf()
-    private val mCurrenciesChange: MutableList<Double> = arrayListOf()
-    private val mCurrenciesChangePct: MutableList<Double> = arrayListOf()
-
-
-    private var testGlobalCurr: String = ""
-    private var mBolo: SparseBooleanArray? = null
-    private var isChecked = false
-    private var mCurrenciesForCallback: MutableList<String> = arrayListOf()
-    private var selectCurrToCallback: TextView? = null
-    private var stringToTestConncatenation: String = ""
-
-    //    NOW
-    private var mBaseCurrency: String = ""
-    private var mChangeBaseCurrencyTV: TextView? = null
-    private var mBaseCurrencyTV: TextView? = null
-    private var mEnableEdit: Boolean = false
-    private var mSelectSymbolsTV: TextView? = null
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -103,21 +99,11 @@ class Fluctuation : Fragment() {
     ): View? {
         return inflater.inflate(R.layout.fragment_fluctuation, container, false)
     }
-//  TODO - should I reset somehow the callback when user will pick another currency from spinner?
-//  TODO - when RecyclerView is not filled, first currency occurs in almost middle of the screen. Is it because of the 'All currencies' in List?
 
-    @RequiresApi(Build.VERSION_CODES.N)
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-//      First part of views
         selectBaseCurrency = view.findViewById(R.id.fluctuation_select_base_currency)
-
-
-
-
-
-
         mCurrenciesListView = view.findViewById(R.id.fluctuation_select_symbols_lv)
         mRecyclerView = view.findViewById(R.id.fluctuation_rv)
         selectCurrToCallback = view.findViewById(R.id.fluctuation_select_curr_to_callback)
@@ -135,7 +121,6 @@ class Fluctuation : Fragment() {
         mSelectSymbolsTV = view.findViewById(R.id.fluctuation_select_symbols_tv)
 
 
-//        NOW
         mChangeBaseCurrencyTV = view.findViewById(R.id.fluctuation_fluctuation)
         mBaseCurrencyTV = view.findViewById(R.id.fluctuation_base_currency_tv)
 
@@ -143,17 +128,14 @@ class Fluctuation : Fragment() {
 
         fromOk?.setOnClickListener {
             getDateFromUser(1)
-            Log.i(TAG, "onViewCreated: TEST FROM DATE: $mFromFullDate")
             setupViewsToGetDate()
         }
         toOk?.setOnClickListener {
             getDateFromUser(2)
-            Log.i(TAG, "onViewCreated: TEST TO DATE: $mToFullDate")
             setupViewsForListView()
         }
-        saveSymbols?.setOnClickListener{
+        saveSymbols?.setOnClickListener {
             getCurrencies()
-            Log.i(TAG, "onViewCreated: $mCurrenciesForCallback")
         }
     }
 
@@ -169,7 +151,7 @@ class Fluctuation : Fragment() {
     }
 
     private fun getDateFromUser(selection: Int?) {
-//      1 - from / 2 - to
+//      1 = from / 2 = to
         val cal = Calendar.getInstance()
         val sdf = SimpleDateFormat("yyyy-MM-dd")
 
@@ -213,71 +195,89 @@ class Fluctuation : Fragment() {
         mSelectSymbolsTV?.visibility = View.VISIBLE
         saveSymbols?.visibility = View.VISIBLE
 
-//      TODO add string formatting
-        fromDateTV?.text = "From: " + mFromFullDate
-        toDateTV?.text = "To: " + mToFullDate
+        fromDateTV?.text = String.format("From: %s", mFromFullDate)
+        toDateTV?.text = String.format("To: %s", mToFullDate)
 
         retrieveCurrencyNamesForSpinner()
+
     }
 
     //  Retrieve currency names from database. Pass data to the 'setupBaseCurrencySpinner'
     private fun retrieveCurrencyNamesForSpinner() {
-        mDatabaseViewModel.fluctuationRatesForSpinner.observe(viewLifecycleOwner) {
-            setupBaseCurrencySpinner(it as MutableList<CurrencyDatabaseModel>)
-        }
-        mDatabaseViewModel.allCurrencies.observe(viewLifecycleOwner) {
-            setupListView(it as MutableList<CurrencyDatabaseModel>)
+        mDatabaseViewModel.baseCurrency.observe(requireActivity(), androidx.lifecycle.Observer {
+            mBaseCurrency = it.baseCurrency
+            mBaseCurrencyTV?.text = String.format("Base Currency: %s", mBaseCurrency)
+        })
+        mDatabaseViewModel.allCurrencies.observe(requireActivity(), androidx.lifecycle.Observer {
+            mCurrencyNamesFromVM.addAll(it as MutableList)
+
+            if (mCurrencyNamesFromVM.size > 1) {
+                deleteBaseCurrencyFromList(mBaseCurrency)
+            }
+        })
+    }
+    //  This function will delete base currency from list that will be forwarded to 'setupBaseCurrencySpinner' to populate spinner
+    private fun deleteBaseCurrencyFromList(baseCurr: String) {
+        val currenciesWithoutBase: MutableList<CurrencyNamesModel> = mCurrencyNamesFromVM.toMutableList()
+        for (i in 1 until currenciesWithoutBase.size - 1) {
+            if (currenciesWithoutBase[i].toString() == baseCurr) {
+                currenciesWithoutBase.removeAt(i)
+                setupBaseCurrencySpinner(currenciesWithoutBase)
+            }
         }
     }
 
-    //  Prepare 'selectBaseCurrency' spinner. Make an adapter, initiate list with currency names from database, initiate listener.
-    private fun setupBaseCurrencySpinner(currencyNames: List<CurrencyDatabaseModel>) {
+    private fun setupBaseCurrencySpinner(currencyNames: MutableList<CurrencyNamesModel>) {
 
-        val baseCurrencySpinnerAdapter = ArrayAdapter(
-            requireActivity(), android.R.layout.simple_spinner_item, currencyNames
-        )
-
-        selectBaseCurrency?.adapter = baseCurrencySpinnerAdapter
-        selectBaseCurrency?.onItemSelectedListener = object : AdapterView.OnItemSelectedListener,
-            OnItemClickListener {
+        mSpinnerAdapter =
+            ArrayAdapter(requireActivity(), android.R.layout.simple_spinner_item, currencyNames)
+        selectBaseCurrency?.adapter = mSpinnerAdapter
+        selectBaseCurrency?.setSelection(0, false)
+        Log.i(TAG, "setupBaseCurrencySpinner: $currencyNames")
+        selectBaseCurrency?.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(p0: AdapterView<*>?, p1: View?, p2: Int, p3: Long) {
-                Log.i(TAG, "onItemClick: SELECTED " + selectBaseCurrency?.getItemAtPosition(p2))
-                mBaseCurrency = selectBaseCurrency?.getItemAtPosition(p2).toString()
+                Log.i(TAG, "onItemSelected: CLICKED "+mCurrencyNamesFromVM[p2])
+                mBaseCurrency = mCurrencyNamesFromVM[p2].toString()
+                mBaseCurrencyTV?.text = String.format("Base Currency: %s", mBaseCurrency)
 
+                currencyNames.clear()
+                currencyNames.addAll(mCurrencyNamesFromVM.toMutableList())
+
+
+                for (i in 0 until currencyNames.size - 1) {
+                    if (currencyNames[i].toString() == mBaseCurrency) {
+                        currencyNames.removeAt(i)
+                        mIsBaseChanged = true
+                        setupListView(currencyNames)
+                        mSpinnerAdapter.notifyDataSetChanged()
+                    }
+                }
+                Log.i(TAG, "onItemSelected: after loop $currencyNames")
             }
 
             override fun onNothingSelected(p0: AdapterView<*>?) {
                 Log.i(TAG, "onNothingSelected: ")
             }
-
-            override fun onItemClick(p0: AdapterView<*>?, p1: View?, p2: Int, p3: Long) {
-                Log.i(TAG, "onItemClick: ")
-            }
+        }
+        if (!mIsBaseChanged) {
+            setupListView(currencyNames)
         }
     }
 
-    private fun setupListView(list: MutableList<CurrencyDatabaseModel>) {
+    private fun setupListView(list: MutableList<CurrencyNamesModel>) {
 
 //      Add "All currencies" at top of the list in case when user would like to display every available currency from the api
-        val allCurrencies = CurrencyDatabaseModel("All currencies")
-        list.add(0, allCurrencies)
-
+        if (!list[0].equals("All currencies")) {
+            val allCurrencies = CurrencyNamesModel("All currencies")
+            list.add(0, allCurrencies)
+        }
         val adapter = ArrayAdapter(
             requireActivity(), android.R.layout.simple_list_item_multiple_choice,
             list
         )
         mCurrenciesListView?.choiceMode = ListView.CHOICE_MODE_MULTIPLE
         mCurrenciesListView?.adapter = adapter
-        mCurrenciesListView?.onItemClickListener = object : AdapterView.OnItemSelectedListener,
-            OnItemClickListener {
-            override fun onItemSelected(p0: AdapterView<*>?, p1: View?, p2: Int, p3: Long) {
-                Log.i(TAG, "onItemSelected: ")
-            }
-
-            override fun onNothingSelected(p0: AdapterView<*>?) {
-                Log.i(TAG, "onNothingSelected: ")
-            }
-
+        mCurrenciesListView?.onItemClickListener = object : OnItemClickListener {
             override fun onItemClick(p0: AdapterView<*>?, p1: View?, p2: Int, p3: Long) {
                 /**
                 Whenever user will check some currency name, it will be added to the "mBolo" with id of clicked currency.
@@ -287,34 +287,40 @@ class Fluctuation : Fragment() {
 //              Checking if the "All currencies" is checked.
                 if (mCurrenciesListView?.isItemChecked(0) == true) {
 //                    If yes, check if program already checked once all currencies, if yes, just let user decide whether  he want to uncheck some currencies, or just uncheck everything
-                    if (!isChecked) {
+                    if (!mIsChecked) {
                         checkEveryCurrency(1)
-                        isChecked = true
+                        mIsChecked = true
                     }
 //                 Called whenever user uncheck the "All currencies". Uncheck every element in the ListView
                 } else {
-                    if (isChecked) {
+                    if (mIsChecked) {
                         checkEveryCurrency(2)
-                        isChecked = false
+                        mIsChecked = false
                     }
                 }
-                mBolo = mCurrenciesListView?.checkedItemPositions
+//              Insert to the "mBolo" every currency name that user checked
+                mCheckedSymbols = mCurrenciesListView?.checkedItemPositions
             }
         }
     }
 
     fun getCurrencies() {
-        for (i in 1..(mCurrenciesListView?.adapter?.count!!) - 1)
-            if (mBolo?.get(i)!!) {
+//      After clicking on save button, this fun will be called. Then, program calculate how many items are in listview
+//      Program start from the 1 index, because the 0 is All currencies, and program don't need in case it need to get all checked symbols
+        for (i in 1..(mCurrenciesListView?.adapter?.count!!) - 1) {
+            if (mCheckedSymbols?.get(i)!!) {
                 mCurrenciesForCallback.add(mCurrenciesListView?.adapter?.getItem(i).toString())
             }
+        }
         prepareRecyclerView()
     }
 
 
     fun checkEveryCurrency(state: Int) {
+//      If state = 1, then user want to have checked all of the currencies. Loop over the ListView, and set every currency to be checked.
+//      If state = 2, then loop over ListView, and uncheck every currency.
         if (state == 1) {
-            for (i in 0..(mCurrenciesListView?.adapter?.count!!)) {
+            for (i in 1..(mCurrenciesListView?.adapter?.count!!)) {
                 mCurrenciesListView?.setItemChecked(i, true)
             }
         } else {
@@ -327,7 +333,9 @@ class Fluctuation : Fragment() {
 
     private fun prepareRecyclerView() {
         baseCurrencyTV?.visibility = View.VISIBLE
-        baseCurrencyTV?.text = testGlobalCurr
+        mRecyclerView?.visibility = View.VISIBLE
+
+        baseCurrencyTV?.text = mBaseCurrency
         mRecyclerView?.layoutManager = LinearLayoutManager(this.requireContext())
         mFluctuationAdapter = FluctuationAdapter()
 
@@ -340,7 +348,6 @@ class Fluctuation : Fragment() {
         mSelectSymbolsTV?.visibility = View.INVISIBLE
         saveSymbols?.visibility = View.INVISIBLE
 
-        mRecyclerView?.visibility = View.VISIBLE
 
         getFluctuationData()
     }
@@ -355,10 +362,15 @@ class Fluctuation : Fragment() {
 
 //      Iterate through every checked currency, and make a single string for callback by concatenation
         for (i in 0..mCurrenciesForCallback.size - 1) {
-            stringToTestConncatenation += mCurrenciesForCallback[i] + ","
+            mConcatenatedSymbols += mCurrenciesForCallback[i] + ","
         }
-        Log.i(TAG, "getFluctuationData: test $stringToTestConncatenation")
-        mViewModel.fetchFluctuation(mFromFullDate, mToFullDate, "PLN", stringToTestConncatenation)
+
+        mViewModel.fetchFluctuation(
+            mFromFullDate,
+            mToFullDate,
+            mBaseCurrency,
+            mConcatenatedSymbols
+        )
         mViewModel.fluctuationRates.observe(viewLifecycleOwner, androidx.lifecycle.Observer {
 
             for (x in it.rates.keys) {
@@ -379,3 +391,5 @@ class Fluctuation : Fragment() {
         })
     }
 }
+//TODO - why does spinner display "All currencies?
+//TODO - add comments to funs

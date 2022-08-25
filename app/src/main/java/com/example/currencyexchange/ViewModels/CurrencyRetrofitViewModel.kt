@@ -17,7 +17,6 @@ class CurrencyRetrofitViewModel constructor(private val CurrencyRetrofitReposito
     ViewModel() {
 
     val latestCurrencyRates = MutableLiveData<LatestRates>()
-
     val fluctuationRates = MutableLiveData<CurrencyModel>()
     val convertCurrencyData = MutableLiveData<CurrencyModel>()
     val errorMessage = MutableLiveData<String>()

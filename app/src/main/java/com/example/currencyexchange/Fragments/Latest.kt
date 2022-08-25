@@ -1,8 +1,6 @@
 package com.example.currencyexchange.Fragments
 
-import android.content.ContentValues.TAG
 import android.os.Bundle
-import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
@@ -16,7 +14,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.currencyexchange.API.ApiServices
 import com.example.currencyexchange.Adapters.CurrencyAdapter
 import com.example.currencyexchange.Application.CurrencyApplication
-import com.example.currencyexchange.Models.CurrencyDatabaseModel
+import com.example.currencyexchange.Models.CurrencyNamesModel
 import com.example.currencyexchange.R
 import com.example.currencyexchange.Repository.CurrencyRetrofitRepository
 import com.example.currencyexchange.ViewModels.CurrencyDatabaseFactory
@@ -49,7 +47,6 @@ class Latest : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-//        TODO - disabled, due to testing toolbar.
         fetchFromViewModel()
 
         mBaseCurrencyTV = view.findViewById(R.id.latest_base)
@@ -91,7 +88,7 @@ class Latest : Fragment() {
     private fun  populateDB(){
         val currIterator = currencyNames.iterator()
         while (currIterator.hasNext()){
-            val curr = CurrencyDatabaseModel(currIterator.next())
+            val curr = CurrencyNamesModel(currIterator.next())
 //            Log.i(TAG, "populateDB: "+curr)
             mDatabaseViewModel.insertNewCurrency(curr)
         }

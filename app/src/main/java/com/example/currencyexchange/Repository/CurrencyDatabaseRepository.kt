@@ -8,14 +8,18 @@ import kotlinx.coroutines.flow.Flow
 
 class CurrencyDatabaseRepository(private val currencyDAO: CurrencyDAO) {
 
-    val allCurrencyNamesModel: Flow<List<CurrencyNamesModel>> = currencyDAO.getAllCurrencies()
-    val baseCurrency: Flow<String> = currencyDAO.getBaseCurrency()
+
+//  Base currency
+    val baseCurrency: Flow<BaseCurrencyModel> = currencyDAO.getBaseCurrency()
 
     @Suppress("RedundantSuspendModifier")
     @WorkerThread
     suspend fun insertNewCurrency(currencyNamesModel: CurrencyNamesModel){
         currencyDAO.insertNewCurrency(currencyNamesModel)
     }
+
+//  All currencies
+    val allCurrencyNamesModel: Flow<List<CurrencyNamesModel>> = currencyDAO.getAllCurrencies()
 
     @Suppress("RedundantSuspendModifier")
     @WorkerThread

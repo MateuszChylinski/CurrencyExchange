@@ -22,7 +22,8 @@ class CurrencyDatabaseViewModel(private val currencyDatabaseRepository: Currency
     val allCurrencies: LiveData<List<CurrencyNamesModel>> = currencyDatabaseRepository.allCurrencyNamesModel.asLiveData()
 
 //  BASE CURR
-    val baseCurrency = currencyDatabaseRepository.baseCurrency
+    val baseCurrency: LiveData<BaseCurrencyModel> = currencyDatabaseRepository.baseCurrency.asLiveData()
+
     fun updateCurrency(baseCurrencyModel: BaseCurrencyModel) = viewModelScope.launch {
         currencyDatabaseRepository.updateBaseCurrency(baseCurrencyModel)
     }

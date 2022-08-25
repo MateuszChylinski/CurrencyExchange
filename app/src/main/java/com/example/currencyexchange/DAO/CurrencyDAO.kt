@@ -13,7 +13,7 @@ interface CurrencyDAO {
     @Update
     suspend fun updateBaseCurrency(baseCurrencyModel: BaseCurrencyModel)
     @Query("SELECT base_curr FROM base_currency")
-    fun getBaseCurrency(): Flow<String>
+    fun getBaseCurrency(): Flow<BaseCurrencyModel>
 
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
