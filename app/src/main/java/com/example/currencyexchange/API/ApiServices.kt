@@ -18,9 +18,9 @@ interface ApiServices {
 
     @GET("/fixer/convert")
     fun convertCurrency(
-        @Query("to") to: String,
-        @Query("from") from: String,
-        @Query("amount") amount: Double,
+        @Query("from") to: String,
+        @Query("to") from: String,
+        @Query("amount") amount: String,
         @Query("apikey") apiKey: String
     ): Call<CurrencyModel>
 

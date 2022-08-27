@@ -32,7 +32,8 @@ class CurrencyRetrofitViewModel constructor(private val CurrencyRetrofitReposito
             }
 
             override fun onFailure(call: retrofit2.Call<LatestRates>, t: Throwable) {
-                Log.d(TAG, "onFailure: LATEST RATES ERROR")
+                Log.i(TAG, "onFailure: LATEST RATES ERROR")
+                Log.i(TAG, "onFailure: ${t.message}")
                 errorMessage.postValue(t.message)
                 
             }
@@ -56,8 +57,8 @@ class CurrencyRetrofitViewModel constructor(private val CurrencyRetrofitReposito
         })
     }
 
-    fun convertCurrency() {
-        val response = CurrencyRetrofitRepository.convertCurrency()
+    fun convertCurrency(from: String, to: String, value: String) {
+        val response = CurrencyRetrofitRepository.convertCurrency(from, to, value)
         response.enqueue(object : retrofit2.Callback<CurrencyModel> {
             override fun onResponse(call: Call<CurrencyModel>, response: Response<CurrencyModel>) {
                 if (response.isSuccessful) {
