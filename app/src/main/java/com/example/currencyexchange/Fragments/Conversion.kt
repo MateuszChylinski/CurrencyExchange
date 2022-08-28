@@ -79,7 +79,7 @@ class Conversion : Fragment() {
         mDatabaseViewModel.allCurrencies.observe(requireActivity(), Observer {
             if (it != null) {
                 prepareFromSpinner(it)
-                prepareToSpinner(it)
+                prepareToSpinner(it as MutableList<CurrencyNamesModel>)
             }
         })
         mDatabaseViewModel.baseCurrency.observe(requireActivity(), Observer {
@@ -100,6 +100,8 @@ class Conversion : Fragment() {
         mFromSpinner?.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(p0: AdapterView<*>?, p1: View?, p2: Int, p3: Long) {
                 Log.i(TAG, "onItemSelected FROM SELECTED " + currencyNames[p2])
+                adapter.notifyDataSetChanged()
+
                 mFromCurrencyName = currencyNames[p2].toString()
             }
 
@@ -110,7 +112,8 @@ class Conversion : Fragment() {
     }
 
     //  Prepare "to" spinner. Init adapter, fetch spinner with data from ViewModel, implement OnItemClickListener
-    private fun prepareToSpinner(currencyNames: List<CurrencyNamesModel>) {
+    private fun prepareToSpinner(currencyNames: MutableList<CurrencyNamesModel>) {
+
         val adapter =
             ArrayAdapter(requireActivity(), android.R.layout.simple_spinner_item, currencyNames)
         mToSpinner?.adapter = adapter
@@ -120,7 +123,10 @@ class Conversion : Fragment() {
         mToSpinner?.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(p0: AdapterView<*>?, p1: View?, p2: Int, p3: Long) {
                 Log.i(TAG, "onItemSelected TO SELECTED " + currencyNames[p2])
+                adapter.notifyDataSetChanged()
+
                 mToCurrencyName = currencyNames[p2].toString()
+
             }
 
             override fun onNothingSelected(p0: AdapterView<*>?) {
@@ -149,4 +155,4 @@ class Conversion : Fragment() {
         })
     }
 }
-//TODO ADD POSSIBILITY TO MAKE ANOTHER CALL
+
