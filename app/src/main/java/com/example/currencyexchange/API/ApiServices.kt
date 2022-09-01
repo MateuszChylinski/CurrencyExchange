@@ -1,13 +1,15 @@
 package com.example.currencyexchange.API
 
 import com.example.currencyexchange.Models.CurrencyModel
+import com.example.currencyexchange.Models.HistoricalRatesModel
 import com.example.currencyexchange.Models.LatestRates
 import com.example.currencyexchange.ViewModels.CurrencyRetrofitViewModel
+import okhttp3.OkHttpClient
+import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Call
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
-import retrofit2.http.GET
-import retrofit2.http.Query
+import retrofit2.http.*
 
 interface ApiServices {
     @GET("/fixer/latest")
@@ -18,9 +20,9 @@ interface ApiServices {
 
     @GET("/fixer/convert")
     fun convertCurrency(
-        @Query("to") to: String,
-        @Query("from") from: String,
-        @Query("amount") amount: Double,
+        @Query("from") to: String,
+        @Query("to") from: String,
+        @Query("amount") amount: String,
         @Query("apikey") apiKey: String
     ): Call<CurrencyModel>
 
@@ -32,7 +34,13 @@ interface ApiServices {
         @Query("symbols") symbols: String,
         @Query("apikey") apikey: String
     ): Call<CurrencyModel>
-
+    @GET("/fixer/{date}")
+    fun getHistoricalData(
+        @Path("date")date: String,
+        @Query("symbols") symbols: String,
+        @Query("base") baseCurrency: String,
+        @Query("apikey") apiKey: String
+    ): Call<HistoricalRatesModel>
 
     companion object {
         private const val url = "https://api.apilayer.com/"
