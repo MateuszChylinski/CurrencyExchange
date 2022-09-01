@@ -84,6 +84,7 @@ class Conversion : Fragment() {
         })
         mDatabaseViewModel.baseCurrency.observe(requireActivity(), Observer {
             mBaseCurrency = it.toString()
+            mFromTV?.text = String.format("From: %s", mBaseCurrency)
             mFromCurrencyName = mBaseCurrency
         })
     }
@@ -103,6 +104,7 @@ class Conversion : Fragment() {
                 adapter.notifyDataSetChanged()
 
                 mFromCurrencyName = currencyNames[p2].toString()
+                mFromTV?.text = String.format("From: %s", mFromCurrencyName)
             }
 
             override fun onNothingSelected(p0: AdapterView<*>?) {
@@ -126,6 +128,7 @@ class Conversion : Fragment() {
                 adapter.notifyDataSetChanged()
 
                 mToCurrencyName = currencyNames[p2].toString()
+                mToTV?.text = String.format("To: %s", mToCurrencyName)
 
             }
 

@@ -25,6 +25,7 @@ import com.example.currencyexchange.Repository.CurrencyRetrofitRepository
 import com.example.currencyexchange.ViewModels.*
 import java.text.SimpleDateFormat
 import java.util.*
+import kotlin.math.log
 
 
 class Fluctuation : Fragment() {
@@ -35,12 +36,11 @@ class Fluctuation : Fragment() {
 
     // VARIABLES
 //    private var testGlobalCurr: String = ""
-    private var mBaseCurrency: String = ""
+    private var mBaseCurrency: String = "default"
     private var mFluctuationAdapter: FluctuationAdapter? = null
 
-    private var mIsTouched = false
     private var mIsBaseChanged = false
-    private lateinit var mSpinnerAdapter: ArrayAdapter<CurrencyNamesModel>
+    lateinit var mSpinnerAdapter: ArrayAdapter<CurrencyNamesModel>
 
 
     private val currentCal = Calendar.getInstance()
@@ -63,6 +63,8 @@ class Fluctuation : Fragment() {
     private var mIsChecked = false
     private var mConcatenatedSymbols: String = ""
     private val mCurrencyNamesFromVM: MutableList<CurrencyNamesModel> = mutableListOf()
+    private var mIsSpinnerInit = false
+    private var mIsTouched = false
 
     // VIEWS
 
@@ -208,21 +210,33 @@ class Fluctuation : Fragment() {
             mBaseCurrency = it.baseCurrency
             mBaseCurrencyTV?.text = String.format("Base Currency: %s", mBaseCurrency)
         })
-        mDatabaseViewModel.allCurrencies.observe(requireActivity(), androidx.lifecycle.Observer {
-            mCurrencyNamesFromVM.addAll(it as MutableList)
+        mDatabaseViewModel.fluctuationRatesForSpinner.observe(
+            requireActivity(),
+            androidx.lifecycle.Observer {
+                mCurrencyNamesFromVM.addAll(it as MutableList)
+                Log.i(TAG, "retrieveCurrencyNamesForSpinner: $it")
 
-            if (mCurrencyNamesFromVM.size > 1) {
-                deleteBaseCurrencyFromList(mBaseCurrency)
-            }
-        })
+//                if(mCurrencyNamesFromVM.size > 1) {
+//                if deleteBaseCurrencyFromList(it as MutableList<CurrencyNamesModel>)
+
+                if (mBaseCurrency != "default") {
+                    deleteBaseCurrencyFromList(it as MutableList<CurrencyNamesModel>)
+                }
+            })
     }
+
     //  This function will delete base currency from list that will be forwarded to 'setupBaseCurrencySpinner' to populate spinner
-    private fun deleteBaseCurrencyFromList(baseCurr: String) {
-        val currenciesWithoutBase: MutableList<CurrencyNamesModel> = mCurrencyNamesFromVM.toMutableList()
-        for (i in 1 until currenciesWithoutBase.size - 1) {
-            if (currenciesWithoutBase[i].toString() == baseCurr) {
-                currenciesWithoutBase.removeAt(i)
-                setupBaseCurrencySpinner(currenciesWithoutBase)
+    private fun deleteBaseCurrencyFromList(list: MutableList<CurrencyNamesModel>) {
+        for (i in 0 until list.size - 1) {
+            if (list[i].toString() == mBaseCurrency) {
+                Log.i(TAG, "deleteBaseCurrencyFromList: $list")
+                list.removeAt(i)
+            }
+            if (!mIsSpinnerInit) {
+                setupBaseCurrencySpinner(list)
+                mIsSpinnerInit = true
+            } else {
+                setupListView(list)
             }
         }
     }
@@ -232,48 +246,41 @@ class Fluctuation : Fragment() {
         mSpinnerAdapter =
             ArrayAdapter(requireActivity(), android.R.layout.simple_spinner_item, currencyNames)
         selectBaseCurrency?.adapter = mSpinnerAdapter
-        selectBaseCurrency?.setSelection(0, false)
-        Log.i(TAG, "setupBaseCurrencySpinner: $currencyNames")
         selectBaseCurrency?.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(p0: AdapterView<*>?, p1: View?, p2: Int, p3: Long) {
-                Log.i(TAG, "onItemSelected: CLICKED "+mCurrencyNamesFromVM[p2])
-                mBaseCurrency = mCurrencyNamesFromVM[p2].toString()
-                mBaseCurrencyTV?.text = String.format("Base Currency: %s", mBaseCurrency)
+                if (mIsTouched) {
+                    mBaseCurrency = currencyNames[p2].toString()
+                    mBaseCurrencyTV?.text = String.format("Base Currency: %s", mBaseCurrency)
 
-                currencyNames.clear()
-                currencyNames.addAll(mCurrencyNamesFromVM.toMutableList())
-
-
-                for (i in 0 until currencyNames.size - 1) {
-                    if (currencyNames[i].toString() == mBaseCurrency) {
-                        currencyNames.removeAt(i)
-                        mIsBaseChanged = true
-                        setupListView(currencyNames)
-                        mSpinnerAdapter.notifyDataSetChanged()
-                    }
+                    currencyNames.clear()
+                    currencyNames.addAll(mCurrencyNamesFromVM.toMutableList())
+                    deleteBaseCurrencyFromList(currencyNames)
+                    mSpinnerAdapter.notifyDataSetChanged()
+                } else {
+                    mIsTouched = true
                 }
-                Log.i(TAG, "onItemSelected: after loop $currencyNames")
             }
 
             override fun onNothingSelected(p0: AdapterView<*>?) {
                 Log.i(TAG, "onNothingSelected: ")
             }
         }
-        if (!mIsBaseChanged) {
-            setupListView(currencyNames)
-        }
     }
+
 
     private fun setupListView(list: MutableList<CurrencyNamesModel>) {
 
-//      Add "All currencies" at top of the list in case when user would like to display every available currency from the api
-        if (!list[0].equals("All currencies")) {
-            val allCurrencies = CurrencyNamesModel("All currencies")
-            list.add(0, allCurrencies)
-        }
+//      Copy list list that came as argument for this function, because adding the 'All currencies' to list from the arguments will affect list that will be displayed in spinner, so we would have the 'All currencies' in the spinner as well.
+        val copiedList: MutableList<CurrencyNamesModel> = mutableListOf()
+        copiedList.addAll(list)
+//      Ad the top of ListView add new record - all currencies so user can check it instead of checking every single one.
+        val ac = CurrencyNamesModel("All currencies")
+        copiedList.add(0, ac)
+
+
         val adapter = ArrayAdapter(
             requireActivity(), android.R.layout.simple_list_item_multiple_choice,
-            list
+            copiedList
         )
         mCurrenciesListView?.choiceMode = ListView.CHOICE_MODE_MULTIPLE
         mCurrenciesListView?.adapter = adapter
@@ -372,7 +379,6 @@ class Fluctuation : Fragment() {
             mConcatenatedSymbols
         )
         mViewModel.fluctuationRates.observe(viewLifecycleOwner, androidx.lifecycle.Observer {
-
             for (x in it.rates.keys) {
                 mCurrenciesNames.add(x)
                 mCurrenciesStartRate.add(it.rates.getValue(x).startRate)
@@ -391,5 +397,3 @@ class Fluctuation : Fragment() {
         })
     }
 }
-//TODO - why does spinner display "All currencies?
-//TODO - add comments to funs

@@ -6,10 +6,12 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.example.currencyexchange.Models.CurrencyModel
+import com.example.currencyexchange.Models.HistoricalRatesModel
 import com.example.currencyexchange.Models.LatestRates
 import com.example.currencyexchange.Repository.CurrencyDatabaseRepository
 import com.example.currencyexchange.Repository.CurrencyRetrofitRepository
 import retrofit2.Call
+import retrofit2.Callback
 import retrofit2.Response
 import java.lang.IllegalArgumentException
 
@@ -19,6 +21,7 @@ class CurrencyRetrofitViewModel constructor(private val CurrencyRetrofitReposito
     val latestCurrencyRates = MutableLiveData<LatestRates>()
     val fluctuationRates = MutableLiveData<CurrencyModel>()
     val convertCurrencyData = MutableLiveData<CurrencyModel>()
+    val historicalRates = MutableLiveData<HistoricalRatesModel>()
     val errorMessage = MutableLiveData<String>()
 
 
@@ -35,12 +38,19 @@ class CurrencyRetrofitViewModel constructor(private val CurrencyRetrofitReposito
                 Log.i(TAG, "onFailure: LATEST RATES ERROR")
                 Log.i(TAG, "onFailure: ${t.message}")
                 errorMessage.postValue(t.message)
-                
+
             }
         })
     }
-    fun fetchFluctuation(startDate:String, endDate:String, baseCurrency:String, symbols: String){
-        val response = CurrencyRetrofitRepository.fetchFluctuation(startDate, endDate, baseCurrency, symbols)
+
+    fun fetchFluctuation(
+        startDate: String,
+        endDate: String,
+        baseCurrency: String,
+        symbols: String
+    ) {
+        val response =
+            CurrencyRetrofitRepository.fetchFluctuation(startDate, endDate, baseCurrency, symbols)
         response.enqueue(object : retrofit2.Callback<CurrencyModel> {
             override fun onResponse(
                 call: retrofit2.Call<CurrencyModel>, response: Response<CurrencyModel>
@@ -65,20 +75,34 @@ class CurrencyRetrofitViewModel constructor(private val CurrencyRetrofitReposito
                     convertCurrencyData.postValue(response.body())
                 }
             }
+
             override fun onFailure(call: Call<CurrencyModel>, t: Throwable) {
                 Log.d(TAG, "onFailure: CONVERT CURRENCY ERROR")
                 errorMessage.postValue(t.message)
             }
         })
     }
+
+    fun historicalRates(date: String, symbols: String, baseCurrency: String) {
+        val response = CurrencyRetrofitRepository.fetchHistoricalData(date, symbols, baseCurrency)
+        response.enqueue(object : retrofit2.Callback<HistoricalRatesModel> {
+            override fun onResponse(
+                call: Call<HistoricalRatesModel>,
+                response: Response<HistoricalRatesModel>
+            ) {
+                historicalRates.postValue(response.body())
+            }
+
+            override fun onFailure(call: Call<HistoricalRatesModel>, t: Throwable) {
+                Log.i(TAG, "onFailure: HISTORICAL\n${t.message}")
+            }
+        })
+    }
 }
 
 
-
-
-
-
-class CurrencyViewModelFactory(val repository: CurrencyRetrofitRepository): ViewModelProvider.Factory {
+class CurrencyViewModelFactory(val repository: CurrencyRetrofitRepository) :
+    ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(CurrencyRetrofitViewModel::class.java)) {
             @Suppress("UNCHECKED_CAST")

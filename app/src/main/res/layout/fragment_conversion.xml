@@ -15,7 +15,7 @@
         android:layout_margin="15dp"
         android:layout_marginStart="36dp"
         android:layout_marginTop="44dp"
-        android:text="FROM: EUR"
+        android:text="From: XXX"
         android:textSize="25sp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
@@ -28,7 +28,6 @@
         android:layout_marginStart="84dp"
         android:layout_marginTop="16dp"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.021"
         app:layout_constraintStart_toEndOf="@+id/conversion_from_tv"
         app:layout_constraintTop_toTopOf="parent" />
 
@@ -39,7 +38,7 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
         android:layout_marginTop="36dp"
-        android:text="TO: USD"
+        android:text="To: ?"
         android:textSize="25sp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/conversion_from_tv" />
@@ -50,7 +49,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="52dp"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.596"
+        app:layout_constraintHorizontal_bias="0.75"
         app:layout_constraintStart_toEndOf="@+id/conversion_to_tv"
         app:layout_constraintTop_toBottomOf="@+id/conversion_from_spinner" />
 

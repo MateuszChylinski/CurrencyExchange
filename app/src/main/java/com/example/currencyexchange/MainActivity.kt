@@ -33,20 +33,19 @@ class MainActivity : AppCompatActivity() {
         setupFragments()
     }
 
-    //  TODO - delete change base currency before commit!
+
     private fun setupFragments() {
         mViewPager = findViewById(R.id.viewPager)
+        mFragments.add(HistoricalRates())
         mFragments.add(Fluctuation())
         mFragments.add(Latest())
         mFragments.add(Conversion())
-        mFragments.add(HistoricalRates())
         mFragments.add(ChangeBaseCurrency())
 
         val fragmentsAdapter = ViewPagerAdapter(mFragments as ArrayList<Fragment>, this)
         mViewPager!!.adapter = fragmentsAdapter
     }
 }
-//TODO - consider getting all of the currencies from the latest fragment, and hardcode them whenever the database is created, so user can change default currency into desired one
 //TODO Add some kind of toolbar in every fragment where user can click on some icon, then go to the fragment where he can change the base currency
-//TODO make posibility to restart for every fragment
+//TODO Add fun to restart fragment on drag
 

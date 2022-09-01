@@ -4,6 +4,7 @@ import androidx.lifecycle.*
 import com.example.currencyexchange.Models.BaseCurrencyModel
 import com.example.currencyexchange.Models.CurrencyNamesModel
 import com.example.currencyexchange.Repository.CurrencyDatabaseRepository
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.lang.IllegalArgumentException
 
@@ -24,8 +25,10 @@ class CurrencyDatabaseViewModel(private val currencyDatabaseRepository: Currency
 //  BASE CURR
     val baseCurrency: LiveData<BaseCurrencyModel> = currencyDatabaseRepository.baseCurrency.asLiveData()
 
-    fun updateCurrency(baseCurrencyModel: BaseCurrencyModel) = viewModelScope.launch {
-        currencyDatabaseRepository.updateBaseCurrency(baseCurrencyModel)
+    fun updateCurrency(baseCurrencyModel: BaseCurrencyModel) {
+        viewModelScope.launch(Dispatchers.IO) {
+            currencyDatabaseRepository.updateBaseCurrency(baseCurrencyModel)
+        }
     }
 }
 

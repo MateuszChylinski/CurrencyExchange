@@ -9,6 +9,8 @@ data class CurrencyModel(
     val timestamp: String,
     @SerializedName("base")
     val base: String,
+    @SerializedName("historical")
+    val historical: String,
     @SerializedName("date")
     val date: String,
     @SerializedName("result")
@@ -17,7 +19,7 @@ data class CurrencyModel(
     val startDate: String,
     @SerializedName("end_date")
     val endDAte: String,
-    val rates: Map<String, Test>
+    val rates: Map<String, Test>,
 
 )
 
