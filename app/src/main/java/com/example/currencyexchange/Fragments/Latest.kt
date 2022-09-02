@@ -1,6 +1,8 @@
 package com.example.currencyexchange.Fragments
 
+import android.content.ContentValues.TAG
 import android.os.Bundle
+import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
@@ -34,8 +36,6 @@ class Latest : Fragment() {
     private var mRecyclerView: RecyclerView? = null
     private var mAdapter: CurrencyAdapter? = null
     private var mBaseCurrencyTV: TextView? = null
-    private var mBase: String? = null
-
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -54,7 +54,6 @@ class Latest : Fragment() {
         mRecyclerView?.layoutManager = LinearLayoutManager(this.context)
         mAdapter = CurrencyAdapter()
         mRecyclerView?.adapter = mAdapter
-
     }
 
     private fun fetchFromViewModel() {
@@ -70,7 +69,6 @@ class Latest : Fragment() {
 
             mBaseCurrencyTV?.text = ("Base currency: " + it.baseCurrency)
             mAdapter?.setData(it.latestRates)
-//            Log.i(TAG, "fetchFromViewModel: \n${it.latestRates.keys}")
 
             val testIterator = it.latestRates.keys.iterator()
             while (testIterator.hasNext()) {
@@ -81,15 +79,14 @@ class Latest : Fragment() {
 
 
         mViewModel.errorMessage.observe(viewLifecycleOwner, Observer {
-//            Log.i(TAG, "fetchFromViewModel: ERROR")
+            Log.i(TAG, "fetchFromViewModel: RETROFIT VIEW MODEL ERROR!\n$it")
         })
     }
 
-    private fun  populateDB(){
+    private fun populateDB() {
         val currIterator = currencyNames.iterator()
-        while (currIterator.hasNext()){
+        while (currIterator.hasNext()) {
             val curr = CurrencyNamesModel(currIterator.next())
-//            Log.i(TAG, "populateDB: "+curr)
             mDatabaseViewModel.insertNewCurrency(curr)
         }
     }
