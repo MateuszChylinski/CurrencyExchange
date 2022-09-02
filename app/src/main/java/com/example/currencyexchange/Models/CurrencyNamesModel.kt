@@ -12,6 +12,8 @@ data class CurrencyNamesModel(
     @PrimaryKey
     @ColumnInfo(name = "currency_name")
     val currency: String,
+    @ColumnInfo(name = "is_base")
+    val isBase: Boolean = false
 
 ) {
     override fun toString(): String {
