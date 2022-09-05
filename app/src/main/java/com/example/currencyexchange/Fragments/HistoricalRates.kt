@@ -10,9 +10,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.*
 import androidx.fragment.app.activityViewModels
-import androidx.fragment.app.viewModels
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.get
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.currencyexchange.API.ApiServices
@@ -27,7 +25,6 @@ import com.example.currencyexchange.ViewModels.CurrencyRetrofitViewModel
 import com.example.currencyexchange.ViewModels.CurrencyViewModelFactory
 import java.text.SimpleDateFormat
 import java.util.*
-import kotlin.collections.HashMap
 
 class HistoricalRates : Fragment() {
     //    VARIABLES
@@ -64,7 +61,6 @@ class HistoricalRates : Fragment() {
     private var mSymbols: ListView? = null
     private var mChangeBase: Spinner? = null
     private var mSymbolsRv: RecyclerView? = null
-    private var mBaseCurrencyTop: TextView? = null
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -87,7 +83,6 @@ class HistoricalRates : Fragment() {
         mSymbols = view.findViewById(R.id.historical_symbols_lv)
         mChangeBase = view.findViewById(R.id.historical_change_base)
         mSymbolsRv = view.findViewById(R.id.historical_rv)
-//        mBaseCurrencyTop = view.findViewById(R.id.historical_base_top)
 
         mMinCall.set(1999, 2, 1)
         mDatePicker?.minDate = mMinCall.timeInMillis
@@ -104,7 +99,7 @@ class HistoricalRates : Fragment() {
 
     //  Get picked date by user in DatePicker view, and store it in mDate variable in format of 'yyyy-mm-dd'
     private fun getDate() {
-//      setup datepicker. Adjust min/max date to call
+//      setup date picker. Adjust min/max date to call
 
         val cal = Calendar.getInstance()
         val sdf = SimpleDateFormat("yyyy-MM-dd")
@@ -127,12 +122,10 @@ class HistoricalRates : Fragment() {
         mChangeBase?.visibility = View.VISIBLE
         mBaseCurrencyTV?.visibility = View.VISIBLE
         mDateTV?.visibility = View.VISIBLE
-        mDateTV?.text = String.format("Date: %s" ,mDate)
+        mDateTV?.text = String.format("Date: %s", mDate)
 
         getCurrenciesFromDB()
     }
-
-
 
 
     private fun getCurrenciesFromDB() {
@@ -142,39 +135,26 @@ class HistoricalRates : Fragment() {
                 mBaseCurrency = it.toString()
                 mBaseCurrencyTV?.text = String.format("Base currency: %s", it.toString())
             })
-        mDatabaseViewModel.allCurrencies.observe(requireActivity(), androidx.lifecycle.Observer {
+        mDatabaseViewModel.currencyNames.observe(requireActivity(), androidx.lifecycle.Observer {
 //          The reason why we're adding here 'it' to the 'mCurrenciesNames' is because in 'ListView' we're gonna need additional record, called 'All currencies' - since we shouldn't add it to the json response, it's better to just add response to the mutable list for the 'ListView'
             mCurrenciesNames.addAll(it)
             if (mBaseCurrency != "default") {
                 deleteBaseFromTheList(it as MutableList<CurrencyNamesModel>)
-            } else {
-                Log.i(TAG, "getCurrenciesFromDB: iuts default")
             }
-
-//            setupListView(mCurrenciesNames)
-//            setupSpinner(it as MutableList<CurrencyNamesModel>)
         })
     }
 
     private fun deleteBaseFromTheList(list: MutableList<CurrencyNamesModel>) {
-        Log.i(TAG, "deleteBaseFromTheList: $mBaseCurrency")
-        for (i in 0 until list.size - 1) {
-            if (list[i].toString() == mBaseCurrency) {
-                Log.i(
-                    TAG,
-                    "deleteBaseFromTheList: BASE $mBaseCurrency DELETING " + list[i] + " AT INDEX $i"
-                )
-                list.removeAt(i)
-            }
+        if (list.toString().contains(mBaseCurrency)) {
+            val index = list.indices.find { list[it].toString() == mBaseCurrency }
+            list.removeAt(index!!)
         }
-        Log.i(TAG, "deleteBaseFromTheList: flag status $mIsInit")
 
         if (!mIsInit) {
             Log.i(TAG, "deleteBaseFromTheList: initial")
             setupSpinner(list)
-            mIsInit = true
-        }else{
             setupListView(list)
+            mIsInit = true
         }
     }
 
@@ -188,14 +168,13 @@ class HistoricalRates : Fragment() {
                     Log.i(TAG, "onItemSelected: SPINNER " + currencies[p2])
 
                     mBaseCurrency = currencies[p2].toString()
-                    mBaseCurrencyTV?.text = String.format("Base currency: %s" ,mBaseCurrency)
+                    mBaseCurrencyTV?.text = String.format("Base currency: %s", mBaseCurrency)
                     currencies.clear()
                     currencies.addAll(mCurrenciesNames)
-                    Log.i(TAG, "onItemSelected: ${currencies.size} || ${mCurrenciesNames.size}")
                     deleteBaseFromTheList(currencies)
+                    setupListView(currencies)
                     adapter.notifyDataSetChanged()
-                }
-                else{
+                } else {
                     mIsTouched = true
                 }
 
@@ -264,24 +243,19 @@ class HistoricalRates : Fragment() {
 //      Program start from the 1 index, because the 0 is All currencies, and program don't need in case it need to get all checked symbols
         for (i in 1..(mSymbols?.adapter?.count!!) - 1) {
             if (mCheckedCurrencies?.get(i)!!) {
-//                mCurrenciesForCallback.add(mCurrenciesListView?.adapter?.getItem(i).toString())
-                Log.i(TAG, "getCurrencies: CHECKED " + mSymbols?.adapter?.getItem(i).toString())
-                mConcatenatedSymbols += mSymbols?.adapter?.getItem(i).toString()+", "
+                mConcatenatedSymbols += mSymbols?.adapter?.getItem(i).toString() + ", "
             }
         }
-        Log.i(TAG, "getCurrencies: $mConcatenatedSymbols")
         prepareViewsForRecyclerView()
     }
 
-    private fun prepareViewsForRecyclerView(){
+    //  Prepare views to display RecyclerView. Delete unneeded views
+    private fun prepareViewsForRecyclerView() {
         mSelectionInfo?.visibility = View.GONE
         mSymbols?.visibility = View.GONE
         mSaveSymbols?.visibility = View.GONE
         mChangeInfo?.visibility = View.GONE
         mChangeBase?.visibility = View.GONE
-
-//        mBaseCurrencyTop?.visibility = View.VISIBLE
-//        mBaseCurrencyTop?.text = String.format("Base currency: %s", mBaseCurrency)
 
         mDateTV?.visibility = View.VISIBLE
         mSymbolsRv?.visibility = View.VISIBLE
@@ -289,26 +263,24 @@ class HistoricalRates : Fragment() {
         getDataFromViewModel()
     }
 
-
-
-
+    // Make a call within api to receive data about historical rates for selected base currency, and all of the currencies selected in ListView
     private fun getDataFromViewModel() {
-        mRetrofitViewModel = ViewModelProvider(this, CurrencyViewModelFactory(
-            CurrencyRetrofitRepository(mApiService))).get(CurrencyRetrofitViewModel::class.java)
-        mRetrofitViewModel.historicalRates(mDate,mConcatenatedSymbols, mBaseCurrency)
+        mRetrofitViewModel = ViewModelProvider(
+            this, CurrencyViewModelFactory(
+                CurrencyRetrofitRepository(mApiService)
+            )
+        ).get(CurrencyRetrofitViewModel::class.java)
+        mRetrofitViewModel.historicalRates(mDate, mConcatenatedSymbols, mBaseCurrency)
         mRetrofitViewModel.historicalRates.observe(viewLifecycleOwner, androidx.lifecycle.Observer {
-            Log.i(TAG, "getDataFromViewModel: ")
             prepareRecyclerView(it.abc.toSortedMap())
         })
     }
 
-    private fun prepareRecyclerView(currencyData: SortedMap<String, Double>){
-//        mHistoricalAdapter ||         mSymbolsRv
-        Log.i(TAG, "prepareRecyclerView: $mBaseCurrency")
+    //   Make a basic basic setup of the RecyclerView
+    private fun prepareRecyclerView(currencyData: SortedMap<String, Double>) {
         mHistoricalAdapter = HistoricalAdapter()
         mHistoricalAdapter?.setData(currencyData)
         mSymbolsRv?.layoutManager = LinearLayoutManager(this.context)
-
         mSymbolsRv?.adapter = mHistoricalAdapter
     }
 }

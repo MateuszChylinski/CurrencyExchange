@@ -23,16 +23,22 @@ import com.example.currencyexchange.ViewModels.CurrencyDatabaseFactory
 import com.example.currencyexchange.ViewModels.CurrencyDatabaseViewModel
 import com.example.currencyexchange.ViewModels.CurrencyRetrofitViewModel
 import com.example.currencyexchange.ViewModels.CurrencyViewModelFactory
+import kotlin.reflect.typeOf
 
 
 class Latest : Fragment() {
-
+    //VARIABLES
     private val mRetrofitService = ApiServices.getInstance()
     private lateinit var mViewModel: CurrencyRetrofitViewModel
     private val mDatabaseViewModel: CurrencyDatabaseViewModel by activityViewModels {
         CurrencyDatabaseFactory((activity?.application as CurrencyApplication).repository)
     }
-    private val currencyNames = mutableListOf<String>()
+    private val currencies = mutableListOf<String>()
+    private var mBaseCurrency: String = "default"
+    private var mAllCurrencies: HashMap<String, Double> = hashMapOf()
+
+
+    //    VIEWS
     private var mRecyclerView: RecyclerView? = null
     private var mAdapter: CurrencyAdapter? = null
     private var mBaseCurrencyTV: TextView? = null
@@ -47,13 +53,22 @@ class Latest : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        fetchFromViewModel()
+        getBaseCurrency()
 
         mBaseCurrencyTV = view.findViewById(R.id.latest_base)
         mRecyclerView = view.findViewById(R.id.latest_rv)
         mRecyclerView?.layoutManager = LinearLayoutManager(this.context)
         mAdapter = CurrencyAdapter()
         mRecyclerView?.adapter = mAdapter
+    }
+
+    private fun getBaseCurrency() {
+        mDatabaseViewModel.baseCurrency.observe(requireActivity(), Observer {
+            mBaseCurrency = it.toString()
+            if (mBaseCurrency != "default") {
+                fetchFromViewModel()
+            }
+        })
     }
 
     private fun fetchFromViewModel() {
@@ -64,27 +79,27 @@ class Latest : Fragment() {
             )
                 .get(CurrencyRetrofitViewModel::class.java)
 
-        mViewModel.fetchLatestRates()
+        mViewModel.fetchLatestRates(mBaseCurrency)
         mViewModel.latestCurrencyRates.observe(viewLifecycleOwner, Observer {
 
-            mBaseCurrencyTV?.text = ("Base currency: " + it.baseCurrency)
+            currencies.addAll(it.latestRates.keys)
+            mAllCurrencies = it.latestRates
+
+            populateDB(currencies)
+
+            mAllCurrencies.remove(mBaseCurrency)
             mAdapter?.setData(it.latestRates)
+            mBaseCurrencyTV?.text = String.format("Base currency: %s", mBaseCurrency)
 
-            val testIterator = it.latestRates.keys.iterator()
-            while (testIterator.hasNext()) {
-                currencyNames.add(testIterator.next())
-            }
-            populateDB()
         })
-
 
         mViewModel.errorMessage.observe(viewLifecycleOwner, Observer {
             Log.i(TAG, "fetchFromViewModel: RETROFIT VIEW MODEL ERROR!\n$it")
         })
     }
 
-    private fun populateDB() {
-        val currIterator = currencyNames.iterator()
+    private fun populateDB(currency: MutableList<String>) {
+        val currIterator = currency.iterator()
         while (currIterator.hasNext()) {
             val curr = CurrencyNamesModel(currIterator.next())
             mDatabaseViewModel.insertNewCurrency(curr)

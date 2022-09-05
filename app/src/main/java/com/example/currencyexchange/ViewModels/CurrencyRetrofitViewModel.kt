@@ -25,12 +25,13 @@ class CurrencyRetrofitViewModel constructor(private val CurrencyRetrofitReposito
     val errorMessage = MutableLiveData<String>()
 
 
-    fun fetchLatestRates() {
-        val response = CurrencyRetrofitRepository.fetchLatestRates()
+    fun fetchLatestRates(baseCurrency: String) {
+        val response = CurrencyRetrofitRepository.fetchLatestRates(baseCurrency)
         response.enqueue(object : retrofit2.Callback<LatestRates> {
             override fun onResponse(
                 call: retrofit2.Call<LatestRates>, response: Response<LatestRates>
             ) {
+                
                 latestCurrencyRates.postValue(response.body())
             }
 
@@ -71,7 +72,9 @@ class CurrencyRetrofitViewModel constructor(private val CurrencyRetrofitReposito
         val response = CurrencyRetrofitRepository.convertCurrency(from, to, value)
         response.enqueue(object : retrofit2.Callback<CurrencyModel> {
             override fun onResponse(call: Call<CurrencyModel>, response: Response<CurrencyModel>) {
+                Log.i(TAG, "onResponse: ${response.code()}")
                 if (response.isSuccessful) {
+                    Log.i(TAG, "onResponse: ${response.code()} inside")
                     convertCurrencyData.postValue(response.body())
                 }
             }

@@ -23,7 +23,7 @@ class CurrencyAdapter() : RecyclerView.Adapter<CurrencyAdapter.ViewHolder>(){
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         holder.currencyOrigin.text = data.keys.toTypedArray()[position]
-        holder.currencyValue.text = data.values.toTypedArray()[position].toString()
+        holder.currencyValue.text = String.format("%.2f", data.values.toTypedArray()[position])
     }
 
     override fun getItemCount(): Int {

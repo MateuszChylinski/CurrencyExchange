@@ -1,6 +1,7 @@
 package com.example.currencyexchange.ViewModels
 
 import androidx.lifecycle.*
+import com.example.currencyexchange.Models.BaseCurrencyModel
 import com.example.currencyexchange.Models.CurrencyNamesModel
 import com.example.currencyexchange.Repository.CurrencyDatabaseRepository
 import kotlinx.coroutines.Dispatchers
@@ -12,10 +13,11 @@ class CurrencyDatabaseViewModel(private val currencyDatabaseRepository: Currency
     ViewModel() {
 
     //  List of currency names TODO
-    val currencyNames = currencyDatabaseRepository.allCurrencies
+    val currencyNames: LiveData<List<CurrencyNamesModel>> =
+        currencyDatabaseRepository.allCurrencies.asLiveData()
 
     //  Base currency
-    val baseCurrency = currencyDatabaseRepository.baseCurrency.asLiveData()
+    val baseCurrency: LiveData<String> = currencyDatabaseRepository.baseCurrency.asLiveData()
 
     //  Insert new currency into the database
     fun insertNewCurrency(currencyNamesModel: CurrencyNamesModel) = viewModelScope.launch {
@@ -23,12 +25,13 @@ class CurrencyDatabaseViewModel(private val currencyDatabaseRepository: Currency
     }
 
     // Update base currency
-    fun updateBaseCurrency(currencyNamesModel: CurrencyNamesModel) = viewModelScope.launch {
-        currencyDatabaseRepository.updateBaseCurrency(currencyNamesModel)
+    fun updateBaseCurrency(baseCurrencyModel: BaseCurrencyModel) = viewModelScope.launch {
+        currencyDatabaseRepository.updateBaseCurrency(baseCurrencyModel)
     }
+}
 
 
-    //  Since in fluctuation fragment, there are two adapters: one for spinner (which can be used to pick base currency for callback),
+//  Since in fluctuation fragment, there are two adapters: one for spinner (which can be used to pick base currency for callback),
 //  and second for ListView Which need option to pick 'all currencies' program need two list with all currencies.
 //  The only one difference is that the list for spinner doesn't have option to pick all currencies
 
@@ -43,7 +46,6 @@ class CurrencyDatabaseViewModel(private val currencyDatabaseRepository: Currency
 //            currencyDatabaseRepository.updateBaseCurrency(baseCurrencyModel)
 //        }
 //    }
-}
 
 
 class CurrencyDatabaseFactory(private val currencyDatabaseRepository: CurrencyDatabaseRepository) :

@@ -12,11 +12,22 @@ data class CurrencyNamesModel(
     @PrimaryKey
     @ColumnInfo(name = "currency_name")
     val currency: String,
-    @ColumnInfo(name = "is_base")
-    val isBase: Boolean = false
 
 ) {
     override fun toString(): String {
         return this.currency
+    }
+}
+
+@Entity(tableName = "base_currency")
+data class BaseCurrencyModel(
+    @PrimaryKey(autoGenerate = true)
+    val id: Int,
+    @ColumnInfo(name = "base")
+    val baseCurr: String
+)
+{
+    override fun toString(): String {
+        return this.baseCurr
     }
 }
