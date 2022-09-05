@@ -43,10 +43,19 @@ class Conversion : Fragment() {
     private var mRetrofitService = ApiServices.getInstance()
 
     private var mBaseCurrency: String = "def"
-    private var mFromCurrencyName = "def"
-    private var mToCurrencyName = "def"
+    private var mDesiredCurrency: String = "def"
     private var mValue: String = "none"
     private var mConvertedValue: Double = 0.0
+    private var mIsFromTouched = false
+    private var mIsToTouched = false
+    private var mAllCurrencies: MutableList<CurrencyNamesModel> = mutableListOf()
+
+    private var mIsFromInit = false
+    private var mIsToInit = false
+
+    private var mIsFromUpdated = false
+    private var mIsToUpdated = false
+
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -76,35 +85,71 @@ class Conversion : Fragment() {
 
     //  Retrieve data from database, by using the ViewModel
     private fun retrieveCurrency() {
-        mDatabaseViewModel.allCurrencies.observe(requireActivity(), Observer {
-            if (it != null) {
-                prepareFromSpinner(it)
-                prepareToSpinner(it as MutableList<CurrencyNamesModel>)
-            }
-        })
+
         mDatabaseViewModel.baseCurrency.observe(requireActivity(), Observer {
             mBaseCurrency = it.toString()
             mFromTV?.text = String.format("From: %s", mBaseCurrency)
-            mFromCurrencyName = mBaseCurrency
+
+        })
+        mDatabaseViewModel.currencyNames.observe(requireActivity(), Observer {
+            if (it != null) {
+                mAllCurrencies.addAll(it)
+                if (mBaseCurrency != "def") {
+                    deleteBaseFromSpinner(mBaseCurrency, it as MutableList<CurrencyNamesModel>)
+                }
+            }
         })
     }
 
+    private fun deleteBaseFromSpinner(currency: String, list: MutableList<CurrencyNamesModel>) {
+        //      Both of the currencies were changed
+        if (mBaseCurrency != "def" && mDesiredCurrency != "def") {
+            Log.i(TAG, "deleteBaseFromSpinner: BOTH")
+            val indexBase = list.indices.find { list[it].toString() == mBaseCurrency }
+            val indexDesired = list.indices.find { list[it].toString() == mDesiredCurrency }
+            list.removeAt(indexBase!!)
+            list.removeAt(indexDesired!!)
+        }else{
+            Log.i(TAG, "deleteBaseFromSpinner: single")
+//          just one currency were changed??
+            val index = list.indices.find { list[it].toString() == currency }
+            list.removeAt(index!!)
+        }
+
+        if (!mIsFromInit || !mIsToInit) {
+//        if (!mIsFromInit || !mIsToInit || mIsFromUpdated || mIsToUpdated) {
+            prepareFromSpinner(list)
+            prepareToSpinner(list)
+
+            mIsFromInit = true
+            mIsToInit = true
+
+//            mIsFromUpdated = false
+//            mIsToUpdated = false
+        }
+    }
+
     //  Prepare "from" spinner. Init adapter, fetch spinner with data from ViewModel, implement OnItemClickListener
-    private fun prepareFromSpinner(currencyNames: List<CurrencyNamesModel>) {
+    private fun prepareFromSpinner(currencyNames: MutableList<CurrencyNamesModel>) {
 
         val adapter =
             ArrayAdapter(requireActivity(), android.R.layout.simple_spinner_item, currencyNames)
         mFromSpinner?.adapter = adapter
-        //      Avoid "getting" item clicked on fragment created/started
-
-        mFromSpinner?.setSelection(0, false)
         mFromSpinner?.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(p0: AdapterView<*>?, p1: View?, p2: Int, p3: Long) {
-                Log.i(TAG, "onItemSelected FROM SELECTED " + currencyNames[p2])
-                adapter.notifyDataSetChanged()
+                if (mIsFromTouched) {
 
-                mFromCurrencyName = currencyNames[p2].toString()
-                mFromTV?.text = String.format("From: %s", mFromCurrencyName)
+                    mBaseCurrency = currencyNames[p2].toString()
+                    mFromTV?.text = String.format("From: %s", mBaseCurrency)
+
+                    currencyNames.clear()
+                    currencyNames.addAll(mAllCurrencies)
+                    deleteBaseFromSpinner(mBaseCurrency, currencyNames)
+                    adapter.notifyDataSetChanged()
+
+                } else {
+                    mIsFromTouched = true
+                }
             }
 
             override fun onNothingSelected(p0: AdapterView<*>?) {
@@ -119,17 +164,22 @@ class Conversion : Fragment() {
         val adapter =
             ArrayAdapter(requireActivity(), android.R.layout.simple_spinner_item, currencyNames)
         mToSpinner?.adapter = adapter
-
-//      Avoid "getting" item clicked on fragment created/started
-        mToSpinner?.setSelection(0, false)
         mToSpinner?.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(p0: AdapterView<*>?, p1: View?, p2: Int, p3: Long) {
-                Log.i(TAG, "onItemSelected TO SELECTED " + currencyNames[p2])
-                adapter.notifyDataSetChanged()
+                if (mIsToTouched) {
 
-                mToCurrencyName = currencyNames[p2].toString()
-                mToTV?.text = String.format("To: %s", mToCurrencyName)
+                    mDesiredCurrency = currencyNames[p2].toString()
+                    mToTV?.text = String.format("To: %s", mDesiredCurrency)
 
+                    currencyNames.clear()
+                    currencyNames.addAll(mAllCurrencies)
+                    deleteBaseFromSpinner(mDesiredCurrency, currencyNames)
+                    adapter.notifyDataSetChanged()
+
+
+                } else {
+                    mIsToTouched = true
+                }
             }
 
             override fun onNothingSelected(p0: AdapterView<*>?) {
@@ -138,24 +188,27 @@ class Conversion : Fragment() {
         }
     }
 
-//  Retrieve value from EditText, make converted data TextView visible, move forward to 'prepareConvertCall()'
+    //  Retrieve value from EditText, make converted data TextView visible, move forward to 'prepareConvertCall()'
     private fun getValuesFromEditTexts() {
         mValue = mGetValue?.text.toString()
         mConvertedData?.visibility = View.VISIBLE
         prepareConvertCall()
     }
 
-//  Initiate the ViewModel, get data from repository, format result, and display it in the TextView
+    //  Initiate the ViewModel, get data from repository, format result, and display it in the TextView
     private fun prepareConvertCall() {
 
-        mCurrencyRetrofitViewModel = ViewModelProvider(this, CurrencyViewModelFactory(
-            CurrencyRetrofitRepository(mRetrofitService))).get(CurrencyRetrofitViewModel::class.java)
-
-        mCurrencyRetrofitViewModel.convertCurrency(mFromCurrencyName, mToCurrencyName, mValue)
+        mCurrencyRetrofitViewModel = ViewModelProvider(
+            this, CurrencyViewModelFactory(
+                CurrencyRetrofitRepository(mRetrofitService)
+            )
+        ).get(CurrencyRetrofitViewModel::class.java)
+        mCurrencyRetrofitViewModel.convertCurrency(mBaseCurrency, mDesiredCurrency, mValue)
         mCurrencyRetrofitViewModel.convertCurrencyData.observe(viewLifecycleOwner, Observer {
+            Log.i(TAG, "prepareConvertCall: ${it.result} ${it.success}")
             mConvertedValue = it.result
-            mConvertedData?.text = String.format("You will receive: %.2f %s",mConvertedValue, mToCurrencyName)
+            mConvertedData?.text =
+                String.format("You will receive: %.2f %s", mConvertedValue, mDesiredCurrency)
         })
     }
 }
-

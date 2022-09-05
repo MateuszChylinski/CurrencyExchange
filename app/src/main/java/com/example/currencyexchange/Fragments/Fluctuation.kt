@@ -18,7 +18,6 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.currencyexchange.API.ApiServices
 import com.example.currencyexchange.Adapters.FluctuationAdapter
 import com.example.currencyexchange.Application.CurrencyApplication
-import com.example.currencyexchange.MainActivity
 import com.example.currencyexchange.Models.CurrencyNamesModel
 import com.example.currencyexchange.R
 import com.example.currencyexchange.Repository.CurrencyRetrofitRepository
@@ -35,13 +34,10 @@ class Fluctuation : Fragment() {
     }
 
     // VARIABLES
-//    private var testGlobalCurr: String = ""
     private var mBaseCurrency: String = "default"
     private var mFluctuationAdapter: FluctuationAdapter? = null
 
-    private var mIsBaseChanged = false
     lateinit var mSpinnerAdapter: ArrayAdapter<CurrencyNamesModel>
-
 
     private val currentCal = Calendar.getInstance()
     private val minimalCal = Calendar.getInstance()
@@ -67,33 +63,30 @@ class Fluctuation : Fragment() {
     private var mIsTouched = false
 
     // VIEWS
-
     private var mChangeBaseCurrencyTV: TextView? = null
     private var mBaseCurrencyTV: TextView? = null
     private var mSelectSymbolsTV: TextView? = null
     private var selectCurrToCallback: TextView? = null
     private var mRecyclerView: RecyclerView? = null
 
-    var baseCurrencyTV: TextView? = null
-
-    //    var fluctuationTV: TextView? = null
-    var selectBaseCurrency: Spinner? = null
-    var saveSymbols: Button? = null
+    private var baseCurrencyTV: TextView? = null
+    private var selectBaseCurrency: Spinner? = null
+    private var saveSymbols: Button? = null
 
 
     //  FROM
-    var mCurrenciesListView: ListView? = null
+    private var mCurrenciesListView: ListView? = null
 
-    var fromDateTV: TextView? = null
-    var fromCenterTV: TextView? = null
-    var fromDatePicker: DatePicker? = null
-    var fromOk: Button? = null
+    private var fromDateTV: TextView? = null
+    private var fromCenterTV: TextView? = null
+    private var fromDatePicker: DatePicker? = null
+    private var fromOk: Button? = null
 
     //  TO
-    var toDateTV: TextView? = null
-    var toCenterTV: TextView? = null
-    var toDatePicker: DatePicker? = null
-    var toOk: Button? = null
+    private var toDateTV: TextView? = null
+    private var toCenterTV: TextView? = null
+    private var toDatePicker: DatePicker? = null
+    private var toOk: Button? = null
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -141,12 +134,11 @@ class Fluctuation : Fragment() {
         }
     }
 
+    // Prepare DatePicker. Set min/max possible date to execute (from 1999-02-01, to present day) in YYYY/MM/DD format.
     private fun setupDatePicker() {
-//      minimal possible date to execute: 1999-02-01 YYYY/MM/DD.
         minimalCal.set(1999, 2, 1)
         fromDatePicker?.minDate = minimalCal.timeInMillis
         toDatePicker?.minDate = minimalCal.timeInMillis
-
 
         fromDatePicker?.maxDate = currentCal.timeInMillis
         toDatePicker?.maxDate = currentCal.timeInMillis
@@ -174,9 +166,9 @@ class Fluctuation : Fragment() {
     }
 
     private fun setupViewsToGetDate() {
-        fromCenterTV?.visibility = View.INVISIBLE
-        fromDatePicker?.visibility = View.INVISIBLE
-        fromOk?.visibility = View.INVISIBLE
+        fromCenterTV?.visibility = View.GONE
+        fromDatePicker?.visibility = View.GONE
+        fromOk?.visibility = View.GONE
 
         toCenterTV?.visibility = View.VISIBLE
         toDatePicker?.visibility = View.VISIBLE
@@ -184,9 +176,9 @@ class Fluctuation : Fragment() {
     }
 
     private fun setupViewsForListView() {
-        toCenterTV?.visibility = View.INVISIBLE
-        toDatePicker?.visibility = View.INVISIBLE
-        toOk?.visibility = View.INVISIBLE
+        toCenterTV?.visibility = View.GONE
+        toDatePicker?.visibility = View.GONE
+        toOk?.visibility = View.GONE
 
         mChangeBaseCurrencyTV?.visibility = View.VISIBLE
         selectBaseCurrency?.visibility = View.VISIBLE
@@ -207,18 +199,13 @@ class Fluctuation : Fragment() {
     //  Retrieve currency names from database. Pass data to the 'setupBaseCurrencySpinner'
     private fun retrieveCurrencyNamesForSpinner() {
         mDatabaseViewModel.baseCurrency.observe(requireActivity(), androidx.lifecycle.Observer {
-            mBaseCurrency = it.baseCurrency
+            mBaseCurrency = it
             mBaseCurrencyTV?.text = String.format("Base Currency: %s", mBaseCurrency)
         })
-        mDatabaseViewModel.fluctuationRatesForSpinner.observe(
+        mDatabaseViewModel.currencyNames.observe(
             requireActivity(),
             androidx.lifecycle.Observer {
                 mCurrencyNamesFromVM.addAll(it as MutableList)
-                Log.i(TAG, "retrieveCurrencyNamesForSpinner: $it")
-
-//                if(mCurrencyNamesFromVM.size > 1) {
-//                if deleteBaseCurrencyFromList(it as MutableList<CurrencyNamesModel>)
-
                 if (mBaseCurrency != "default") {
                     deleteBaseCurrencyFromList(it as MutableList<CurrencyNamesModel>)
                 }
@@ -227,19 +214,20 @@ class Fluctuation : Fragment() {
 
     //  This function will delete base currency from list that will be forwarded to 'setupBaseCurrencySpinner' to populate spinner
     private fun deleteBaseCurrencyFromList(list: MutableList<CurrencyNamesModel>) {
-        for (i in 0 until list.size - 1) {
-            if (list[i].toString() == mBaseCurrency) {
-                Log.i(TAG, "deleteBaseCurrencyFromList: $list")
-                list.removeAt(i)
+        if (list.toString().contains(mBaseCurrency)) {
+            val index = list.indices.find {
+                list[it].toString() == mBaseCurrency
             }
-            if (!mIsSpinnerInit) {
-                setupBaseCurrencySpinner(list)
-                mIsSpinnerInit = true
-            } else {
-                setupListView(list)
-            }
+            list.removeAt(index!!)
+        }
+
+        if (!mIsSpinnerInit) {
+            setupBaseCurrencySpinner(list)
+            setupListView(list)
+            mIsSpinnerInit = true
         }
     }
+
 
     private fun setupBaseCurrencySpinner(currencyNames: MutableList<CurrencyNamesModel>) {
 
@@ -255,6 +243,7 @@ class Fluctuation : Fragment() {
                     currencyNames.clear()
                     currencyNames.addAll(mCurrencyNamesFromVM.toMutableList())
                     deleteBaseCurrencyFromList(currencyNames)
+                    setupListView(currencyNames)
                     mSpinnerAdapter.notifyDataSetChanged()
                 } else {
                     mIsTouched = true
@@ -355,11 +344,10 @@ class Fluctuation : Fragment() {
         mSelectSymbolsTV?.visibility = View.INVISIBLE
         saveSymbols?.visibility = View.INVISIBLE
 
-
         getFluctuationData()
     }
 
-
+    // prepare an api call
     private fun getFluctuationData() {
         mViewModel = ViewModelProvider(
             this,

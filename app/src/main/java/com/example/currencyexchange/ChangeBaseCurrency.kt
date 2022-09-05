@@ -1,5 +1,6 @@
 package com.example.currencyexchange
 
+import android.content.ContentValues
 import android.content.ContentValues.TAG
 import android.os.Bundle
 import android.util.Log
@@ -32,10 +33,9 @@ class ChangeBaseCurrency : Fragment() {
     private val mDatabaseViewModel: CurrencyDatabaseViewModel by activityViewModels {
         CurrencyDatabaseFactory((activity?.application as CurrencyApplication).repository)
     }
-    private var mBaseCurrency: String = ""
+    private var mBaseCurrency: String = "default"
     private var mAllCurrencyNames: MutableList<CurrencyNamesModel> = mutableListOf()
-
-
+    private var mIsInit = false
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -48,68 +48,66 @@ class ChangeBaseCurrency : Fragment() {
 
         mCurrentBaseCurrency = view.findViewById(R.id.change_base_current_base)
         mSelectNewBaseCurrency = view.findViewById(R.id.change_base_select_currency_spinner)
-        getBaseCurrency()
+        getCurrencies()
     }
 
-//  Retrieve base currency via ViewModel for database
-    private fun getBaseCurrency() {
+    //  Retrieve base currency, and all currency names from database via view model
+    private fun getCurrencies() {
         mDatabaseViewModel.baseCurrency.observe(requireActivity(), Observer {
             mBaseCurrency = it.toString()
-            mCurrentBaseCurrency?.text = String.format("Current base: %s", mBaseCurrency)
+            mCurrentBaseCurrency?.text = String.format("Base currency: %s", mBaseCurrency)
         })
-        getAllCurrencies()
-    }
-
-//  Retrieve all currencies that API contains via database ViewModel
-    private fun getAllCurrencies() {
-        mDatabaseViewModel.allCurrencies.observe(requireActivity(), Observer {
+        mDatabaseViewModel.currencyNames.observe(requireActivity(), Observer {
             mAllCurrencyNames.addAll(it)
-            deleteBaseFromList()
+            if (mBaseCurrency != "default") {
+                deleteBaseFromList(it as MutableList<CurrencyNamesModel>)
+            }
         })
     }
 
-    //  Delete currency name that is same as the base  
-    private fun deleteBaseFromList() {
-        for (i in 0 until mAllCurrencyNames.size - 1) {
-            if (mAllCurrencyNames[i].toString().equals(mBaseCurrency)) {
-                mAllCurrencyNames.removeAt(i)
-            }
+    //  Look for base currency in given list, and delete it.
+    private fun deleteBaseFromList(list: MutableList<CurrencyNamesModel>) {
+        if (list.toString().contains(mBaseCurrency)) {
+            val index = list.indices.find { list[it].toString() == mBaseCurrency }
+            list.removeAt(index!!)
         }
-        prepareSpinner(mAllCurrencyNames)
+// To avoid infinite loop in spinner's 'onItemSelected' set mIsInit flag.
+        if (!mIsInit) {
+            mIsInit = true
+            setupSpinner(list)
+
+        }
     }
 
-//  Make basic setup for spinner. Initiate adapter with list. Implement OnItemClickListener to get clicked by user currency, and then update base currency in database
-    private fun prepareSpinner(list: List<CurrencyNamesModel>) {
-        val spinnerAdapter = ArrayAdapter(
-            requireActivity(), android.R.layout.simple_spinner_item, list
-        )
-        mSelectNewBaseCurrency?.adapter = spinnerAdapter
-//      To avoid item selection on start of the fragment.
+    //  Prepare spinner, fill with data without base currency. To avoid selecting by program the first value from the spinner, I've used the 'setSelection'
+    private fun setupSpinner(list: MutableList<CurrencyNamesModel>) {
+        val adapter =
+            ArrayAdapter(requireActivity(), android.R.layout.simple_spinner_item, list)
+        mSelectNewBaseCurrency?.adapter = adapter
         mSelectNewBaseCurrency?.setSelection(0, false)
         mSelectNewBaseCurrency?.onItemSelectedListener =
-            object : AdapterView.OnItemSelectedListener, AdapterView.OnItemClickListener {
+            object : AdapterView.OnItemSelectedListener {
                 override fun onItemSelected(p0: AdapterView<*>?, p1: View?, p2: Int, p3: Long) {
-                    Log.i(TAG, "onItemSelected: "+mAllCurrencyNames[p2])
-                    updateBaseCurrency(mAllCurrencyNames[p2].toString())
+
+                    mBaseCurrency = list[p2].toString()
+                    updateBaseCurrency(mBaseCurrency)
+
+                    list.clear()
+                    list.addAll(mAllCurrencyNames)
+                    deleteBaseFromList(list)
+                    adapter.notifyDataSetChanged()
                 }
 
                 override fun onNothingSelected(p0: AdapterView<*>?) {
                     Log.i(TAG, "onNothingSelected: ")
                 }
-
-                override fun onItemClick(p0: AdapterView<*>?, p1: View?, p2: Int, p3: Long) {
-                    Log.i(TAG, "onItemClick: INDEX = $p2  | VALUE = " + mAllCurrencyNames[p2])
-                }
             }
     }
 
-//  Update base currency
+    // Update base currency
     private fun updateBaseCurrency(selectedCurrency: String) {
-        val newBase = BaseCurrencyModel(selectedCurrency)
-        Log.i(TAG, "updateBaseCurrency: $selectedCurrency || $newBase")
-
-        CoroutineScope(Dispatchers.IO).launch {
-            mDatabaseViewModel.updateCurrency(newBase)
-        }
+        Log.i(TAG, "updateBaseCurrency: $selectedCurrency")
+        val updateBase = BaseCurrencyModel(1, selectedCurrency)
+        mDatabaseViewModel.updateBaseCurrency(updateBase)
     }
 }

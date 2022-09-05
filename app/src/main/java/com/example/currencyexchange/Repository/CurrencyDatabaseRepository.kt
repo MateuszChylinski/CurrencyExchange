@@ -2,6 +2,7 @@ package com.example.currencyexchange.Repository
 
 import androidx.annotation.WorkerThread
 import com.example.currencyexchange.DAO.CurrencyDAO
+import com.example.currencyexchange.Models.BaseCurrencyModel
 import com.example.currencyexchange.Models.CurrencyNamesModel
 import kotlinx.coroutines.flow.Flow
 
@@ -17,8 +18,8 @@ class CurrencyDatabaseRepository(private val currencyDAO: CurrencyDAO) {
     //  Update base currency
     @Suppress("RedundantSuspendModifier")
     @WorkerThread
-    suspend fun updateBaseCurrency(currencyNamesModel: CurrencyNamesModel) {
-        currencyDAO.updateBaseCurrency(currencyNamesModel)
+    suspend fun updateBaseCurrency(baseCurrencyModel: BaseCurrencyModel){
+        currencyDAO.updateBaseCurrency(baseCurrencyModel)
     }
 
     //  Get base currency from database

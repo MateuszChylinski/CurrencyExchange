@@ -20,14 +20,17 @@ class MainActivity : AppCompatActivity() {
 
         setupFragments()
     }
-    
+
     private fun setupFragments() {
         mViewPager = findViewById(R.id.viewPager)
+        mFragments.add(Latest())
+        mFragments.add(ChangeBaseCurrency())
+
+
         mFragments.add(HistoricalRates())
         mFragments.add(Fluctuation())
-        mFragments.add(Latest())
         mFragments.add(Conversion())
-        mFragments.add(ChangeBaseCurrency())
+
 
         val fragmentsAdapter = ViewPagerAdapter(mFragments as ArrayList<Fragment>, this)
         mViewPager!!.adapter = fragmentsAdapter
