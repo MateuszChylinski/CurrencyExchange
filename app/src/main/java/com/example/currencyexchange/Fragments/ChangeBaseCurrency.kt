@@ -1,7 +1,5 @@
-package com.example.currencyexchange
+package com.example.currencyexchange.Fragments
 
-import android.content.ContentValues
-import android.content.ContentValues.TAG
 import android.os.Bundle
 import android.util.Log
 import androidx.fragment.app.Fragment
@@ -14,12 +12,9 @@ import androidx.lifecycle.Observer
 import com.example.currencyexchange.Application.CurrencyApplication
 import com.example.currencyexchange.Models.BaseCurrencyModel
 import com.example.currencyexchange.Models.CurrencyNamesModel
+import com.example.currencyexchange.R
 import com.example.currencyexchange.ViewModels.CurrencyDatabaseFactory
 import com.example.currencyexchange.ViewModels.CurrencyDatabaseViewModel
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlin.math.log
 
 class ChangeBaseCurrency : Fragment() {
     //  TAG
@@ -48,7 +43,8 @@ class ChangeBaseCurrency : Fragment() {
 
         mCurrentBaseCurrency = view.findViewById(R.id.change_base_current_base)
         mSelectNewBaseCurrency = view.findViewById(R.id.change_base_select_currency_spinner)
-        getCurrencies()
+        //        TODO turn it on when finished navigation comp
+//        getCurrencies()
     }
 
     //  Retrieve base currency, and all currency names from database via view model

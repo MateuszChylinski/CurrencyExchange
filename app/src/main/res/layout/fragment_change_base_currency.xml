@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ChangeBaseCurrency">
+    tools:context=".Fragments.ChangeBaseCurrency">
 
     <TextView
         android:id="@+id/change_base_current_base"

@@ -13,7 +13,8 @@
         android:layout_height="wrap_content"
         android:gravity="center"
         android:padding="15dp"
-        android:textSize="20sp"/>
+        android:textSize="20sp"
+        android:text="testtest"/>
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/latest_rv"

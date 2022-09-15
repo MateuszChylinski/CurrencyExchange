@@ -89,8 +89,11 @@ class HistoricalRates : Fragment() {
         mDatePicker?.maxDate = mMaxCall.timeInMillis
 
         mSaveDate?.setOnClickListener {
-            getDate()
-            setVisibilityToLv()
+
+
+//            //        TODO turn it on when finished navigation comp
+//            getDate()
+//            setVisibilityToLv()
         }
         mSaveSymbols?.setOnClickListener {
             getCurrencies()

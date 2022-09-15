@@ -11,6 +11,9 @@ import android.widget.TextView
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
+import androidx.navigation.Navigation
+import androidx.navigation.findNavController
+import androidx.navigation.fragment.NavHostFragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.currencyexchange.API.ApiServices
@@ -48,12 +51,14 @@ class Latest : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         return inflater.inflate(R.layout.fragment_latest, container, false)
+
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        getBaseCurrency()
+//        TODO turn it on when finished navigation comp
+//        getBaseCurrency()
 
         mBaseCurrencyTV = view.findViewById(R.id.latest_base)
         mRecyclerView = view.findViewById(R.id.latest_rv)

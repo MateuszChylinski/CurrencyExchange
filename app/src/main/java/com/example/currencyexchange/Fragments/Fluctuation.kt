@@ -119,7 +119,8 @@ class Fluctuation : Fragment() {
         mChangeBaseCurrencyTV = view.findViewById(R.id.fluctuation_fluctuation)
         mBaseCurrencyTV = view.findViewById(R.id.fluctuation_base_currency_tv)
 
-        setupDatePicker()
+//        //        TODO turn it on when finished navigation comp
+//        setupDatePicker()
 
         fromOk?.setOnClickListener {
             getDateFromUser(1)

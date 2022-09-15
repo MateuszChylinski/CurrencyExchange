@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/latest">
+
+    <fragment
+        android:id="@+id/latest"
+        android:name="com.example.currencyexchange.Fragments.Latest"
+        android:label="fragment_latest"
+        tools:layout="@layout/fragment_latest" >
+        <action
+            android:id="@+id/latest_to_change_base"
+            app:destination="@id/changeBaseCurrency" />
+    </fragment>
+    <fragment
+        android:id="@+id/conversion"
+        android:name="com.example.currencyexchange.Fragments.Conversion"
+        android:label="fragment_conversion"
+        tools:layout="@layout/fragment_conversion" >
+        <action
+            android:id="@+id/conversion_to_change_base"
+            app:destination="@id/changeBaseCurrency" />
+    </fragment>
+    <fragment
+        android:id="@+id/fluctuation"
+        android:name="com.example.currencyexchange.Fragments.Fluctuation"
+        android:label="fragment_fluctuation"
+        tools:layout="@layout/fragment_fluctuation" >
+        <action
+            android:id="@+id/fluctuation_to_change_base"
+            app:destination="@id/changeBaseCurrency" />
+    </fragment>
+    <fragment
+        android:id="@+id/historicalRates"
+        android:name="com.example.currencyexchange.Fragments.HistoricalRates"
+        android:label="fragment_historical_rates"
+        tools:layout="@layout/fragment_historical_rates" >
+        <action
+            android:id="@+id/historical_to_change_base"
+            app:destination="@id/changeBaseCurrency" />
+    </fragment>
+    <fragment
+        android:id="@+id/changeBaseCurrency"
+        android:name="com.example.currencyexchange.Fragments.ChangeBaseCurrency"
+        android:label="fragment_change_base_currency"
+        tools:layout="@layout/fragment_change_base_currency" />
+
+
+</navigation>
