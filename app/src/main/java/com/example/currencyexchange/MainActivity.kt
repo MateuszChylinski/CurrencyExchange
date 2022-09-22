@@ -24,7 +24,6 @@ class MainActivity : AppCompatActivity() {
         mFragments.add(Conversion())
         mFragments.add(Fluctuation())
         mFragments.add(HistoricalRates())
-//        mFragments.add(ChangeBaseCurrency())
 
 
         val fragmentsAdapter = ViewPagerAdapter(mFragments as ArrayList<Fragment>, this)

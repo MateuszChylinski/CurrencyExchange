@@ -91,9 +91,8 @@ class HistoricalRates : Fragment() {
         mSaveDate?.setOnClickListener {
 
 
-//            //        TODO turn it on when finished navigation comp
-//            getDate()
-//            setVisibilityToLv()
+            getDate()
+            setVisibilityToLv()
         }
         mSaveSymbols?.setOnClickListener {
             getCurrencies()

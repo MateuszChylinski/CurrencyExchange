@@ -9,6 +9,8 @@ import android.view.ViewGroup
 import android.widget.*
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Observer
+import androidx.navigation.findNavController
+import androidx.navigation.fragment.navArgs
 import com.example.currencyexchange.Application.CurrencyApplication
 import com.example.currencyexchange.Models.BaseCurrencyModel
 import com.example.currencyexchange.Models.CurrencyNamesModel
@@ -21,6 +23,7 @@ class ChangeBaseCurrency : Fragment() {
     private var TAG = "ChangeBaseCurrency"
 
     //  Views
+
     private var mCurrentBaseCurrency: TextView? = null
     private var mSelectNewBaseCurrency: Spinner? = null
 
@@ -31,6 +34,8 @@ class ChangeBaseCurrency : Fragment() {
     private var mBaseCurrency: String = "default"
     private var mAllCurrencyNames: MutableList<CurrencyNamesModel> = mutableListOf()
     private var mIsInit = false
+    private var mFragmentName: String? = "def"
+    private val args: ChangeBaseCurrencyArgs by navArgs()
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -43,8 +48,10 @@ class ChangeBaseCurrency : Fragment() {
 
         mCurrentBaseCurrency = view.findViewById(R.id.change_base_current_base)
         mSelectNewBaseCurrency = view.findViewById(R.id.change_base_select_currency_spinner)
-        //        TODO turn it on when finished navigation comp
-//        getCurrencies()
+
+        mFragmentName = args.fragmentName
+
+        getCurrencies()
     }
 
     //  Retrieve base currency, and all currency names from database via view model
@@ -86,7 +93,9 @@ class ChangeBaseCurrency : Fragment() {
                 override fun onItemSelected(p0: AdapterView<*>?, p1: View?, p2: Int, p3: Long) {
 
                     mBaseCurrency = list[p2].toString()
+
                     updateBaseCurrency(mBaseCurrency)
+                    moveToPreviousFragment()
 
                     list.clear()
                     list.addAll(mAllCurrencyNames)
@@ -98,6 +107,28 @@ class ChangeBaseCurrency : Fragment() {
                     Log.i(TAG, "onNothingSelected: ")
                 }
             }
+    }
+
+    private fun moveToPreviousFragment() {
+        when (mFragmentName) {
+            "Latest" -> {
+                val navigateBack = ChangeBaseCurrencyDirections.actionChangeBaseCurrencyToLatest()
+                view?.findNavController()?.navigate(navigateBack)
+//                it.findNavController().navigate(navigateBack)
+            }
+            "Fluctation" -> {
+                val navigateBack = ChangeBaseCurrencyDirections.actionChangeBaseCurrencyToLatest()
+//                it.findNavController().navigate(navigateBack)
+            }
+            "Conversion" -> {
+                val navigateBack = ChangeBaseCurrencyDirections.actionChangeBaseCurrencyToLatest()
+//                it.findNavController().navigate(navigateBack)
+            }
+            "HistoricalRates" ->{
+                val navigateBack = ChangeBaseCurrencyDirections.actionChangeBaseCurrencyToLatest()
+//                it.findNavController().navigate(navigateBack)
+            }
+        }
     }
 
     // Update base currency

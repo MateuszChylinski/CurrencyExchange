@@ -12,7 +12,6 @@ import java.lang.IllegalArgumentException
 class CurrencyDatabaseViewModel(private val currencyDatabaseRepository: CurrencyDatabaseRepository) :
     ViewModel() {
 
-    //  List of currency names TODO
     val currencyNames: LiveData<List<CurrencyNamesModel>> =
         currencyDatabaseRepository.allCurrencies.asLiveData()
 
