@@ -1,16 +1,15 @@
 package com.example.currencyexchange.Fragments
 
-import android.content.ContentValues.TAG
+import android.content.ContentValues
 import android.os.Bundle
 import android.util.Log
+import android.view.*
+import android.widget.ImageView
 import androidx.fragment.app.Fragment
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
 import android.widget.TextView
 import androidx.fragment.app.activityViewModels
-import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.*
+import androidx.navigation.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.currencyexchange.API.ApiServices
@@ -23,11 +22,11 @@ import com.example.currencyexchange.ViewModels.CurrencyDatabaseFactory
 import com.example.currencyexchange.ViewModels.CurrencyDatabaseViewModel
 import com.example.currencyexchange.ViewModels.CurrencyRetrofitViewModel
 import com.example.currencyexchange.ViewModels.CurrencyViewModelFactory
-import kotlin.reflect.typeOf
 
 
 class Latest : Fragment() {
     //VARIABLES
+    private val TAG = "Latest"
     private val mRetrofitService = ApiServices.getInstance()
     private lateinit var mViewModel: CurrencyRetrofitViewModel
     private val mDatabaseViewModel: CurrencyDatabaseViewModel by activityViewModels {
@@ -37,17 +36,19 @@ class Latest : Fragment() {
     private var mBaseCurrency: String = "default"
     private var mAllCurrencies: HashMap<String, Double> = hashMapOf()
 
-
     //    VIEWS
     private var mRecyclerView: RecyclerView? = null
     private var mAdapter: CurrencyAdapter? = null
     private var mBaseCurrencyTV: TextView? = null
+
+    private var mChangeBaseIcon: ImageView? = null
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
         return inflater.inflate(R.layout.fragment_latest, container, false)
+
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -56,14 +57,22 @@ class Latest : Fragment() {
         getBaseCurrency()
 
         mBaseCurrencyTV = view.findViewById(R.id.latest_base)
+        mChangeBaseIcon = view.findViewById(R.id.toolbar_change_base)
         mRecyclerView = view.findViewById(R.id.latest_rv)
         mRecyclerView?.layoutManager = LinearLayoutManager(this.context)
         mAdapter = CurrencyAdapter()
         mRecyclerView?.adapter = mAdapter
+
+        mChangeBaseIcon?.setOnClickListener(View.OnClickListener {
+
+            val navigateToChangeBase =
+                LatestDirections.actionLatestToChangeBaseCurrency().setFragmentName(TAG)
+            it.findNavController().navigate(navigateToChangeBase)
+        })
     }
 
     private fun getBaseCurrency() {
-        mDatabaseViewModel.baseCurrency.observe(requireActivity(), Observer {
+        mDatabaseViewModel.baseCurrency.observe(viewLifecycleOwner, Observer {
             mBaseCurrency = it.toString()
             if (mBaseCurrency != "default") {
                 fetchFromViewModel()
@@ -90,11 +99,10 @@ class Latest : Fragment() {
             mAllCurrencies.remove(mBaseCurrency)
             mAdapter?.setData(it.latestRates)
             mBaseCurrencyTV?.text = String.format("Base currency: %s", mBaseCurrency)
-
         })
 
         mViewModel.errorMessage.observe(viewLifecycleOwner, Observer {
-            Log.i(TAG, "fetchFromViewModel: RETROFIT VIEW MODEL ERROR!\n$it")
+            Log.i(ContentValues.TAG, "fetchFromViewModel: RETROFIT VIEW MODEL ERROR!\n$it")
         })
     }
 

@@ -76,6 +76,7 @@ class Conversion : Fragment() {
         mConvertBtn = view.findViewById(R.id.conversion_converse_btn)
         mConvertedData = view.findViewById(R.id.conversion_converted_data)
 
+
         retrieveCurrency()
 
         mConvertBtn?.setOnClickListener {

@@ -89,6 +89,8 @@ class HistoricalRates : Fragment() {
         mDatePicker?.maxDate = mMaxCall.timeInMillis
 
         mSaveDate?.setOnClickListener {
+
+
             getDate()
             setVisibilityToLv()
         }
