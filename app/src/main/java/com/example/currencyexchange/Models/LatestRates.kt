@@ -7,6 +7,7 @@ data class LatestRates(
     @SerializedName("base")
     val baseCurrency: String,
     @SerializedName("rates")
-    val latestRates: HashMap<String, Double>
+    val latestRates: HashMap<String, Double>,
+
 )
 

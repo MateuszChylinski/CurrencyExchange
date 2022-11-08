@@ -6,6 +6,34 @@
     android:layout_height="match_parent"
     tools:context=".Fragments.HistoricalRates">
 
+<!--TODO THE FRAGMENT NAME IS CUTTED DUE TO BIG FONT-->
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/historical_toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/design_default_color_primary"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:title="Historical Rates">
+
+        <ImageView
+            android:id="@+id/historical_change_base_currency"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="end"
+            android:layout_marginEnd="10dp"
+            android:src="@drawable/currency_exchange" />
+
+        <TextView
+            android:id="@+id/toolbar_info"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:text="You can change base currency\nby clicking on the currency icon"
+            android:layout_gravity="end"
+            android:layout_marginEnd="15dp"/>
+    </androidx.appcompat.widget.Toolbar>
+
     <!--    First layout pick date-->
     <TextView
         android:id="@+id/historical_info"
@@ -15,9 +43,9 @@
         android:text="Pick date to display historical rates"
         android:textAlignment="center"
         android:textSize="25sp"
-        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/historical_toolbar"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintEnd_toEndOf="parent"/>
 
     <DatePicker
         android:id="@+id/historical_dt"
@@ -53,7 +81,7 @@
         android:textSize="20sp"
         android:visibility="invisible"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toBottomOf="@id/historical_toolbar" />
 
     <TextView
         android:id="@+id/historical_date_tv"
@@ -66,7 +94,7 @@
         android:visibility="invisible"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@+id/historical_base_tv"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toBottomOf="@id/historical_toolbar" />
 
     <TextView
         android:id="@+id/historical_change_info"

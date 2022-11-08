@@ -9,7 +9,9 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
+import androidx.core.os.bundleOf
 import androidx.fragment.app.activityViewModels
+import androidx.fragment.app.setFragmentResult
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -28,6 +30,7 @@ import java.util.*
 
 class HistoricalRates : Fragment() {
     //    VARIABLES
+    private val TAG = "HistoricalRates"
     private var mDate: String = "def"
     private var mBaseCurrency = "default"
     private val mDatabaseViewModel: CurrencyDatabaseViewModel by activityViewModels {
@@ -46,7 +49,8 @@ class HistoricalRates : Fragment() {
     private var mIsTouched = false
     private var mConcatenatedSymbols: String = ""
 
-
+    //TOOLBAR
+    private var mChangeBaseCurrency: ImageView? = null
     //    VIEWS
     private var mInfo: TextView? = null
     private var mSelectionInfo: TextView? = null
@@ -87,10 +91,13 @@ class HistoricalRates : Fragment() {
         mMinCall.set(1999, 2, 1)
         mDatePicker?.minDate = mMinCall.timeInMillis
         mDatePicker?.maxDate = mMaxCall.timeInMillis
+        mChangeBaseCurrency = view.findViewById(R.id.historical_change_base_currency)
+        mChangeBaseCurrency?.setOnClickListener{
+            setFragmentResult("request_key", bundleOf("fragment_name" to TAG))
+
+        }
 
         mSaveDate?.setOnClickListener {
-
-
             getDate()
             setVisibilityToLv()
         }

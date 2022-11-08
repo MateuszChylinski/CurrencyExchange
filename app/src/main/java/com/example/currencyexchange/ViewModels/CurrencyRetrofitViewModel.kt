@@ -8,10 +8,8 @@ import androidx.lifecycle.ViewModelProvider
 import com.example.currencyexchange.Models.CurrencyModel
 import com.example.currencyexchange.Models.HistoricalRatesModel
 import com.example.currencyexchange.Models.LatestRates
-import com.example.currencyexchange.Repository.CurrencyDatabaseRepository
 import com.example.currencyexchange.Repository.CurrencyRetrofitRepository
 import retrofit2.Call
-import retrofit2.Callback
 import retrofit2.Response
 import java.lang.IllegalArgumentException
 
@@ -19,20 +17,24 @@ class CurrencyRetrofitViewModel constructor(private val CurrencyRetrofitReposito
     ViewModel() {
 
     val latestCurrencyRates = MutableLiveData<LatestRates>()
+
     val fluctuationRates = MutableLiveData<CurrencyModel>()
     val convertCurrencyData = MutableLiveData<CurrencyModel>()
     val historicalRates = MutableLiveData<HistoricalRatesModel>()
     val errorMessage = MutableLiveData<String>()
 
 
-    fun fetchLatestRates(baseCurrency: String) {
+    fun fetchLatestRates(baseCurrency: String, isCanceled: Boolean) {
         val response = CurrencyRetrofitRepository.fetchLatestRates(baseCurrency)
         response.enqueue(object : retrofit2.Callback<LatestRates> {
             override fun onResponse(
                 call: retrofit2.Call<LatestRates>, response: Response<LatestRates>
             ) {
-                
-                latestCurrencyRates.postValue(response.body())
+                Log.i(TAG, "onResponse: ${response.code()}")
+                if (response.isSuccessful) {
+                    latestCurrencyRates.postValue(response.body())
+//                TODO arrange alphabetically
+                }
             }
 
             override fun onFailure(call: retrofit2.Call<LatestRates>, t: Throwable) {
@@ -42,6 +44,7 @@ class CurrencyRetrofitViewModel constructor(private val CurrencyRetrofitReposito
 
             }
         })
+
     }
 
     fun fetchFluctuation(

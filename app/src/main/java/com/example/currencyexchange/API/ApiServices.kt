@@ -5,7 +5,6 @@ import com.example.currencyexchange.Models.HistoricalRatesModel
 import com.example.currencyexchange.Models.LatestRates
 import com.example.currencyexchange.ViewModels.CurrencyRetrofitViewModel
 import okhttp3.OkHttpClient
-import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Call
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
