@@ -9,9 +9,12 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.*
 import android.widget.AdapterView.OnItemClickListener
+import androidx.core.os.bundleOf
 import androidx.core.view.get
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.fragment.app.setFragmentResult
+import androidx.fragment.app.setFragmentResultListener
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -63,17 +66,16 @@ class Fluctuation : Fragment() {
     private var mIsTouched = false
 
     // VIEWS
-    private var mChangeBaseCurrencyTV: TextView? = null
     private var mBaseCurrencyTV: TextView? = null
     private var mSelectSymbolsTV: TextView? = null
-    private var selectCurrToCallback: TextView? = null
     private var mRecyclerView: RecyclerView? = null
 
     private var baseCurrencyTV: TextView? = null
     private var selectBaseCurrency: Spinner? = null
     private var saveSymbols: Button? = null
 
-
+    // TOOLBAR
+    private var mChangeBaseCurrency: ImageView? = null
     //  FROM
     private var mCurrenciesListView: ListView? = null
 
@@ -101,7 +103,6 @@ class Fluctuation : Fragment() {
         selectBaseCurrency = view.findViewById(R.id.fluctuation_select_base_currency)
         mCurrenciesListView = view.findViewById(R.id.fluctuation_select_symbols_lv)
         mRecyclerView = view.findViewById(R.id.fluctuation_rv)
-        selectCurrToCallback = view.findViewById(R.id.fluctuation_select_curr_to_callback)
         saveSymbols = view.findViewById(R.id.fluctuation_save_symbols)
 
         fromDateTV = view.findViewById(R.id.fluctuation_from_date)
@@ -114,10 +115,12 @@ class Fluctuation : Fragment() {
         toDatePicker = view.findViewById(R.id.fluctuation_to_dt)
         toOk = view.findViewById(R.id.fluctuation_set_to_ok)
         mSelectSymbolsTV = view.findViewById(R.id.fluctuation_select_symbols_tv)
-
-
-        mChangeBaseCurrencyTV = view.findViewById(R.id.fluctuation_fluctuation)
         mBaseCurrencyTV = view.findViewById(R.id.fluctuation_base_currency_tv)
+
+        mChangeBaseCurrency = view.findViewById(R.id.fluctuation_change_base_currency)
+        mChangeBaseCurrency?.setOnClickListener{
+            setFragmentResult("request_key", bundleOf("fragment_name" to TAG))
+        }
 
         setupDatePicker()
 
@@ -180,7 +183,6 @@ class Fluctuation : Fragment() {
         toDatePicker?.visibility = View.GONE
         toOk?.visibility = View.GONE
 
-        mChangeBaseCurrencyTV?.visibility = View.VISIBLE
         selectBaseCurrency?.visibility = View.VISIBLE
         mBaseCurrencyTV?.visibility = View.VISIBLE
         fromDateTV?.visibility = View.VISIBLE
@@ -230,7 +232,6 @@ class Fluctuation : Fragment() {
 
 
     private fun setupBaseCurrencySpinner(currencyNames: MutableList<CurrencyNamesModel>) {
-
         mSpinnerAdapter =
             ArrayAdapter(requireActivity(), android.R.layout.simple_spinner_item, currencyNames)
         selectBaseCurrency?.adapter = mSpinnerAdapter
@@ -335,7 +336,6 @@ class Fluctuation : Fragment() {
         mRecyclerView?.layoutManager = LinearLayoutManager(this.requireContext())
         mFluctuationAdapter = FluctuationAdapter()
 
-        mChangeBaseCurrencyTV?.visibility = View.INVISIBLE
         selectBaseCurrency?.visibility = View.INVISIBLE
         mBaseCurrencyTV?.visibility = View.INVISIBLE
         fromDateTV?.visibility = View.INVISIBLE

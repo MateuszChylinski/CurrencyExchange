@@ -10,20 +10,26 @@ import android.widget.*
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Observer
 import androidx.navigation.findNavController
+import androidx.navigation.fragment.NavHostFragment
+import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
+import androidx.viewpager2.widget.ViewPager2
+import com.example.currencyexchange.Adapters.PagerAdapter
 import com.example.currencyexchange.Application.CurrencyApplication
 import com.example.currencyexchange.Models.BaseCurrencyModel
 import com.example.currencyexchange.Models.CurrencyNamesModel
 import com.example.currencyexchange.R
 import com.example.currencyexchange.ViewModels.CurrencyDatabaseFactory
 import com.example.currencyexchange.ViewModels.CurrencyDatabaseViewModel
+import kotlinx.coroutines.NonDisposableHandle.parent
 
 class ChangeBaseCurrency : Fragment() {
     //  TAG
     private var TAG = "ChangeBaseCurrency"
 
-    //  Views
+    val args: ChangeBaseCurrencyArgs by navArgs()
 
+    //  Views
     private var mCurrentBaseCurrency: TextView? = null
     private var mSelectNewBaseCurrency: Spinner? = null
 
@@ -35,21 +41,22 @@ class ChangeBaseCurrency : Fragment() {
     private var mAllCurrencyNames: MutableList<CurrencyNamesModel> = mutableListOf()
     private var mIsInit = false
     private var mFragmentName: String? = "def"
-    private val args: ChangeBaseCurrencyArgs by navArgs()
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        return inflater.inflate(R.layout.fragment_change_base_currency, container, false)
+        val view = inflater.inflate(R.layout.fragment_change_base_currency, container, false)
+        mFragmentName = args.fragmentName
+        Log.i(TAG, "onCreateView: ||||||||||||||||||||||||||||||||||||| $mFragmentName")
+        return view
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+
         mCurrentBaseCurrency = view.findViewById(R.id.change_base_current_base)
         mSelectNewBaseCurrency = view.findViewById(R.id.change_base_select_currency_spinner)
-
-        mFragmentName = args.fragmentName
 
         getCurrencies()
     }
@@ -95,12 +102,14 @@ class ChangeBaseCurrency : Fragment() {
                     mBaseCurrency = list[p2].toString()
 
                     updateBaseCurrency(mBaseCurrency)
-                    moveToPreviousFragment()
 
                     list.clear()
                     list.addAll(mAllCurrencyNames)
                     deleteBaseFromList(list)
                     adapter.notifyDataSetChanged()
+
+                    moveToPreviousFragment()
+
                 }
 
                 override fun onNothingSelected(p0: AdapterView<*>?) {
@@ -110,31 +119,28 @@ class ChangeBaseCurrency : Fragment() {
     }
 
     private fun moveToPreviousFragment() {
-        when (mFragmentName) {
-            "Latest" -> {
-                val navigateBack = ChangeBaseCurrencyDirections.actionChangeBaseCurrencyToLatest()
-                view?.findNavController()?.navigate(navigateBack)
-//                it.findNavController().navigate(navigateBack)
-            }
-            "Fluctation" -> {
-                val navigateBack = ChangeBaseCurrencyDirections.actionChangeBaseCurrencyToLatest()
-//                it.findNavController().navigate(navigateBack)
-            }
-            "Conversion" -> {
-                val navigateBack = ChangeBaseCurrencyDirections.actionChangeBaseCurrencyToLatest()
-//                it.findNavController().navigate(navigateBack)
-            }
-            "HistoricalRates" ->{
-                val navigateBack = ChangeBaseCurrencyDirections.actionChangeBaseCurrencyToLatest()
-//                it.findNavController().navigate(navigateBack)
-            }
-        }
+        findNavController().navigate(R.id.action_changeBaseCurrency_to_pagerBase)
     }
+//        when (mFragmentName) {
+//            "Latest" -> {
+//                findNavController().navigate(R.id.action_from_change_to_latest)
+//            }
+//            "Fluctation" -> {
+//                findNavController().navigate(R.id.action_from_change_to_fluctuation)
+//            }
+//            "Conversion" -> {
+//                findNavController().navigate(R.id.action_from_change_to_conversion)
+//            }
+//            "HistoricalRates" ->{
+//                findNavController().navigate(R.id.action_from_change_to_historical)
+//            }
+//        }
 
-    // Update base currency
-    private fun updateBaseCurrency(selectedCurrency: String) {
-        Log.i(TAG, "updateBaseCurrency: $selectedCurrency")
-        val updateBase = BaseCurrencyModel(1, selectedCurrency)
-        mDatabaseViewModel.updateBaseCurrency(updateBase)
-    }
+
+// Update base currency
+private fun updateBaseCurrency(selectedCurrency: String) {
+    Log.i(TAG, "updateBaseCurrency: $selectedCurrency")
+    val updateBase = BaseCurrencyModel(1, selectedCurrency)
+    mDatabaseViewModel.updateBaseCurrency(updateBase)
+}
 }

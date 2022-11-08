@@ -7,38 +7,60 @@
     android:orientation="vertical"
     tools:context=".Fragments.Conversion">
 
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/conversion_toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/design_default_color_primary"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:title="Conversion">
+
+        <ImageView
+            android:id="@+id/conversion_change_base_currency"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="end"
+            android:layout_marginEnd="10dp"
+            android:src="@drawable/currency_exchange" />
+
+        <TextView
+            android:id="@+id/toolbar_info"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:text="You can change base currency\nby clicking on the currency icon"
+            android:layout_gravity="end"
+            android:layout_marginEnd="15dp"/>
+    </androidx.appcompat.widget.Toolbar>
+
 
     <TextView
         android:id="@+id/conversion_from_tv"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_margin="15dp"
-        android:layout_marginStart="36dp"
-        android:layout_marginTop="44dp"
-        android:text="From: XXX"
+        android:layout_margin="20dp"
         android:textSize="25sp"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toBottomOf="@id/conversion_toolbar" />
 
 
     <Spinner
         android:id="@+id/conversion_from_spinner"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="84dp"
-        android:layout_marginTop="16dp"
+        android:layout_marginTop="25dp"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/conversion_from_tv"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintStart_toEndOf="@id/conversion_from_tv"
+        app:layout_constraintTop_toBottomOf="@id/conversion_toolbar" />
 
 
     <TextView
         android:id="@+id/conversion_to_tv"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="36dp"
-        android:text="To: ?"
+        android:layout_margin="20dp"
+        android:text="To: UNK"
         android:textSize="25sp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/conversion_from_tv" />
@@ -47,55 +69,53 @@
         android:id="@+id/conversion_to_spinner"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="52dp"
+        android:layout_marginTop="30dp"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.75"
+        app:layout_constraintHorizontal_bias="0.56"
         app:layout_constraintStart_toEndOf="@+id/conversion_to_tv"
         app:layout_constraintTop_toBottomOf="@+id/conversion_from_spinner" />
 
-    <TextView
-        android:id="@+id/conversion_enter_value_tv"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="12dp"
-        android:layout_marginTop="52dp"
-        android:text="Enter value"
-        android:textSize="25sp"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/conversion_to_tv" />
 
-    <EditText
-        android:id="@+id/conversion_enter_value"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="44dp"
-        android:ems="10"
-        android:inputType="numberDecimal"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.537"
-        app:layout_constraintStart_toEndOf="@+id/conversion_enter_value_tv"
-        app:layout_constraintTop_toBottomOf="@+id/conversion_to_spinner" />
 
-    <Button
-        android:id="@+id/conversion_converse_btn"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_margin="30dp"
-        android:layout_marginTop="172dp"
-        android:layout_marginEnd="28dp"
-        android:text="Convert"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/conversion_enter_value" />
+        <TextView
+            android:id="@+id/conversion_enter_value_tv"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="20dp"
+            android:text="Enter value"
+            android:textSize="25sp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/conversion_to_tv" />
 
-    <TextView
-        android:id="@+id/conversion_converted_data"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:textAlignment="center"
-        android:textSize="24sp"
-        android:visibility="invisible"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/conversion_converse_btn" />
+        <EditText
+            android:id="@+id/conversion_enter_value"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="20dp"
+            android:ems="10"
+            android:inputType="numberDecimal"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/conversion_enter_value_tv"
+            app:layout_constraintTop_toBottomOf="@+id/conversion_to_spinner" />
+
+        <Button
+            android:id="@+id/conversion_converse_btn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="30dp"
+            android:text="Convert"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/conversion_enter_value" />
+
+        <TextView
+            android:id="@+id/conversion_converted_data"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textAlignment="center"
+            android:textSize="24sp"
+            android:visibility="invisible"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/conversion_converse_btn" />
 </androidx.constraintlayout.widget.ConstraintLayout>
