@@ -194,25 +194,25 @@ class Fluctuation : Fragment() {
         fromDateTV?.text = String.format("From: %s", mFromFullDate)
         toDateTV?.text = String.format("To: %s", mToFullDate)
 
-        retrieveCurrencyNamesForSpinner()
+//        retrieveCurrencyNamesForSpinner()
 
     }
 
     //  Retrieve currency names from database. Pass data to the 'setupBaseCurrencySpinner'
-    private fun retrieveCurrencyNamesForSpinner() {
-        mDatabaseViewModel.baseCurrency.observe(requireActivity(), androidx.lifecycle.Observer {
-            mBaseCurrency = it
-            mBaseCurrencyTV?.text = String.format("Base Currency: %s", mBaseCurrency)
-        })
-        mDatabaseViewModel.currencyNames.observe(
-            requireActivity(),
-            androidx.lifecycle.Observer {
-                mCurrencyNamesFromVM.addAll(it as MutableList)
-                if (mBaseCurrency != "default") {
-                    deleteBaseCurrencyFromList(it as MutableList<CurrencyNamesModel>)
-                }
-            })
-    }
+//    private fun retrieveCurrencyNamesForSpinner() {
+//        mDatabaseViewModel.baseCurrency.observe(requireActivity(), androidx.lifecycle.Observer {
+//            mBaseCurrency = it
+//            mBaseCurrencyTV?.text = String.format("Base Currency: %s", mBaseCurrency)
+//        })
+//        mDatabaseViewModel.currencyNames.observe(
+//            requireActivity(),
+//            androidx.lifecycle.Observer {
+//                mCurrencyNamesFromVM.addAll(it as MutableList)
+//                if (mBaseCurrency != "default") {
+//                    deleteBaseCurrencyFromList(it as MutableList<CurrencyNamesModel>)
+//                }
+//            })
+//    }
 
     //  This function will delete base currency from list that will be forwarded to 'setupBaseCurrencySpinner' to populate spinner
     private fun deleteBaseCurrencyFromList(list: MutableList<CurrencyNamesModel>) {
@@ -344,44 +344,44 @@ class Fluctuation : Fragment() {
         mSelectSymbolsTV?.visibility = View.INVISIBLE
         saveSymbols?.visibility = View.INVISIBLE
 
-        getFluctuationData()
+//        getFluctuationData()
     }
 
     // prepare an api call
-    private fun getFluctuationData() {
-        mViewModel = ViewModelProvider(
-            this,
-            CurrencyViewModelFactory(CurrencyRetrofitRepository(mRetrofitServices))
-        ).get(CurrencyRetrofitViewModel::class.java)
-
-
-//      Iterate through every checked currency, and make a single string for callback by concatenation
-        for (i in 0..mCurrenciesForCallback.size - 1) {
-            mConcatenatedSymbols += mCurrenciesForCallback[i] + ","
-        }
-
-        mViewModel.fetchFluctuation(
-            mFromFullDate,
-            mToFullDate,
-            mBaseCurrency,
-            mConcatenatedSymbols
-        )
-        mViewModel.fluctuationRates.observe(viewLifecycleOwner, androidx.lifecycle.Observer {
-            for (x in it.rates.keys) {
-                mCurrenciesNames.add(x)
-                mCurrenciesStartRate.add(it.rates.getValue(x).startRate)
-                mCurrenciesEndRate.add(it.rates.getValue(x).endRate)
-                mCurrenciesChange.add(it.rates.getValue(x).change)
-                mCurrenciesChangePct.add(it.rates.getValue(x).change_pct)
-            }
-            mFluctuationAdapter?.setData(
-                mCurrenciesNames,
-                mCurrenciesStartRate,
-                mCurrenciesEndRate,
-                mCurrenciesChange,
-                mCurrenciesChangePct
-            )
-            mRecyclerView?.adapter = mFluctuationAdapter
-        })
-    }
+//    private fun getFluctuationData() {
+//        mViewModel = ViewModelProvider(
+//            this,
+//            CurrencyViewModelFactory(CurrencyRetrofitRepository(mRetrofitServices))
+//        ).get(CurrencyRetrofitViewModel::class.java)
+//
+//
+////      Iterate through every checked currency, and make a single string for callback by concatenation
+//        for (i in 0..mCurrenciesForCallback.size - 1) {
+//            mConcatenatedSymbols += mCurrenciesForCallback[i] + ","
+//        }
+//
+//        mViewModel.fetchFluctuation(
+//            mFromFullDate,
+//            mToFullDate,
+//            mBaseCurrency,
+//            mConcatenatedSymbols
+//        )
+//        mViewModel.fluctuationRates.observe(viewLifecycleOwner, androidx.lifecycle.Observer {
+//            for (x in it.rates.keys) {
+//                mCurrenciesNames.add(x)
+//                mCurrenciesStartRate.add(it.rates.getValue(x).startRate)
+//                mCurrenciesEndRate.add(it.rates.getValue(x).endRate)
+//                mCurrenciesChange.add(it.rates.getValue(x).change)
+//                mCurrenciesChangePct.add(it.rates.getValue(x).change_pct)
+//            }
+//            mFluctuationAdapter?.setData(
+//                mCurrenciesNames,
+//                mCurrenciesStartRate,
+//                mCurrenciesEndRate,
+//                mCurrenciesChange,
+//                mCurrenciesChangePct
+//            )
+//            mRecyclerView?.adapter = mFluctuationAdapter
+//        })
+//    }
 }

@@ -1,25 +1,17 @@
 package com.example.currencyexchange.Fragments
 
-import android.annotation.SuppressLint
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
-import androidx.appcompat.app.AppCompatActivity
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.FragmentTransaction
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.setFragmentResult
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
-import androidx.navigation.NavController
-import androidx.navigation.Navigation.findNavController
-import androidx.navigation.findNavController
-import androidx.navigation.fragment.NavHostFragment
-import androidx.navigation.fragment.findNavController
 import com.example.currencyexchange.API.ApiServices
 import com.example.currencyexchange.Application.CurrencyApplication
 import com.example.currencyexchange.Models.CurrencyNamesModel
@@ -28,9 +20,8 @@ import com.example.currencyexchange.Repository.CurrencyRetrofitRepository
 import com.example.currencyexchange.ViewModels.CurrencyDatabaseFactory
 import com.example.currencyexchange.ViewModels.CurrencyDatabaseViewModel
 import com.example.currencyexchange.ViewModels.CurrencyRetrofitViewModel
-import com.example.currencyexchange.ViewModels.CurrencyViewModelFactory
-import kotlin.math.log
-import com.example.currencyexchange.Fragments.Conversion as Conversion
+//import com.example.currencyexchange.ViewModels.CurrencyViewModelFactory
+import com.example.currencyexchange.databinding.FragmentConversionBinding
 
 class Conversion : Fragment() {
     //  TAG
@@ -65,20 +56,27 @@ class Conversion : Fragment() {
     private var mIsFromInit = true
     private var mIsToInit = true
 
+    private var mConversionBinding: FragmentConversionBinding? = null
+    private val mBinding get() = mConversionBinding!!
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
+        mConversionBinding = FragmentConversionBinding.inflate(layoutInflater)
+        val view = mBinding.root
 
-        val view = inflater.inflate(R.layout.fragment_conversion, container, false)
+
         return view
+
+
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
         Log.i(TAG, "onViewCreated: $mIsToInit | $mIsFromInit")
-        retrieveCurrency()
+//        retrieveCurrency()
 
         mFromTV = view.findViewById(R.id.conversion_from_tv)
         mToTV = view.findViewById(R.id.conversion_to_tv)
@@ -99,10 +97,10 @@ class Conversion : Fragment() {
 
     //  Retrieve data from database, by using the ViewModel
     private fun retrieveCurrency() {
-        mDatabaseViewModel.baseCurrency.observe(viewLifecycleOwner, Observer {
-            mBaseCurrency = it.toString()
+//        mDatabaseViewModel.baseCurrency.observe(viewLifecycleOwner, Observer {
+//            mBaseCurrency = it.toString()
             mFromTV?.text = String.format("From: %s", mBaseCurrency)
-        })
+//        })
 
         mDatabaseViewModel.currencyNames.observe(viewLifecycleOwner, Observer {
             if (it != null) {
@@ -144,12 +142,6 @@ class Conversion : Fragment() {
                     Log.i(TAG, "deleteBaseFromSpinner: CALLING TO $mBaseCurrency $mDesiredCurrency")
                     val baseIndex = list.indices.find {list[it].toString() == mDesiredCurrency}
                     list.removeAt(baseIndex!!)
-
-//                    if (mBaseCurrency != "def"){
-//                        Log.i(TAG, "deleteBaseFromSpinner: $mBaseCurrency")
-//                        val desiredIndex = list.indices.find {list[it].toString() == mBaseCurrency}
-//                    }
-
                     prepareToSpinner(list)
                 }
             }
@@ -172,19 +164,16 @@ class Conversion : Fragment() {
                         mFromTV?.text = String.format("From: %s", mBaseCurrency)
                         mIsFromTouched = false
 
-
 //                      Since everytime when user will select any currency, it will be deleted from the list, so user could not refer again to previous currency. This is why there's a need to create a copy of list that stores every currency.
                         currencyNames.clear()
                         currencyNames.addAll(mAllCurrencies)
 
                         deleteBaseFromSpinner("from", currencyNames)
                         adapter.notifyDataSetChanged()
-
                     } else {
                         mIsFromTouched = true
                     }
                 }
-
                 override fun onNothingSelected(p0: AdapterView<*>?) {
                     Log.i(TAG, "onNothingSelected: ?")
                 }
@@ -229,27 +218,27 @@ class Conversion : Fragment() {
         if (mBaseCurrency != "def" && mDesiredCurrency != "def") {
             mValue = mGetValue?.text.toString()
             mConvertedData?.visibility = View.VISIBLE
-            prepareConvertCall()
+//            prepareConvertCall()
         }else{
             Toast.makeText(requireActivity(), "You have to select desired currency in order to make a conversion!", Toast.LENGTH_LONG).show()
         }
     }
 
     //  Initiate the ViewModel, get data from repository, format result, and display it in the TextView
-    private fun prepareConvertCall() {
-
-        mCurrencyRetrofitViewModel = ViewModelProvider(
-            this, CurrencyViewModelFactory(
-                CurrencyRetrofitRepository(mRetrofitService)
-            )
-        ).get(CurrencyRetrofitViewModel::class.java)
-        mCurrencyRetrofitViewModel.convertCurrency(mBaseCurrency, mDesiredCurrency, mValue)
-        Log.i(TAG, "prepareConvertCall: $mBaseCurrency $mDesiredCurrency $mValue")
-        mCurrencyRetrofitViewModel.convertCurrencyData.observe(viewLifecycleOwner, Observer {
-            Log.i(TAG, "prepareConvertCall: ${it.result} ${it.success}")
-            mConvertedValue = it.result
-            mConvertedData?.text =
-                String.format("You will receive: %.2f %s", mConvertedValue, mDesiredCurrency)
-        })
-    }
+//    private fun prepareConvertCall() {
+//
+//        mCurrencyRetrofitViewModel = ViewModelProvider(
+//            this, CurrencyViewModelFactory(
+//                CurrencyRetrofitRepository(mRetrofitService)
+//            )
+//        ).get(CurrencyRetrofitViewModel::class.java)
+//        mCurrencyRetrofitViewModel.convertCurrency(mBaseCurrency, mDesiredCurrency, mValue)
+//        Log.i(TAG, "prepareConvertCall: $mBaseCurrency $mDesiredCurrency $mValue")
+//        mCurrencyRetrofitViewModel.convertCurrencyData.observe(viewLifecycleOwner, Observer {
+//            Log.i(TAG, "prepareConvertCall: ${it.result} ${it.success}")
+//            mConvertedValue = it.result
+//            mConvertedData?.text =
+//                String.format("You will receive: %.2f %s", mConvertedValue, mDesiredCurrency)
+//        })
+//    }
 }

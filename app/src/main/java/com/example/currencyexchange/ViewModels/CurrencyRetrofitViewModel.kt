@@ -17,35 +17,33 @@ class CurrencyRetrofitViewModel constructor(private val CurrencyRetrofitReposito
     ViewModel() {
 
     val latestCurrencyRates = MutableLiveData<LatestRates>()
-
     val fluctuationRates = MutableLiveData<CurrencyModel>()
     val convertCurrencyData = MutableLiveData<CurrencyModel>()
     val historicalRates = MutableLiveData<HistoricalRatesModel>()
     val errorMessage = MutableLiveData<String>()
 
-
-    fun fetchLatestRates(baseCurrency: String) {
-        val response = CurrencyRetrofitRepository.fetchLatestRates(baseCurrency)
-        response.enqueue(object : retrofit2.Callback<LatestRates> {
-            override fun onResponse(
-                call: retrofit2.Call<LatestRates>, response: Response<LatestRates>
-            ) {
-                Log.i(TAG, "onResponse: ${response.code()}")
-                if (response.isSuccessful) {
-                    latestCurrencyRates.postValue(response.body())
-//                TODO arrange alphabetically
-                }
-            }
-
-            override fun onFailure(call: retrofit2.Call<LatestRates>, t: Throwable) {
-                Log.i(TAG, "onFailure: LATEST RATES ERROR")
-                Log.i(TAG, "onFailure: ${t.message}")
-                errorMessage.postValue(t.message)
-
-            }
-        })
-
-    }
+//    fun fetchLatestRates(baseCurrency: String) {
+//        val response = CurrencyRetrofitRepository.fetchLatestRates(baseCurrency)
+//        response.enqueue(object : retrofit2.Callback<LatestRates> {
+//            override fun onResponse(
+//                call: retrofit2.Call<LatestRates>, response: Response<LatestRates>
+//            ) {
+//                Log.i(TAG, "onResponse: ${response.code()}")
+//                if (response.isSuccessful) {
+////                    latestCurrencyRates.postValue(response.body())
+////                TODO arrange alphabetically
+//                }
+//            }
+//
+//            override fun onFailure(call: retrofit2.Call<LatestRates>, t: Throwable) {
+//                Log.i(TAG, "onFailure: LATEST RATES ERROR")
+//                Log.i(TAG, "onFailure: ${t.message}")
+//                errorMessage.postValue(t.message)
+//
+//            }
+//        })
+//
+//    }
 
     fun fetchFluctuation(
         startDate: String,
@@ -107,15 +105,15 @@ class CurrencyRetrofitViewModel constructor(private val CurrencyRetrofitReposito
 }
 
 
-class CurrencyViewModelFactory(val repository: CurrencyRetrofitRepository) :
-    ViewModelProvider.Factory {
-    override fun <T : ViewModel> create(modelClass: Class<T>): T {
-        if (modelClass.isAssignableFrom(CurrencyRetrofitViewModel::class.java)) {
-            @Suppress("UNCHECKED_CAST")
-            return CurrencyRetrofitViewModel(repository) as T
-        }
-        throw IllegalArgumentException("Unknown retrofit ViewModel")
-    }
-}
+//class CurrencyViewModelFactory(val repository: CurrencyRetrofitRepository) :
+//    ViewModelProvider.Factory {
+//    override fun <T : ViewModel> create(modelClass: Class<T>): T {
+//        if (modelClass.isAssignableFrom(CurrencyRetrofitViewModel::class.java)) {
+//            @Suppress("UNCHECKED_CAST")
+//            return CurrencyRetrofitViewModel(repository) as T
+//        }
+//        throw IllegalArgumentException("Unknown retrofit ViewModel")
+//    }
+//}
 
 

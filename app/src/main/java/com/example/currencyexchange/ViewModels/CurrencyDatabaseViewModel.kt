@@ -16,7 +16,7 @@ class CurrencyDatabaseViewModel(private val currencyDatabaseRepository: Currency
         currencyDatabaseRepository.allCurrencies.asLiveData()
 
     //  Base currency
-    val baseCurrency: LiveData<String> = currencyDatabaseRepository.baseCurrency.asLiveData()
+//    val baseCurrency: LiveData<String> = currencyDatabaseRepository.baseCurrency.asLiveData()
 
     //  Insert new currency into the database
     fun insertNewCurrency(currencyNamesModel: CurrencyNamesModel) = viewModelScope.launch {
