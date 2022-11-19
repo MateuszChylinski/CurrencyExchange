@@ -19,8 +19,6 @@ import com.example.currencyexchange.Application.CurrencyApplication
 import com.example.currencyexchange.Models.BaseCurrencyModel
 import com.example.currencyexchange.Models.CurrencyNamesModel
 import com.example.currencyexchange.R
-import com.example.currencyexchange.ViewModels.CurrencyDatabaseFactory
-import com.example.currencyexchange.ViewModels.CurrencyDatabaseViewModel
 import kotlinx.coroutines.NonDisposableHandle.parent
 
 class ChangeBaseCurrency : Fragment() {
@@ -34,9 +32,6 @@ class ChangeBaseCurrency : Fragment() {
     private var mSelectNewBaseCurrency: Spinner? = null
 
     //  Variables
-    private val mDatabaseViewModel: CurrencyDatabaseViewModel by activityViewModels {
-        CurrencyDatabaseFactory((activity?.application as CurrencyApplication).repository)
-    }
     private var mBaseCurrency: String = "default"
     private var mAllCurrencyNames: MutableList<CurrencyNamesModel> = mutableListOf()
     private var mIsInit = false
@@ -141,6 +136,5 @@ class ChangeBaseCurrency : Fragment() {
 private fun updateBaseCurrency(selectedCurrency: String) {
     Log.i(TAG, "updateBaseCurrency: $selectedCurrency")
     val updateBase = BaseCurrencyModel(1, selectedCurrency)
-    mDatabaseViewModel.updateBaseCurrency(updateBase)
 }
 }

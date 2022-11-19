@@ -17,8 +17,6 @@ import com.example.currencyexchange.Repository.CurrencyRetrofitRepository
 import com.example.currencyexchange.ViewModels.*
 import com.example.currencyexchange.databinding.FragmentLatestBinding
 
-//    TODO - consider putting the currencies to the database in alph. Order
-//    TODO - should I move it to the ViewModel, to relieve this fragment from any not view operations?
 //    TODO - add collapsing toolbar
 
 class Latest : Fragment() {

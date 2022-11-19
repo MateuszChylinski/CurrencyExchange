@@ -25,7 +25,8 @@ class LatestViewModel constructor(
         response.enqueue(object : retrofit2.Callback<LatestRates> {
             override fun onResponse(call: Call<LatestRates>, response: Response<LatestRates>) {
                 if (response.isSuccessful) {
-                    latestRates.postValue(response.body())
+//                    TODO - turn it on
+//                    latestRates.postValue(response.body())
                     response.body()?.latestRates?.keys?.let { mCurrenciesSet.addAll(it) }
                     if (mCurrenciesSet.size > 0) {
                         viewModelScope.launch { populateDB() }

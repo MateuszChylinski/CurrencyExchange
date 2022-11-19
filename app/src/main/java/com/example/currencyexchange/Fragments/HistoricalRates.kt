@@ -1,6 +1,5 @@
 package com.example.currencyexchange.Fragments
 
-import android.content.ContentValues.TAG
 import android.os.Bundle
 import android.util.Log
 import android.util.SparseBooleanArray
@@ -12,7 +11,6 @@ import android.widget.*
 import androidx.core.os.bundleOf
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.setFragmentResult
-import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.currencyexchange.API.ApiServices
@@ -20,10 +18,6 @@ import com.example.currencyexchange.Adapters.HistoricalAdapter
 import com.example.currencyexchange.Application.CurrencyApplication
 import com.example.currencyexchange.Models.CurrencyNamesModel
 import com.example.currencyexchange.R
-import com.example.currencyexchange.Repository.CurrencyRetrofitRepository
-import com.example.currencyexchange.ViewModels.CurrencyDatabaseFactory
-import com.example.currencyexchange.ViewModels.CurrencyDatabaseViewModel
-import com.example.currencyexchange.ViewModels.CurrencyRetrofitViewModel
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -32,10 +26,7 @@ class HistoricalRates : Fragment() {
     private val TAG = "HistoricalRates"
     private var mDate: String = "def"
     private var mBaseCurrency = "default"
-    private val mDatabaseViewModel: CurrencyDatabaseViewModel by activityViewModels {
-        CurrencyDatabaseFactory((activity?.application as CurrencyApplication).repository)
-    }
-    private lateinit var mRetrofitViewModel: CurrencyRetrofitViewModel
+
     private var mApiService: ApiServices = ApiServices.getInstance()
 
     private var mHistoricalAdapter: HistoricalAdapter? = null

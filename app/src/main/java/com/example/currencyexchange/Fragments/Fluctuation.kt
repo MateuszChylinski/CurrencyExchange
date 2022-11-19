@@ -32,9 +32,6 @@ import kotlin.math.log
 
 class Fluctuation : Fragment() {
     private val TAG = "Fluctuation"
-    val mDatabaseViewModel: CurrencyDatabaseViewModel by activityViewModels {
-        CurrencyDatabaseFactory((activity?.application as CurrencyApplication).repository)
-    }
 
     // VARIABLES
     private var mBaseCurrency: String = "default"
@@ -49,7 +46,6 @@ class Fluctuation : Fragment() {
 
 
     private val mRetrofitServices = ApiServices.getInstance()
-    private lateinit var mViewModel: CurrencyRetrofitViewModel
 
     private var mCurrenciesForCallback: MutableList<String> = mutableListOf()
     private val mCurrenciesNames: MutableList<String> = mutableListOf()
