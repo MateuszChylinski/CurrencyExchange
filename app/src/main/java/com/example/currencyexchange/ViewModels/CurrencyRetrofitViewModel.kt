@@ -24,7 +24,7 @@ class CurrencyRetrofitViewModel constructor(private val CurrencyRetrofitReposito
     val errorMessage = MutableLiveData<String>()
 
 
-    fun fetchLatestRates(baseCurrency: String, isCanceled: Boolean) {
+    fun fetchLatestRates(baseCurrency: String) {
         val response = CurrencyRetrofitRepository.fetchLatestRates(baseCurrency)
         response.enqueue(object : retrofit2.Callback<LatestRates> {
             override fun onResponse(

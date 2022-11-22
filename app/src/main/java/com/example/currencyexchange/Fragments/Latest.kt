@@ -4,24 +4,15 @@ import android.content.ContentValues
 import android.os.Bundle
 import android.util.Log
 import android.view.*
-import android.widget.ImageView
-import android.widget.TextView
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.setFragmentResult
-import androidx.fragment.app.setFragmentResultListener
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
-import androidx.navigation.fragment.NavHostFragment
-import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
-import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
-import androidx.viewpager2.widget.ViewPager2
 import com.example.currencyexchange.API.ApiServices
 import com.example.currencyexchange.Adapters.CurrencyAdapter
-import com.example.currencyexchange.Adapters.PagerAdapter
 import com.example.currencyexchange.Application.CurrencyApplication
 import com.example.currencyexchange.Models.CurrencyNamesModel
 import com.example.currencyexchange.R
@@ -30,63 +21,48 @@ import com.example.currencyexchange.ViewModels.CurrencyDatabaseFactory
 import com.example.currencyexchange.ViewModels.CurrencyDatabaseViewModel
 import com.example.currencyexchange.ViewModels.CurrencyRetrofitViewModel
 import com.example.currencyexchange.ViewModels.CurrencyViewModelFactory
+import com.example.currencyexchange.databinding.FragmentLatestBinding
 
 
 class Latest : Fragment() {
 
-//    TODO Add collapsing toolbar
-    //VARIABLES
     private val TAG = "Latest"
+    private var mBaseCurrency: String = "default"
+
+    private var mLatestBinding: FragmentLatestBinding? = null
+    private val mBinding get() = mLatestBinding!!
+    private val mAdapter = CurrencyAdapter()
+
     private val mRetrofitService = ApiServices.getInstance()
     private lateinit var mViewModel: CurrencyRetrofitViewModel
     private val mDatabaseViewModel: CurrencyDatabaseViewModel by activityViewModels {
         CurrencyDatabaseFactory((activity?.application as CurrencyApplication).repository)
     }
-    private val currencies = mutableListOf<String>()
-    private var mBaseCurrency: String = "default"
-    private var mAllCurrencies: HashMap<String, Double> = hashMapOf()
-    private var mIsCallCanceled: Boolean = false
-
-    //    VIEWS
-    private var mRefreshContainer: SwipeRefreshLayout? = null
-    private var mRecyclerView: RecyclerView? = null
-    private var mAdapter: CurrencyAdapter? = null
-    private var mBaseCurrencyTV: TextView? = null
-    private var mChangeBaseIcon: ImageView? = null
 
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
-        val view = layoutInflater.inflate(R.layout.fragment_latest, container, false)
+    ): View {
+        mLatestBinding = FragmentLatestBinding.inflate(layoutInflater)
+        val view = mBinding.root
+
+        mBinding.latestRv.layoutManager = LinearLayoutManager(this.context)
+        mBinding.latestRv.adapter = mAdapter
+        mBinding.latestRefreshContainer.setOnRefreshListener {
+            getBaseCurrency()
+            mBinding.latestRefreshContainer.isRefreshing = false
+        }
+        mBinding.latestChangeBaseCurrency.setOnClickListener {
+            setFragmentResult("request_key", bundleOf("fragment_name" to TAG))
+        }
         return view
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
-        mRefreshContainer = view.findViewById(R.id.latest_refresh_container)
-        mBaseCurrencyTV = view.findViewById(R.id.latest_base)
-        mRecyclerView = view.findViewById(R.id.latest_rv)
-        mRecyclerView?.layoutManager = LinearLayoutManager(this.context)
-        mAdapter = CurrencyAdapter()
-        mRecyclerView?.adapter = mAdapter
-        mChangeBaseIcon = view.findViewById(R.id.latest_change_base_currency)
-        mChangeBaseIcon?.setOnClickListener {
-            setFragmentResult("request_key", bundleOf("fragment_name" to TAG))
-        }
         getBaseCurrency()
-
-        mRefreshContainer?.setOnRefreshListener {
-            getBaseCurrency()
-            mRefreshContainer?.isRefreshing = false
-        }
-        mBaseCurrencyTV?.setOnClickListener {
-            mIsCallCanceled = true
-        }
     }
-
 
     private fun getBaseCurrency() {
         mDatabaseViewModel.baseCurrency.observe(viewLifecycleOwner, Observer {
@@ -105,18 +81,15 @@ class Latest : Fragment() {
             )
                 .get(CurrencyRetrofitViewModel::class.java)
 
-        mViewModel.fetchLatestRates(mBaseCurrency, mIsCallCanceled)
+        mViewModel.fetchLatestRates(mBaseCurrency)
         mViewModel.latestCurrencyRates.observe(viewLifecycleOwner, Observer {
+            mBinding.latestBase.text = String.format("Base currency: %s", mBaseCurrency)
 
-
-            currencies.addAll(it.latestRates.keys)
-            mAllCurrencies = it.latestRates
-
-            populateDB(currencies)
-
-            mAllCurrencies.remove(mBaseCurrency)
-            mAdapter?.setData(it.latestRates)
-            mBaseCurrencyTV?.text = String.format("Base currency: %s", mBaseCurrency)
+            if (it.latestRates.containsKey(mBaseCurrency)) {
+                it.latestRates.remove(mBaseCurrency)
+            }
+            mAdapter.setData(it.latestRates)
+            populateDB(it.latestRates.keys)
         })
 
         mViewModel.errorMessage.observe(viewLifecycleOwner, Observer {
@@ -124,8 +97,10 @@ class Latest : Fragment() {
         })
     }
 
-//    TODO consider putting the currencies to the database in alph. Order
-    private fun populateDB(currency: MutableList<String>) {
+//    TODO - consider putting the currencies to the database in alph. Order
+//    TODO - should I move it to the ViewModel, to relieve this fragment from any not view operations?
+//    TODO - add collapsing toolbar
+    private fun populateDB(currency: MutableSet<String>) {
         val currIterator = currency.iterator()
         while (currIterator.hasNext()) {
             val curr = CurrencyNamesModel(currIterator.next())
