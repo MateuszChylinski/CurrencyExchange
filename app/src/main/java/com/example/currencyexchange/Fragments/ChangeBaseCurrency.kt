@@ -19,8 +19,6 @@ import com.example.currencyexchange.Application.CurrencyApplication
 import com.example.currencyexchange.Models.BaseCurrencyModel
 import com.example.currencyexchange.Models.CurrencyNamesModel
 import com.example.currencyexchange.R
-import com.example.currencyexchange.ViewModels.CurrencyDatabaseFactory
-import com.example.currencyexchange.ViewModels.CurrencyDatabaseViewModel
 import kotlinx.coroutines.NonDisposableHandle.parent
 
 class ChangeBaseCurrency : Fragment() {
@@ -34,9 +32,6 @@ class ChangeBaseCurrency : Fragment() {
     private var mSelectNewBaseCurrency: Spinner? = null
 
     //  Variables
-    private val mDatabaseViewModel: CurrencyDatabaseViewModel by activityViewModels {
-        CurrencyDatabaseFactory((activity?.application as CurrencyApplication).repository)
-    }
     private var mBaseCurrency: String = "default"
     private var mAllCurrencyNames: MutableList<CurrencyNamesModel> = mutableListOf()
     private var mIsInit = false
@@ -58,22 +53,22 @@ class ChangeBaseCurrency : Fragment() {
         mCurrentBaseCurrency = view.findViewById(R.id.change_base_current_base)
         mSelectNewBaseCurrency = view.findViewById(R.id.change_base_select_currency_spinner)
 
-        getCurrencies()
+//        getCurrencies()
     }
 
     //  Retrieve base currency, and all currency names from database via view model
-    private fun getCurrencies() {
-        mDatabaseViewModel.baseCurrency.observe(requireActivity(), Observer {
-            mBaseCurrency = it.toString()
-            mCurrentBaseCurrency?.text = String.format("Base currency: %s", mBaseCurrency)
-        })
-        mDatabaseViewModel.currencyNames.observe(requireActivity(), Observer {
-            mAllCurrencyNames.addAll(it)
-            if (mBaseCurrency != "default") {
-                deleteBaseFromList(it as MutableList<CurrencyNamesModel>)
-            }
-        })
-    }
+//    private fun getCurrencies() {
+//        mDatabaseViewModel.baseCurrency.observe(requireActivity(), Observer {
+//            mBaseCurrency = it.toString()
+//            mCurrentBaseCurrency?.text = String.format("Base currency: %s", mBaseCurrency)
+//        })
+//        mDatabaseViewModel.currencyNames.observe(requireActivity(), Observer {
+//            mAllCurrencyNames.addAll(it)
+//            if (mBaseCurrency != "default") {
+//                deleteBaseFromList(it as MutableList<CurrencyNamesModel>)
+//            }
+//        })
+//    }
 
     //  Look for base currency in given list, and delete it.
     private fun deleteBaseFromList(list: MutableList<CurrencyNamesModel>) {
@@ -141,6 +136,5 @@ class ChangeBaseCurrency : Fragment() {
 private fun updateBaseCurrency(selectedCurrency: String) {
     Log.i(TAG, "updateBaseCurrency: $selectedCurrency")
     val updateBase = BaseCurrencyModel(1, selectedCurrency)
-    mDatabaseViewModel.updateBaseCurrency(updateBase)
 }
 }

@@ -1,6 +1,5 @@
 package com.example.currencyexchange.Fragments
 
-import android.content.ContentValues.TAG
 import android.os.Bundle
 import android.util.Log
 import android.util.SparseBooleanArray
@@ -12,7 +11,6 @@ import android.widget.*
 import androidx.core.os.bundleOf
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.setFragmentResult
-import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.currencyexchange.API.ApiServices
@@ -20,11 +18,6 @@ import com.example.currencyexchange.Adapters.HistoricalAdapter
 import com.example.currencyexchange.Application.CurrencyApplication
 import com.example.currencyexchange.Models.CurrencyNamesModel
 import com.example.currencyexchange.R
-import com.example.currencyexchange.Repository.CurrencyRetrofitRepository
-import com.example.currencyexchange.ViewModels.CurrencyDatabaseFactory
-import com.example.currencyexchange.ViewModels.CurrencyDatabaseViewModel
-import com.example.currencyexchange.ViewModels.CurrencyRetrofitViewModel
-import com.example.currencyexchange.ViewModels.CurrencyViewModelFactory
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -33,10 +26,7 @@ class HistoricalRates : Fragment() {
     private val TAG = "HistoricalRates"
     private var mDate: String = "def"
     private var mBaseCurrency = "default"
-    private val mDatabaseViewModel: CurrencyDatabaseViewModel by activityViewModels {
-        CurrencyDatabaseFactory((activity?.application as CurrencyApplication).repository)
-    }
-    private lateinit var mRetrofitViewModel: CurrencyRetrofitViewModel
+
     private var mApiService: ApiServices = ApiServices.getInstance()
 
     private var mHistoricalAdapter: HistoricalAdapter? = null
@@ -133,25 +123,25 @@ class HistoricalRates : Fragment() {
         mDateTV?.visibility = View.VISIBLE
         mDateTV?.text = String.format("Date: %s", mDate)
 
-        getCurrenciesFromDB()
+//        getCurrenciesFromDB()
     }
 
 
-    private fun getCurrenciesFromDB() {
-        mDatabaseViewModel.baseCurrency.observe(
-            requireActivity(),
-            androidx.lifecycle.Observer {
-                mBaseCurrency = it.toString()
-                mBaseCurrencyTV?.text = String.format("Base currency: %s", it.toString())
-            })
-        mDatabaseViewModel.currencyNames.observe(requireActivity(), androidx.lifecycle.Observer {
-//          The reason why we're adding here 'it' to the 'mCurrenciesNames' is because in 'ListView' we're gonna need additional record, called 'All currencies' - since we shouldn't add it to the json response, it's better to just add response to the mutable list for the 'ListView'
-            mCurrenciesNames.addAll(it)
-            if (mBaseCurrency != "default") {
-                deleteBaseFromTheList(it as MutableList<CurrencyNamesModel>)
-            }
-        })
-    }
+//    private fun getCurrenciesFromDB() {
+//        mDatabaseViewModel.baseCurrency.observe(
+//            requireActivity(),
+//            androidx.lifecycle.Observer {
+//                mBaseCurrency = it.toString()
+//                mBaseCurrencyTV?.text = String.format("Base currency: %s", it.toString())
+//            })
+//        mDatabaseViewModel.currencyNames.observe(requireActivity(), androidx.lifecycle.Observer {
+////          The reason why we're adding here 'it' to the 'mCurrenciesNames' is because in 'ListView' we're gonna need additional record, called 'All currencies' - since we shouldn't add it to the json response, it's better to just add response to the mutable list for the 'ListView'
+//            mCurrenciesNames.addAll(it)
+//            if (mBaseCurrency != "default") {
+//                deleteBaseFromTheList(it as MutableList<CurrencyNamesModel>)
+//            }
+//        })
+//    }
 
     private fun deleteBaseFromTheList(list: MutableList<CurrencyNamesModel>) {
         if (list.toString().contains(mBaseCurrency)) {
@@ -269,21 +259,21 @@ class HistoricalRates : Fragment() {
         mDateTV?.visibility = View.VISIBLE
         mSymbolsRv?.visibility = View.VISIBLE
 
-        getDataFromViewModel()
+//        getDataFromViewModel()
     }
 
     // Make a call within api to receive data about historical rates for selected base currency, and all of the currencies selected in ListView
-    private fun getDataFromViewModel() {
-        mRetrofitViewModel = ViewModelProvider(
-            this, CurrencyViewModelFactory(
-                CurrencyRetrofitRepository(mApiService)
-            )
-        ).get(CurrencyRetrofitViewModel::class.java)
-        mRetrofitViewModel.historicalRates(mDate, mConcatenatedSymbols, mBaseCurrency)
-        mRetrofitViewModel.historicalRates.observe(viewLifecycleOwner, androidx.lifecycle.Observer {
-            prepareRecyclerView(it.abc.toSortedMap())
-        })
-    }
+//    private fun getDataFromViewModel() {
+//        mRetrofitViewModel = ViewModelProvider(
+//            this, CurrencyViewModelFactory(
+//                CurrencyRetrofitRepository(mApiService)
+//            )
+//        ).get(CurrencyRetrofitViewModel::class.java)
+//        mRetrofitViewModel.historicalRates(mDate, mConcatenatedSymbols, mBaseCurrency)
+//        mRetrofitViewModel.historicalRates.observe(viewLifecycleOwner, androidx.lifecycle.Observer {
+//            prepareRecyclerView(it.abc.toSortedMap())
+//        })
+//    }
 
     //   Make a basic basic setup of the RecyclerView
     private fun prepareRecyclerView(currencyData: SortedMap<String, Double>) {

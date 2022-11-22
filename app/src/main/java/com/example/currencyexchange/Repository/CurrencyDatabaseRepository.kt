@@ -1,14 +1,17 @@
 package com.example.currencyexchange.Repository
 
 import androidx.annotation.WorkerThread
+import com.example.currencyexchange.API.ApiServices
 import com.example.currencyexchange.DAO.CurrencyDAO
 import com.example.currencyexchange.Models.BaseCurrencyModel
 import com.example.currencyexchange.Models.CurrencyNamesModel
 import kotlinx.coroutines.flow.Flow
 
-class CurrencyDatabaseRepository(private val currencyDAO: CurrencyDAO) {
+class CurrencyDatabaseRepository constructor(private val currencyDAO: CurrencyDAO) {
+//    class CurrencyRetrofitRepository constructor(private val apiServices: ApiServices) {
 
-    //  Insert new currency into the database
+
+        //  Insert new currency into the database
     @Suppress("RedundantSuspendModifier")
     @WorkerThread
     suspend fun insertNewCurrency(currencyNamesModel: CurrencyNamesModel) {

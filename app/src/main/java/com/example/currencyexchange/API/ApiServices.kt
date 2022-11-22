@@ -3,8 +3,6 @@ package com.example.currencyexchange.API
 import com.example.currencyexchange.Models.CurrencyModel
 import com.example.currencyexchange.Models.HistoricalRatesModel
 import com.example.currencyexchange.Models.LatestRates
-import com.example.currencyexchange.ViewModels.CurrencyRetrofitViewModel
-import okhttp3.OkHttpClient
 import retrofit2.Call
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory

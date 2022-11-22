@@ -7,11 +7,12 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.example.currencyexchange.R
 import org.w3c.dom.Text
+import java.util.*
 
 class CurrencyAdapter() : RecyclerView.Adapter<CurrencyAdapter.ViewHolder>(){
-    private var data = HashMap<String, Double>()
+    private var data = sortedMapOf<String, Double>()
 
-    fun setData(data: HashMap<String, Double>){
+    fun setData(data: SortedMap<String, Double>){
         this.data = data
         notifyDataSetChanged()
     }
