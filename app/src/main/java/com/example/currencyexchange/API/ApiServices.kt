@@ -1,12 +1,11 @@
 package com.example.currencyexchange.API
 
-import com.example.currencyexchange.Models.CurrencyModel
-import com.example.currencyexchange.Models.HistoricalRatesModel
-import com.example.currencyexchange.Models.LatestRates
+import com.example.currencyexchange.Models.*
 import retrofit2.Call
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.*
+import retrofit2.http.Query
 
 interface ApiServices {
     @GET("/fixer/latest")
@@ -30,7 +29,8 @@ interface ApiServices {
         @Query("base") base: String,
         @Query("symbols") symbols: String,
         @Query("apikey") apikey: String
-    ): Call<CurrencyModel>
+    ): Call<FluctuationModel>
+
     @GET("/fixer/{date}")
     fun getHistoricalData(
         @Path("date")date: String,

@@ -1,5 +1,7 @@
 package com.example.currencyexchange.ViewModels
 
+import android.content.ContentValues.TAG
+import android.util.Log
 import androidx.lifecycle.*
 import com.example.currencyexchange.Models.CurrencyNamesModel
 import com.example.currencyexchange.Models.LatestRates
@@ -24,9 +26,9 @@ class LatestViewModel constructor(
         val response = apiRepository.fetchLatestRates(baseCurrency)
         response.enqueue(object : retrofit2.Callback<LatestRates> {
             override fun onResponse(call: Call<LatestRates>, response: Response<LatestRates>) {
+                Log.i(TAG, "onResponse: LATEST ${response.code()}")
                 if (response.isSuccessful) {
-//                    TODO - turn it on
-//                    latestRates.postValue(response.body())
+                    latestRates.postValue(response.body())
                     response.body()?.latestRates?.keys?.let { mCurrenciesSet.addAll(it) }
                     if (mCurrenciesSet.size > 0) {
                         viewModelScope.launch { populateDB() }
@@ -62,3 +64,4 @@ class LatestFactory(
         throw IllegalArgumentException("Unknown retrofit ViewModel")
     }
 }
+// TODO - IN ORDER TO FILL UP DATABASE WITH CURRENCIES, CHECK THE INTERNET CONNECTION BEFORE CALLING ANYTHING IN OTHER FRAGMENTS?

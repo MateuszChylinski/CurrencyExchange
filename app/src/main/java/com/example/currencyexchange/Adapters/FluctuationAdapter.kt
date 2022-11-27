@@ -1,25 +1,25 @@
 package com.example.currencyexchange.Adapters
 
 import android.view.LayoutInflater
-import android.view.TextureView
-import android.view.View
 import android.view.ViewGroup
-import android.widget.TextView
-import androidx.appcompat.view.menu.MenuView
 import androidx.recyclerview.widget.RecyclerView
-import com.example.currencyexchange.Models.CurrencyModel
-import com.example.currencyexchange.Models.Test
-import com.example.currencyexchange.R
+import com.example.currencyexchange.databinding.FluctuationItemsBinding
 
-class FluctuationAdapter: RecyclerView.Adapter<FluctuationAdapter.ViewHolder>(){
+class FluctuationAdapter : RecyclerView.Adapter<FluctuationAdapter.ViewHolder>() {
     private var mCurrenciesNames: List<String> = arrayListOf()
     private var mCurrenciesStartRates: List<Double> = arrayListOf()
     private var mCurrenciesEndRates: List<Double> = arrayListOf()
     private var mCurrenciesChange: List<Double> = arrayListOf()
     private var mCurrenciesChangePct: List<Double> = arrayListOf()
 
-    fun setData(currencyNames: List<String>, currencyStartRates: List<Double>, currencyEndRates: List<Double>,
-    currencyChange: List<Double>, currencyChangePct: List<Double>){
+
+    fun setData(
+        currencyNames: List<String>,
+        currencyStartRates: List<Double>,
+        currencyEndRates: List<Double>,
+        currencyChange: List<Double>,
+        currencyChangePct: List<Double>
+    ) {
         this.mCurrenciesNames = currencyNames
         this.mCurrenciesStartRates = currencyStartRates
         this.mCurrenciesEndRates = currencyEndRates
@@ -27,32 +27,22 @@ class FluctuationAdapter: RecyclerView.Adapter<FluctuationAdapter.ViewHolder>(){
         this.mCurrenciesChangePct = currencyChangePct
     }
 
-
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-        val view = LayoutInflater.from(parent.context).inflate(R.layout.fluctuation_items,parent, false)
+        val view =
+            FluctuationItemsBinding.inflate(LayoutInflater.from(parent.context), parent, false)
         return ViewHolder(view)
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        holder.foreignCurrencyName.text = "Currency name: "+mCurrenciesNames[position]
-        holder.startRate.text = "Currency start rate: %.2f".format(mCurrenciesStartRates[position])
-        holder.endRate.text = "Currency end rate: %.2f".format(mCurrenciesEndRates[position])
-        holder.change.text = "Currency change: %.2f".format(mCurrenciesChange[position])
-        holder.changePct.text = "Currench change pct: %.2f".format(mCurrenciesChangePct[position])
-
-
+        holder.binding.fluctuationRvForeignCurrency.text = String.format("Currency name: %s", mCurrenciesNames[position])
+        holder.binding.fluctuationRvStartRate.text = String.format("Currency start rate: %.2f".format(mCurrenciesStartRates[position]))
+        holder.binding.fluctuationRvEndRate.text = String.format("Currency end rate: %.2f".format(mCurrenciesEndRates[position]))
+        holder.binding.fluctuationRvChange.text = String.format("Currency change: %.2f".format(mCurrenciesChange[position]))
+        holder.binding.fluctuationRvChangePct.text = String.format("Currency change pct: %.2f".format(mCurrenciesChangePct[position]))
     }
-
     override fun getItemCount(): Int {
         return mCurrenciesNames.size
     }
 
-
-    class ViewHolder(ItemView: View) : RecyclerView.ViewHolder(ItemView) {
-        val foreignCurrencyName: TextView = ItemView.findViewById(R.id.fluctuation_rv_foreign_currency)
-        val startRate: TextView = ItemView.findViewById(R.id.fluctuation_rv_start_rate)
-        val endRate: TextView = ItemView.findViewById(R.id.fluctuation_rv_end_rate)
-        val change: TextView = ItemView.findViewById(R.id.fluctuation_rv_change)
-        val changePct: TextView = ItemView.findViewById(R.id.fluctuation_rv_change_pct)
-    }
+    inner class ViewHolder(var binding: FluctuationItemsBinding) : RecyclerView.ViewHolder(binding.root)
 }
