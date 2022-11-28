@@ -28,7 +28,7 @@ class ConversionViewModel constructor(
         val response = apiRepository.convertCurrency(from, to, amount)
         response.enqueue(object : retrofit2.Callback<CurrencyModel> {
             override fun onResponse(call: Call<CurrencyModel>, response: Response<CurrencyModel>) {
-                Log.i(TAG, "onResponse: ${response.code()}")
+                Log.i(TAG, "onResponse: CONVERSION ${response.code()}")
                 if (response.isSuccessful) {
                     conversionResult.value = response.body()?.result
                 }
