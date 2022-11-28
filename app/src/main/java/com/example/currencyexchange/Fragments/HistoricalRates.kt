@@ -8,6 +8,8 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
+import androidx.core.os.bundleOf
+import androidx.fragment.app.setFragmentResult
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.currencyexchange.API.ApiServices
@@ -87,6 +89,9 @@ class HistoricalRates : Fragment() {
         mBinding.historicalSaveDate.setOnClickListener {
             getDate()
         }
+        mBinding.historicalChangeBaseCurrency.setOnClickListener{
+            setFragmentResult("request_key", bundleOf("fragment_name" to TAG))
+        }
     }
 
     //  Get picked date, and store it in mDate variable in format of 'yyyy-mm-dd'
@@ -128,9 +133,7 @@ class HistoricalRates : Fragment() {
             val index = list.indices.find { list[it].toString() == mBaseCurrency }
             list.removeAt(index!!)
         }
-
         if (!mIsInit) {
-            Log.i(TAG, "deleteBaseFromTheList: initial")
             setupSpinner(list)
             setupListView(list)
             mIsInit = true
@@ -157,7 +160,6 @@ class HistoricalRates : Fragment() {
                         mIsTouched = true
                     }
                 }
-
                 override fun onNothingSelected(p0: AdapterView<*>?) {
                     Log.i(TAG, "onNothingSelected in historical spinner ")
                 }

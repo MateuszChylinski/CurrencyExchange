@@ -37,6 +37,7 @@ class HistoricalViewModel constructor(
                         historicalData.value = response.body()
                     }
                 }
+
                 override fun onFailure(call: Call<HistoricalRatesModel>, t: Throwable) {
                     Log.i(TAG, "onFailure: FETCHING HISTORICAL DATA ERROR\n${t.message}")
                 }
