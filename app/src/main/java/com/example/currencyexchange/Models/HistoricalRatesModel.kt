@@ -15,5 +15,5 @@ data class HistoricalRatesModel(
     @SerializedName("date")
     val date: String,
     @SerializedName("rates")
-    val abc: SortedMap<String, Double>
+    val rates: SortedMap<String, Double>
 )
