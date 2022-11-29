@@ -77,8 +77,6 @@ class Latest : Fragment() {
         mViewModel.fetchLatestRates(mBaseCurrency)
         mViewModel.latestRates.observe(viewLifecycleOwner, Observer {
             mBinding.latestBase.text = String.format("Base Currency: %s", mBaseCurrency)
-
-//            TODO - what if user will change base currency? Does the previous one will be deleted along with the new one?
             if (it.latestRates.containsKey(mBaseCurrency)){
                 it.latestRates.remove(mBaseCurrency)
             }
