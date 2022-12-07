@@ -9,31 +9,31 @@
         android:id="@+id/fluctuation_rv_foreign_currency"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-       android:text="Currency: USD"
+       android:text="@string/currency_name"
         android:textSize="18sp"/>
     <TextView
         android:id="@+id/fluctuation_rv_start_rate"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Start: 11.1111111"
+        android:text="@string/start_rate"
         android:textSize="18sp"/>
     <TextView
         android:id="@+id/fluctuation_rv_end_rate"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="End: 11.1111111"
+        android:text="@string/end_rate"
         android:textSize="18sp"/>
     <TextView
         android:id="@+id/fluctuation_rv_change"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textSize="18sp"
-        android:text="Change: 00.0000"/>
+        android:text="@string/change_rate"/>
     <TextView
         android:id="@+id/fluctuation_rv_change_pct"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textSize="18sp"
-        android:text="Change pct: 00.0000000"/>
+        android:text="@string/change_pct_rate"/>
 
 </LinearLayout>

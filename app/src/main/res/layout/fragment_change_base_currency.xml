@@ -23,7 +23,7 @@
         android:id="@+id/change_base_select_new"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Select new base currency"
+        android:text="@string/select_new_base_currency"
         android:textSize="20sp"
         android:layout_marginTop="30dp"
         android:layout_marginStart="20dp"
