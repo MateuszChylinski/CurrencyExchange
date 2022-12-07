@@ -1,38 +1,56 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/fluctuation_test_id"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".Fragments.Fluctuation">
 
-    <androidx.appcompat.widget.Toolbar
-        android:id="@+id/fluctuation_toolbar"
+    <com.google.android.material.appbar.AppBarLayout
+        android:id="@+id/fluctuation_appbar"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@color/design_default_color_primary"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:title="Fluctation">
+        android:layout_height="?attr/actionBarSize"
+        android:background="#ff44">
+        <com.google.android.material.appbar.MaterialToolbar
+            android:id="@+id/fluctuation_toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            app:layout_scrollFlags="scroll|enterAlways">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/fluctuation_fragment_name"
+                android:textSize="22sp"
+                android:textAlignment="center"/>
 
-        <ImageView
-            android:id="@+id/fluctuation_change_base_currency"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="end"
-            android:layout_marginEnd="10dp"
-            android:src="@drawable/currency_exchange" />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/toolbar_info"
+                android:textSize="15sp"
+                android:layout_marginStart="25dp"
+                android:textAlignment="center"/>
 
-        <TextView
-            android:id="@+id/toolbar_info"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:text="You can change base currency\nby clicking on the currency icon"
-            android:layout_gravity="end"
-            android:layout_marginEnd="15dp"/>
-    </androidx.appcompat.widget.Toolbar>
+            <ImageView
+                android:id="@+id/fluctuation_change_base_currency"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:srcCompat="@drawable/currency_exchange"
+                android:layout_gravity="end"
+                android:layout_marginEnd="10dp"
+                android:contentDescription="@string/change_base_content_description"/>
+        </com.google.android.material.appbar.MaterialToolbar>
+    </com.google.android.material.appbar.AppBarLayout>
+
+    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+        android:id="@+id/fluctuation_refresh_container"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
 
 
     <!--First section of the layout-->
@@ -40,13 +58,13 @@
         android:id="@+id/fluctuation_from_center_tv"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="25dp"
-        android:text="From"
         android:textAlignment="center"
         android:textSize="25sp"
+        android:text="@string/from"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/fluctuation_base_currency_tv" />
+        app:layout_constraintTop_toTopOf="parent"
+        android:layout_marginTop="10dp"/>
 
     <DatePicker
         android:id="@+id/fluctuation_from_dt"
@@ -57,7 +75,7 @@
         android:datePickerMode="spinner"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/fluctuation_from_center_tv" />
+        app:layout_constraintTop_toBottomOf="@+id/fluctuation_from_center_tv"/>
 
     <Button
         android:id="@+id/fluctuation_set_from_ok"
@@ -65,158 +83,156 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="10dp"
         android:layout_marginEnd="50dp"
-        android:text="OK"
+        android:text="@string/ok"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/fluctuation_from_dt" />
+        app:layout_constraintTop_toBottomOf="@+id/fluctuation_from_dt"/>
+
+            <!--Second section of the layout-->
+            <TextView
+                android:id="@+id/fluctuation_to_center_tv"
+                android:visibility="invisible"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAlignment="center"
+                android:textSize="25sp"
+                android:text="@string/to"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                android:layout_marginTop="10dp"/>
+
+            <DatePicker
+                android:id="@+id/fluctuation_to_dt"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="15dp"
+                android:calendarViewShown="false"
+                android:datePickerMode="spinner"
+                android:visibility="invisible"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/fluctuation_to_center_tv"/>
+
+            <Button
+                android:id="@+id/fluctuation_set_to_ok"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:layout_marginEnd="50dp"
+                android:text="@string/ok"
+                android:visibility="invisible"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/fluctuation_to_dt"/>
+
+            <!--Third section of the layout-->
+
+            <TextView
+                android:id="@+id/fluctuation_base_currency_tv"
+                android:visibility="invisible"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/currency_name"
+                android:textAlignment="center"
+                android:textSize="20sp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                android:layout_marginStart="15dp"
+                android:layout_marginTop="15dp"/>
+
+            <Spinner
+                android:id="@+id/fluctuation_select_base_currency"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="38dp"
+                android:layout_marginTop="17dp"
+                android:visibility="invisible"
+                app:layout_constraintStart_toEndOf="@id/fluctuation_base_currency_tv"
+                app:layout_constraintTop_toTopOf="parent"/>
 
 
-    <!--Second section of the layout-->
-    <TextView
-        android:id="@+id/fluctuation_to_center_tv"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="25dp"
-        android:text="To"
-        android:textAlignment="center"
-        android:textSize="25sp"
-        android:visibility="invisible"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/fluctuation_base_currency_tv" />
+            <TextView
+                android:id="@+id/fluctuation_from_date"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/fluctuation_base_currency_tv"
+                android:layout_marginTop="15dp"
+                android:layout_marginStart="15dp"
+                android:textAlignment="center"
+                android:text="@string/from"
+                android:textSize="20sp"
+                android:visibility="invisible"/>
 
-    <DatePicker
-        android:id="@+id/fluctuation_to_dt"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="15dp"
-        android:calendarViewShown="false"
-        android:datePickerMode="spinner"
-        android:visibility="invisible"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/fluctuation_to_center_tv" />
+            <TextView
+                android:id="@+id/fluctuation_to_date"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:layout_constraintTop_toBottomOf="@id/fluctuation_from_date"
+                app:layout_constraintStart_toStartOf="parent"
+                android:layout_marginTop="15dp"
+                android:layout_marginStart="15dp"
+                android:text="@string/to"
+                android:textAlignment="center"
+                android:textSize="20sp"
+                android:visibility="invisible"/>
 
-    <Button
-        android:id="@+id/fluctuation_set_to_ok"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="10dp"
-        android:layout_marginEnd="50dp"
-        android:text="Ok"
-        android:visibility="invisible"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/fluctuation_to_dt" />
-
-
-    <!--Third section of the layout-->
-
-    <TextView
-        android:id="@+id/fluctuation_base_currency_tv"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="15dp"
-        android:layout_marginTop="15dp"
-        android:text="Base Currency: UNK"
-        android:textAlignment="center"
-        android:textSize="20dp"
-        android:visibility="invisible"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/fluctuation_toolbar" />
-
-    <Spinner
-        android:id="@+id/fluctuation_select_base_currency"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="38dp"
-        android:layout_marginTop="15dp"
-        android:visibility="invisible"
-        app:layout_constraintStart_toEndOf="@id/fluctuation_base_currency_tv"
-        app:layout_constraintTop_toBottomOf="@id/fluctuation_toolbar" />
+            <TextView
+                android:id="@+id/fluctuation_select_symbols_tv"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="30dp"
+                android:text="@string/select_currencies_to_display_fluctuation"
+                android:textAlignment="center"
+                android:textSize="20sp"
+                android:visibility="invisible"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/fluctuation_to_date"/>
 
 
-    <TextView
-        android:id="@+id/fluctuation_from_date"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/fluctuation_base_currency_tv"
-        android:layout_marginTop="15dp"
-        android:layout_marginStart="15dp"
-        android:textAlignment="center"
-        android:text="From: 02-04-1997"
-        android:textSize="20sp"
-        android:visibility="invisible"
-        />
+            <ListView
+                android:id="@+id/fluctuation_select_symbols_lv"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:visibility="invisible"
+                app:layout_constraintTop_toBottomOf="@id/fluctuation_select_symbols_tv"
+                app:layout_constraintBottom_toTopOf="@id/fluctuation_save_symbols"
+                android:layout_marginTop="15dp"
+                android:layout_marginBottom="5dp"/>
 
-    <TextView
-        android:id="@+id/fluctuation_to_date"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        app:layout_constraintTop_toBottomOf="@id/fluctuation_from_date"
-        app:layout_constraintStart_toStartOf="parent"
-        android:layout_marginTop="15dp"
-        android:layout_marginStart="15dp"
-        android:text="To: 04-03-1998"
-        android:textAlignment="center"
-        android:textSize="20sp"
-        android:visibility="invisible" />
+            <Button
+                android:id="@+id/fluctuation_save_symbols"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/save"
+                android:visibility="invisible"
+                app:layout_constraintBottom_toBottomOf="parent"
+                android:layout_marginBottom="58dp"/>
 
+            <!--Fourth section of the layout-->
+            <TextView
+                android:id="@+id/fluctuation_base_in_rv"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="10dp"
+                android:text="@string/currency_name"
+                android:textAlignment="center"
+                android:textSize="18sp"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                android:visibility="invisible"/>
 
-    <TextView
-        android:id="@+id/fluctuation_select_symbols_tv"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="30dp"
-        android:text="Select currencies to display fluctuation"
-        android:textAlignment="center"
-        android:textSize="20sp"
-        android:visibility="invisible"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/fluctuation_to_date" />
-
-
-    <ListView
-        android:id="@+id/fluctuation_select_symbols_lv"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_marginTop="20dp"
-        android:layout_marginBottom="20dp"
-        android:visibility="invisible"
-        app:layout_constraintBottom_toTopOf="@id/fluctuation_save_symbols"
-        app:layout_constraintTop_toBottomOf="@id/fluctuation_select_symbols_tv" />
-
-    <Button
-        android:id="@+id/fluctuation_save_symbols"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Save"
-        android:visibility="invisible"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/fluctuation_select_symbols_lv" />
-
-    <!--Fourth section of the layout-->
-    <TextView
-        android:id="@+id/fluctuation_base_in_rv"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_margin="10dp"
-        android:text="Base: EUR"
-        android:textAlignment="center"
-        android:textSize="18sp"
-        app:layout_constraintTop_toBottomOf="@id/fluctuation_toolbar"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        android:visibility="invisible"
-        />
-
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/fluctuation_rv"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:visibility="invisible"
-        app:layout_constraintTop_toBottomOf="@id/fluctuation_base_in_rv"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"
-        />
-</androidx.constraintlayout.widget.ConstraintLayout>
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/fluctuation_rv"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:visibility="invisible"
+                app:layout_constraintTop_toBottomOf="@id/fluctuation_base_in_rv"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                android:layout_marginTop="10dp"
+                android:layout_marginBottom="58dp"/>
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+</androidx.coordinatorlayout.widget.CoordinatorLayout>
