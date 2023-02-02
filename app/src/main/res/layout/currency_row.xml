@@ -12,13 +12,15 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:padding="20dp"
-        android:textSize="17sp"/>
+        android:textSize="17sp"
+        android:text="@string/currency_item_name"/>
 
         <TextView
             android:id="@+id/latest_currency_value"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textSize="17sp"
-            android:layout_marginStart="30dp"/>
+            android:layout_marginStart="30dp"
+            android:text="@string/currency_item_value"/>
     </LinearLayout>
 </LinearLayout>

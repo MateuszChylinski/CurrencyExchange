@@ -3,8 +3,6 @@ package com.example.currencyexchange.ViewModels
 import android.content.ContentValues.TAG
 import android.util.Log
 import androidx.lifecycle.*
-import com.example.currencyexchange.Models.CurrencyModel
-import com.example.currencyexchange.Models.CurrencyNamesModel
 import com.example.currencyexchange.Models.HistoricalRatesModel
 import com.example.currencyexchange.Repository.CurrencyDatabaseRepository
 import com.example.currencyexchange.Repository.CurrencyRetrofitRepository

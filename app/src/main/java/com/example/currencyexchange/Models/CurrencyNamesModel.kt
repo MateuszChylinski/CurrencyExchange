@@ -2,7 +2,6 @@ package com.example.currencyexchange.Models
 
 import androidx.room.ColumnInfo
 import androidx.room.Entity
-import androidx.room.Ignore
 import androidx.room.PrimaryKey
 
 
@@ -13,7 +12,7 @@ data class CurrencyNamesModel(
     @ColumnInfo(name = "currency_name")
     val currency: String,
 
-) {
+    ) {
     override fun toString(): String {
         return this.currency
     }
@@ -25,8 +24,7 @@ data class BaseCurrencyModel(
     val id: Int,
     @ColumnInfo(name = "base")
     val baseCurr: String
-)
-{
+) {
     override fun toString(): String {
         return this.baseCurr
     }

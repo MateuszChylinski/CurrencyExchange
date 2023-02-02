@@ -7,8 +7,6 @@ import com.example.currencyexchange.Models.CurrencyModel
 import com.example.currencyexchange.Models.CurrencyNamesModel
 import com.example.currencyexchange.Repository.CurrencyDatabaseRepository
 import com.example.currencyexchange.Repository.CurrencyRetrofitRepository
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.launch
 import retrofit2.Call
 import retrofit2.Response
 import java.lang.IllegalArgumentException
@@ -23,12 +21,11 @@ class ConversionViewModel constructor(
     var baseCurrency: LiveData<String> = databaseRepository.baseCurrency.asLiveData()
     var conversionResult = MutableLiveData<Double>()
 
-    
+
     fun conversionCall(from: String, to: String, amount: String) {
         val response = apiRepository.convertCurrency(from, to, amount)
         response.enqueue(object : retrofit2.Callback<CurrencyModel> {
             override fun onResponse(call: Call<CurrencyModel>, response: Response<CurrencyModel>) {
-                Log.i(TAG, "onResponse: CONVERSION ${response.code()}")
                 if (response.isSuccessful) {
                     conversionResult.value = response.body()?.result
                 }

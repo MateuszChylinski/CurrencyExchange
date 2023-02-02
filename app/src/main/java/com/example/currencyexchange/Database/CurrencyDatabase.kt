@@ -11,7 +11,11 @@ import com.example.currencyexchange.Models.CurrencyNamesModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
-@Database(entities = arrayOf(CurrencyNamesModel::class, BaseCurrencyModel::class), version = 1, exportSchema = false)
+@Database(
+    entities = arrayOf(CurrencyNamesModel::class, BaseCurrencyModel::class),
+    version = 1,
+    exportSchema = false
+)
 abstract class CurrencyDatabase() : RoomDatabase() {
 
     abstract fun getDAO(): CurrencyDAO

@@ -14,11 +14,13 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.setFragmentResult
 import androidx.lifecycle.*
 import androidx.lifecycle.Observer
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.currencyexchange.API.ApiServices
 import com.example.currencyexchange.Adapters.FluctuationAdapter
 import com.example.currencyexchange.Application.CurrencyApplication
 import com.example.currencyexchange.Models.CurrencyNamesModel
+import com.example.currencyexchange.R
 import com.example.currencyexchange.Repository.CurrencyDatabaseRepository
 import com.example.currencyexchange.Repository.CurrencyRetrofitRepository
 import com.example.currencyexchange.ViewModels.*
@@ -28,8 +30,8 @@ import java.util.*
 
 class Fluctuation : Fragment() {
     private val TAG = "Fluctuation"
-    private val mYearInMilis = 31556926000
-    private val mDayInMilis = 86400000
+    private val mYearInMs = 31556926000
+    private val mDayInMs = 86400000
 
     // VARIABLES
     private var mFluctuationAdapter: FluctuationAdapter? = null
@@ -57,7 +59,7 @@ class Fluctuation : Fragment() {
     private var mDatabaseInstance: CurrencyDatabaseRepository? = null
     private lateinit var mViewModel: FluctuationViewModel
 
-//  View binding
+    //  View binding
     private var _binding: FragmentFluctuationBinding? = null
     private val mBinding get() = _binding!!
 
@@ -74,16 +76,28 @@ class Fluctuation : Fragment() {
             FluctuationFactory(CurrencyRetrofitRepository(mApiInstance), mDatabaseInstance!!)
         ).get(FluctuationViewModel::class.java)
 
-        mViewModel.baseCurrency.observe(requireActivity(), androidx.lifecycle.Observer { mBaseCurrency = it })
+        mViewModel.baseCurrency.observe(
+            requireActivity(),
+            androidx.lifecycle.Observer { mBaseCurrency = it })
         mViewModel.allCurrencies.observe(requireActivity(), androidx.lifecycle.Observer {
             mAllCurrencies.addAll(it)
             mCurrencyList.addAll(it)
         })
-        mViewModel.currenciesNames.observe(requireActivity(), androidx.lifecycle.Observer { currenciesNames.add(it) })
-        mViewModel.currenciesStartRates.observe(requireActivity(), androidx.lifecycle.Observer { currenciesStartRates.addAll(listOf(it)) })
-        mViewModel.currenciesEndRates.observe(requireActivity(), androidx.lifecycle.Observer { currenciesEndRates.addAll(listOf(it)) })
-        mViewModel.currenciesChange.observe(requireActivity(), androidx.lifecycle.Observer { currenciesChange.addAll(listOf(it)) })
-        mViewModel.currenciesChangePct.observe(requireActivity(), androidx.lifecycle.Observer { currenciesChangePct.addAll(listOf(it)) })
+        mViewModel.currenciesNames.observe(
+            requireActivity(),
+            androidx.lifecycle.Observer { currenciesNames.add(it) })
+        mViewModel.currenciesStartRates.observe(
+            requireActivity(),
+            androidx.lifecycle.Observer { currenciesStartRates.addAll(listOf(it)) })
+        mViewModel.currenciesEndRates.observe(
+            requireActivity(),
+            androidx.lifecycle.Observer { currenciesEndRates.addAll(listOf(it)) })
+        mViewModel.currenciesChange.observe(
+            requireActivity(),
+            androidx.lifecycle.Observer { currenciesChange.addAll(listOf(it)) })
+        mViewModel.currenciesChangePct.observe(
+            requireActivity(),
+            androidx.lifecycle.Observer { currenciesChangePct.addAll(listOf(it)) })
         mViewModel.isDone.observe(requireActivity(), Observer {
             when (it) {
                 true -> {
@@ -100,6 +114,11 @@ class Fluctuation : Fragment() {
                 else -> Log.i(TAG, "getCurrencies: MISSING DATA?")
             }
         })
+        mBinding.fluctuationRefreshContainer.setOnRefreshListener {
+            //          TODO - finish refreshing. How to reset whole layout?
+
+            mBinding.fluctuationRefreshContainer.isRefreshing = false
+        }
         return view
     }
 
@@ -109,7 +128,7 @@ class Fluctuation : Fragment() {
          * Setup date picker where user can set from where he want to display fluctuation from.
          * Since the API allow to see fluctuation back to 365 days, the minimum date is set to display max a year before actual date
          */
-        mBinding.fluctuationFromDt.minDate = Calendar.getInstance().timeInMillis - mYearInMilis
+        mBinding.fluctuationFromDt.minDate = Calendar.getInstance().timeInMillis - mYearInMs
         mBinding.fluctuationFromDt.maxDate = Calendar.getInstance().timeInMillis
 
         mBinding.fluctuationSetFromOk.setOnClickListener {
@@ -120,8 +139,9 @@ class Fluctuation : Fragment() {
             getDateFromUser(2)
             setupViewsForListView()
         }
-        mBinding.fluctuationChangeBaseCurrency.setOnClickListener{
+        mBinding.fluctuationChangeBaseCurrency.setOnClickListener {
             setFragmentResult("request_key", bundleOf("fragment_name" to TAG))
+            findNavController().navigate(R.id.action_from_base_to_change)
         }
     }
 
@@ -136,7 +156,7 @@ class Fluctuation : Fragment() {
                 mViewModel.startDate = mSdf.format(mCalendar.time).toString()
 
 //              After picking starting date, set "ending" date picker. As a minimum date, provide the selected earlier minimum date+1 day.
-                mBinding.fluctuationToDt.minDate = (mCalendar.timeInMillis + mDayInMilis)
+                mBinding.fluctuationToDt.minDate = (mCalendar.timeInMillis + mDayInMs)
                 mBinding.fluctuationToDt.maxDate = Calendar.getInstance().timeInMillis
             }
             2 -> {
@@ -220,6 +240,7 @@ class Fluctuation : Fragment() {
                         mIsTouched = true
                     }
                 }
+
                 override fun onNothingSelected(p0: AdapterView<*>?) {
                     Log.i(TAG, "onNothingSelected: IN FLUCTUATION SPINNER")
                 }
@@ -228,9 +249,14 @@ class Fluctuation : Fragment() {
 
     private fun setupListView(list: MutableList<CurrencyNamesModel>) {
         val symbols: MutableList<CurrencyNamesModel> = mutableListOf()
-        val adapter = ArrayAdapter(requireActivity(), android.R.layout.simple_list_item_multiple_choice, list)
+        val adapter =
+            ArrayAdapter(requireActivity(), android.R.layout.simple_list_item_multiple_choice, list)
 
-        Toast.makeText(activity, "Select up to 30 currencies, and then, click on the save button", Toast.LENGTH_SHORT).show()
+        Toast.makeText(
+            activity,
+            "Select up to 30 currencies, and then, click on the save button",
+            Toast.LENGTH_SHORT
+        ).show()
 
         mBinding.fluctuationSelectSymbolsLv.choiceMode = ListView.CHOICE_MODE_MULTIPLE
         mBinding.fluctuationSelectSymbolsLv.adapter = adapter
@@ -241,19 +267,25 @@ class Fluctuation : Fragment() {
                 position: Int,
                 id: Long
             ) {
-/**             After every click, check if total selected amount of symbols is <= 30.
-//              If user will try to select more than 30 symbols, inform him that he can't select more than 30 **/
+                /**             After every click, check if total selected amount of symbols is <= 30.
+                //              If user will try to select more than 30 symbols, inform him that he can't select more than 30 **/
                 if (mBinding.fluctuationSelectSymbolsLv.checkedItemCount > 30) {
-                    Toast.makeText(requireContext(), "You can't select anymore currencies.", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(
+                        requireContext(),
+                        "You can't select anymore currencies.",
+                        Toast.LENGTH_SHORT
+                    ).show()
                     mBinding.fluctuationSelectSymbolsLv.setItemChecked(position, false)
                 }
-                Log.i(TAG, "onItemClick: "+mBinding.fluctuationSelectSymbolsLv.checkedItemIds)
+                Log.i(TAG, "onItemClick: " + mBinding.fluctuationSelectSymbolsLv.checkedItemIds)
             }
         }
         mBinding.fluctuationSaveSymbols.setOnClickListener {
 //          Add to the created list all of the checked symbols. Next function will convert them into String
-            for (i in 0 until list.size){
-                if (mBinding.fluctuationSelectSymbolsLv.isItemChecked(i)){symbols.add(list[i])}
+            for (i in 0 until list.size) {
+                if (mBinding.fluctuationSelectSymbolsLv.isItemChecked(i)) {
+                    symbols.add(list[i])
+                }
             }
             getCurrencies(symbols)
         }
@@ -261,7 +293,7 @@ class Fluctuation : Fragment() {
 
     private fun getCurrencies(list: MutableList<CurrencyNamesModel>) {
         for (i in 0 until list.size) {
-                mConcatenatedSymbols += list[i].toString() + ", "
+            mConcatenatedSymbols += list[i].toString() + ", "
         }
 //      Pass converted symbols from list to String to the ViewModel. These symbol will be one of the endpoints needed to perform the call
         mViewModel.selectedCurrencies = mConcatenatedSymbols

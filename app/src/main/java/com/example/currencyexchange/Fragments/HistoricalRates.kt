@@ -11,11 +11,13 @@ import android.widget.*
 import androidx.core.os.bundleOf
 import androidx.fragment.app.setFragmentResult
 import androidx.lifecycle.ViewModelProvider
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.currencyexchange.API.ApiServices
 import com.example.currencyexchange.Adapters.HistoricalAdapter
 import com.example.currencyexchange.Application.CurrencyApplication
 import com.example.currencyexchange.Models.CurrencyNamesModel
+import com.example.currencyexchange.R
 import com.example.currencyexchange.Repository.CurrencyDatabaseRepository
 import com.example.currencyexchange.Repository.CurrencyRetrofitRepository
 import com.example.currencyexchange.ViewModels.HistoricalFactory
@@ -75,6 +77,11 @@ class HistoricalRates : Fragment() {
             mBinding.historicalRv.layoutManager = LinearLayoutManager(this.context)
             mBinding.historicalRv.adapter = mHistoricalAdapter
         })
+//        mBinding.historicalRefreshContainer.setOnRefreshListener {
+//            //          TODO - finish refreshing. How to reset whole layout?
+//
+//            mBinding.historicalRefreshContainer.isRefreshing = false
+//        }
 
         return view
     }
@@ -89,8 +96,10 @@ class HistoricalRates : Fragment() {
         mBinding.historicalSaveDate.setOnClickListener {
             getDate()
         }
-        mBinding.historicalChangeBaseCurrency.setOnClickListener{
+        mBinding.historicalChangeBaseIcon.setOnClickListener {
             setFragmentResult("request_key", bundleOf("fragment_name" to TAG))
+            findNavController().navigate(R.id.action_from_base_to_change)
+
         }
     }
 
@@ -160,6 +169,7 @@ class HistoricalRates : Fragment() {
                         mIsTouched = true
                     }
                 }
+
                 override fun onNothingSelected(p0: AdapterView<*>?) {
                     Log.i(TAG, "onNothingSelected in historical spinner ")
                 }
@@ -179,26 +189,27 @@ class HistoricalRates : Fragment() {
 
         mBinding.historicalSymbolsLv.adapter = adapter
         mBinding.historicalSymbolsLv.choiceMode = ListView.CHOICE_MODE_MULTIPLE
-        mBinding.historicalSymbolsLv.onItemClickListener = object : AdapterView.OnItemClickListener {
-            override fun onItemClick(
-                parent: AdapterView<*>?,
-                view: View?,
-                position: Int,
-                id: Long
-            ) {
-                /** After every click, check if total selected amount of symbols is <= 30.
-                //  If user will try to select more than 30 symbols, inform him that he can't select more than 30 **/
+        mBinding.historicalSymbolsLv.onItemClickListener =
+            object : AdapterView.OnItemClickListener {
+                override fun onItemClick(
+                    parent: AdapterView<*>?,
+                    view: View?,
+                    position: Int,
+                    id: Long
+                ) {
+                    /** After every click, check if total selected amount of symbols is <= 30.
+                    //  If user will try to select more than 30 symbols, inform him that he can't select more than 30 **/
 
-                if (mBinding.historicalSymbolsLv.checkedItemCount > 30) {
-                    Toast.makeText(
-                        requireContext(),
-                        "You can't select anymore currencies.",
-                        Toast.LENGTH_SHORT
-                    ).show()
-                    mBinding.historicalSymbolsLv.setItemChecked(position, false)
+                    if (mBinding.historicalSymbolsLv.checkedItemCount > 30) {
+                        Toast.makeText(
+                            requireContext(),
+                            "You can't select anymore currencies.",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                        mBinding.historicalSymbolsLv.setItemChecked(position, false)
+                    }
                 }
             }
-        }
         mBinding.historicalSaveSymbols.setOnClickListener {
             //          Add to the created list all of the checked symbols. Next function will convert them into String
             for (i in 0 until list.size) {

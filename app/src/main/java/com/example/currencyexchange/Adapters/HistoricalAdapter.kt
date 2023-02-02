@@ -17,18 +17,21 @@ class HistoricalAdapter() : RecyclerView.Adapter<HistoricalAdapter.ViewHolder>()
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-        val view = HistoricalItemsBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+        val view =
+            HistoricalItemsBinding.inflate(LayoutInflater.from(parent.context), parent, false)
         return ViewHolder(view)
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         holder.binding.historicalItemsSymbol.text = mData.keys.toTypedArray()[position]
-        holder.binding.historicalItemsValue.text = String.format("%.2f", mData.get(mData.keys.toTypedArray()[position]))
+        holder.binding.historicalItemsValue.text =
+            String.format("%.2f", mData.get(mData.keys.toTypedArray()[position]))
     }
 
     override fun getItemCount(): Int {
         return mData.size
     }
 
-    inner class ViewHolder(var binding: HistoricalItemsBinding) : RecyclerView.ViewHolder(binding.root)
+    inner class ViewHolder(var binding: HistoricalItemsBinding) :
+        RecyclerView.ViewHolder(binding.root)
 }

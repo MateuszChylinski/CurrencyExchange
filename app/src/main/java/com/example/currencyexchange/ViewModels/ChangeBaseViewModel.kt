@@ -6,7 +6,6 @@ import androidx.lifecycle.asLiveData
 import androidx.lifecycle.viewModelScope
 import com.example.currencyexchange.Models.BaseCurrencyModel
 import com.example.currencyexchange.Repository.CurrencyDatabaseRepository
-import com.example.currencyexchange.Repository.CurrencyRetrofitRepository
 import kotlinx.coroutines.launch
 
 class ChangeBaseViewModel constructor(
@@ -16,7 +15,7 @@ class ChangeBaseViewModel constructor(
     val baseCurrency = currencyDatabaseRepository.baseCurrency.asLiveData()
     val currencyList = currencyDatabaseRepository.allCurrencies.asLiveData()
 
-     fun updateBaseCurrency(selectedCurrency: String) {
+    fun updateBaseCurrency(selectedCurrency: String) {
         viewModelScope.launch {
             val newBase = currencyDatabaseRepository.updateBaseCurrency(
                 BaseCurrencyModel(

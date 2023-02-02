@@ -2,21 +2,27 @@ package com.example.currencyexchange.Adapters
 
 import androidx.fragment.app.Fragment
 import androidx.viewpager2.adapter.FragmentStateAdapter
-import com.example.currencyexchange.Fragments.*
 import java.lang.IllegalArgumentException
 
-class PagerAdapter(fragment: Fragment) : FragmentStateAdapter(fragment) {
+class PagerAdapter(fragment: Fragment, fragmentList: List<Fragment>) :
+    FragmentStateAdapter(fragment) {
+    private val NUM_PAGES: List<Fragment> = fragmentList
+
     override fun getItemCount(): Int {
-        return 4
+        return NUM_PAGES.size
     }
 
     override fun createFragment(position: Int): Fragment {
         return when (position) {
-            0 -> Latest()
-            1 -> Conversion()
-            2 -> Fluctuation()
-            3 -> HistoricalRates()
+            0 -> NUM_PAGES[0]
+            1 -> NUM_PAGES[1]
+            2 -> NUM_PAGES[2]
+            3 -> NUM_PAGES[3]
             else -> throw IllegalArgumentException("Error in FragmentStateAdapter")
         }
+    }
+
+    override fun getItemId(position: Int): Long {
+        return position.toLong()
     }
 }
