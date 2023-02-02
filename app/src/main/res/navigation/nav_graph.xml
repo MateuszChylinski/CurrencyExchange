@@ -5,7 +5,6 @@
     android:id="@+id/nav_graph"
     app:startDestination="@id/pagerBase">
 
-
     <fragment
         android:id="@+id/changeBaseCurrency"
         android:name="com.example.currencyexchange.Fragments.ChangeBaseCurrency"
@@ -23,7 +22,7 @@
         android:id="@+id/pagerBase"
         android:name="com.example.currencyexchange.Fragments.PagerBase"
         android:label="fragment_pager_base"
-        tools:layout="@layout/fragment_pager_base" >
+        tools:layout="@layout/fragment_pager_base">
         <action
             android:id="@+id/action_from_base_to_change"
             app:destination="@id/changeBaseCurrency" />

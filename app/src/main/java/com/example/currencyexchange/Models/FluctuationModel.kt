@@ -1,7 +1,5 @@
 package com.example.currencyexchange.Models
 
-import android.provider.Telephony.Mms.Rate
-import com.example.currencyexchange.Fragments.Fluctuation
 import com.google.gson.annotations.SerializedName
 
 data class FluctuationModel(

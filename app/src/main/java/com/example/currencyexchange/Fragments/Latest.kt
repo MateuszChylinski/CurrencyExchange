@@ -1,21 +1,23 @@
 package com.example.currencyexchange.Fragments
 
 import android.os.Bundle
-import android.util.Log
 import android.view.*
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.setFragmentResult
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
+import androidx.navigation.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.currencyexchange.API.ApiServices
 import com.example.currencyexchange.Adapters.CurrencyAdapter
 import com.example.currencyexchange.Application.CurrencyApplication
+import com.example.currencyexchange.R
 import com.example.currencyexchange.Repository.CurrencyDatabaseRepository
 import com.example.currencyexchange.Repository.CurrencyRetrofitRepository
 import com.example.currencyexchange.ViewModels.*
 import com.example.currencyexchange.databinding.FragmentLatestBinding
+import kotlin.math.log
 
 //    TODO - add collapsing toolbar
 
@@ -42,12 +44,10 @@ class Latest : Fragment() {
 
         mBinding.latestRv.layoutManager = LinearLayoutManager(this.context)
         mBinding.latestRv.adapter = mAdapter
-        mBinding.latestRefreshContainer.setOnRefreshListener {
-            getBaseCurrency()
-            mBinding.latestRefreshContainer.isRefreshing = false
-        }
-        mBinding.latestChangeBaseCurrency.setOnClickListener {
+
+        mBinding.latestChangeBase.setOnClickListener {
             setFragmentResult("request_key", bundleOf("fragment_name" to TAG))
+            it.findNavController().navigate(R.id.action_from_base_to_change)
         }
 
         mDatabaseServices = (activity?.application as CurrencyApplication).repository
@@ -77,7 +77,7 @@ class Latest : Fragment() {
         mViewModel.fetchLatestRates(mBaseCurrency)
         mViewModel.latestRates.observe(viewLifecycleOwner, Observer {
             mBinding.latestBase.text = String.format("Base Currency: %s", mBaseCurrency)
-            if (it.latestRates.containsKey(mBaseCurrency)){
+            if (it.latestRates.containsKey(mBaseCurrency)) {
                 it.latestRates.remove(mBaseCurrency)
             }
             mAdapter.setData(it.latestRates.toSortedMap())

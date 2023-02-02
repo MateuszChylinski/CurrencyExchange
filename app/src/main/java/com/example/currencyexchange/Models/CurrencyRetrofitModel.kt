@@ -40,8 +40,6 @@ data class Info(
     val currencyRate: Double?
 )
 
-
-
 data class Test(
     @SerializedName("start_rate")
     val startRate: Double,

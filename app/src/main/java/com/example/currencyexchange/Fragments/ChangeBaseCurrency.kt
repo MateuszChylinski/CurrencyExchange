@@ -13,7 +13,6 @@ import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.example.currencyexchange.Application.CurrencyApplication
 import com.example.currencyexchange.Models.CurrencyNamesModel
-import com.example.currencyexchange.R
 import com.example.currencyexchange.Repository.CurrencyDatabaseRepository
 import com.example.currencyexchange.ViewModels.ChangeBaseFactory
 import com.example.currencyexchange.ViewModels.ChangeBaseViewModel

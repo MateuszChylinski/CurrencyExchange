@@ -11,9 +11,11 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.setFragmentResult
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
+import androidx.navigation.fragment.findNavController
 import com.example.currencyexchange.API.ApiServices
 import com.example.currencyexchange.Application.CurrencyApplication
 import com.example.currencyexchange.Models.CurrencyNamesModel
+import com.example.currencyexchange.R
 import com.example.currencyexchange.Repository.CurrencyDatabaseRepository
 import com.example.currencyexchange.Repository.CurrencyRetrofitRepository
 import com.example.currencyexchange.ViewModels.*
@@ -34,6 +36,7 @@ class Conversion : Fragment() {
     private var mDesiredCurrency: String = "default"
     private var mCurrencies: MutableList<CurrencyNamesModel> = mutableListOf()
 
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -46,6 +49,15 @@ class Conversion : Fragment() {
             this,
             ConversionFactory(CurrencyRetrofitRepository(mApiInstance), mDatabaseInstance!!)
         )[ConversionViewModel::class.java]
+        mBinding.conversionRefreshContainer.setOnRefreshListener {
+            val id = findNavController().currentDestination?.id
+            findNavController().popBackStack(id!!, true)
+            findNavController().navigate(id)
+
+            mBinding.conversionRefreshContainer.isRefreshing = false
+        }
+
+
         return view
     }
 
@@ -53,6 +65,7 @@ class Conversion : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         mBinding.conversionChangeBaseCurrency.setOnClickListener {
             setFragmentResult("request_key", bundleOf("fragment_name" to TAG))
+            findNavController().navigate(R.id.action_from_base_to_change)
         }
         mViewModel.baseCurrency.observe(viewLifecycleOwner, Observer {
             mBinding.conversionFromTv.text = String.format("From: %s", it)
