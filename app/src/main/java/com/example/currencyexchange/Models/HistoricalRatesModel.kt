@@ -2,6 +2,7 @@ package com.example.currencyexchange.Models
 
 import com.google.gson.annotations.SerializedName
 import java.util.*
+import kotlin.collections.HashMap
 
 data class HistoricalRatesModel(
     @SerializedName("success")
@@ -15,5 +16,5 @@ data class HistoricalRatesModel(
     @SerializedName("date")
     val date: String,
     @SerializedName("rates")
-    val rates: SortedMap<String, Double>
+    val rates: HashMap<String, Double>
 )
