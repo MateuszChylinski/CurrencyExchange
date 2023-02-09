@@ -40,7 +40,6 @@ class HistoricalRates : Fragment() {
 
     //  Variables
     private val TAG = "HistoricalRates"
-    private var mConcatenatedSymbols: String = ""
     private var mDate: String = "default"
     private var mBaseCurrency = "default"
     private var mIsInit = false
@@ -50,6 +49,7 @@ class HistoricalRates : Fragment() {
     private val mCalendar = Calendar.getInstance()
     private var mCurrencyList: MutableList<CurrencyNamesModel> = arrayListOf()
     private var mAlLCurrencies: MutableList<CurrencyNamesModel> = mutableListOf()
+    private var mIsRefreshed: Boolean = false
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -59,30 +59,35 @@ class HistoricalRates : Fragment() {
         val view = mBinding.root
 
         mDatabaseInstance = (activity?.application as CurrencyApplication).repository
+
         mViewModel = ViewModelProvider(
             this,
             HistoricalFactory(CurrencyRetrofitRepository(mApiInstance), mDatabaseInstance!!)
         ).get(HistoricalViewModel::class.java)
 
-        mViewModel.baseCurrency.observe(
-            requireActivity(),
-            androidx.lifecycle.Observer { mBaseCurrency = it })
-        mViewModel.currencyList.observe(requireActivity(), androidx.lifecycle.Observer {
+        mViewModel.mBaseCurrency.observe(
+            requireActivity()){
+                mBaseCurrency = it
+            }
+        mViewModel.currencyList.observe(requireActivity()){
             mCurrencyList.addAll(it)
             mAlLCurrencies.addAll(it)
-        })
-        mViewModel.historicalData.observe(requireActivity(), androidx.lifecycle.Observer {
+        }
+        mViewModel.historicalData.observe(requireActivity()) {
             mHistoricalAdapter = HistoricalAdapter()
-            mHistoricalAdapter?.setData(it.rates)
+            mHistoricalAdapter?.setData(((it?.rates ?: mutableMapOf()) as HashMap<String, Double>))
             mBinding.historicalRv.layoutManager = LinearLayoutManager(this.context)
             mBinding.historicalRv.adapter = mHistoricalAdapter
-        })
-//        mBinding.historicalRefreshContainer.setOnRefreshListener {
-//            //          TODO - finish refreshing. How to reset whole layout?
-//
-//            mBinding.historicalRefreshContainer.isRefreshing = false
-//        }
+        }
 
+        mBinding.historicalRefreshContainer.setOnRefreshListener {
+            mIsRefreshed = true
+            mBaseCurrency = mViewModel.getBaseCurrency()
+            mViewModel.clearApiResponse()
+
+            setDefaultVisibility()
+            mBinding.historicalRefreshContainer.isRefreshing = false
+        }
         return view
     }
 
@@ -93,13 +98,38 @@ class HistoricalRates : Fragment() {
         mBinding.historicalDt.minDate = mCalendar.timeInMillis
         mBinding.historicalDt.maxDate = Calendar.getInstance().timeInMillis
 
-        mBinding.historicalSaveDate.setOnClickListener {
-            getDate()
-        }
         mBinding.historicalChangeBaseIcon.setOnClickListener {
             setFragmentResult("request_key", bundleOf("fragment_name" to TAG))
             findNavController().navigate(R.id.action_from_base_to_change)
+        }
+        setDefaultVisibility()
+    }
 
+    // Prepare default visibility - it is mainly needed after user will refresh the layout
+    private fun setDefaultVisibility() {
+        /** If user refreshed layout uncheck every position in ListView */
+        if (mIsRefreshed) {
+            for (i in 0 until mBinding.historicalSymbolsLv.checkedItemCount) {
+                mBinding.historicalSymbolsLv.setItemChecked(i, false)
+            }
+        }
+        mBinding.historicalInfo.visibility = View.VISIBLE
+        mBinding.historicalDt.visibility = View.VISIBLE
+        mBinding.historicalSaveDate.visibility = View.VISIBLE
+
+        mBinding.historicalSelectInfo.visibility = View.INVISIBLE
+        mBinding.historicalSymbolsLv.visibility = View.INVISIBLE
+        mBinding.historicalSaveSymbols.visibility = View.INVISIBLE
+        mBinding.historicalChangeInfo.visibility = View.INVISIBLE
+        mBinding.historicalChangeBase.visibility = View.INVISIBLE
+        mBinding.historicalBaseTv.visibility = View.INVISIBLE
+        mBinding.historicalDateTv.visibility = View.INVISIBLE
+
+        mBinding.historicalDateTv.visibility = View.INVISIBLE
+        mBinding.historicalRv.visibility = View.INVISIBLE
+
+        mBinding.historicalSaveDate.setOnClickListener {
+            getDate()
         }
     }
 
@@ -113,15 +143,14 @@ class HistoricalRates : Fragment() {
         cal.set(Calendar.DATE, mBinding.historicalDt.dayOfMonth)
         mDate = sdf.format(cal.time).toString()
         mViewModel.date = mDate
-
         setVisibilityToLv()
     }
 
-    //  Prepare views for ListView. Delete unneeded views.
+    //  Prepare views to display ListView. Make unneeded views invisible
     private fun setVisibilityToLv() {
-        mBinding.historicalInfo.visibility = View.GONE
-        mBinding.historicalDt.visibility = View.GONE
-        mBinding.historicalSaveDate.visibility = View.GONE
+        mBinding.historicalInfo.visibility = View.INVISIBLE
+        mBinding.historicalDt.visibility = View.INVISIBLE
+        mBinding.historicalSaveDate.visibility = View.INVISIBLE
 
         mBinding.historicalSelectInfo.visibility = View.VISIBLE
         mBinding.historicalSymbolsLv.visibility = View.VISIBLE
@@ -131,12 +160,12 @@ class HistoricalRates : Fragment() {
         mBinding.historicalBaseTv.visibility = View.VISIBLE
         mBinding.historicalDateTv.visibility = View.VISIBLE
 
-        mBinding.historicalDateTv.text = String.format("Date: %s", mDate)
-        mBinding.historicalBaseTv.text = String.format("Base currency: %s", mBaseCurrency)
-
+        mBinding.historicalDateTv.text = String.format(getString(R.string.formatted_date), mDate)
+        mBinding.historicalBaseTv.text = String.format(getString(R.string.formatted_base_currency), mBaseCurrency)
         deleteBaseFromTheList(mCurrencyList)
     }
 
+    // Delete base currency from the list, so it will not be presented in Spinner, and ListView
     private fun deleteBaseFromTheList(list: MutableList<CurrencyNamesModel>) {
         if (list.toString().contains(mBaseCurrency)) {
             val index = list.indices.find { list[it].toString() == mBaseCurrency }
@@ -149,6 +178,7 @@ class HistoricalRates : Fragment() {
         }
     }
 
+    // Prepare spinner to display available currencies to change base currency, but only temporary. It will NOT affect the database.
     private fun setupSpinner(currencies: MutableList<CurrencyNamesModel>) {
         val adapter =
             ArrayAdapter(requireActivity(), android.R.layout.simple_spinner_item, currencies)
@@ -156,12 +186,15 @@ class HistoricalRates : Fragment() {
         mBinding.historicalChangeBase.onItemSelectedListener =
             object : AdapterView.OnItemSelectedListener {
                 override fun onItemSelected(p0: AdapterView<*>?, p1: View?, p2: Int, p3: Long) {
+                    /** By using boolean variable: "mIsTouched" we can avoid self picking first value from the spinner   */
                     if (mIsTouched) {
                         mBaseCurrency = currencies[p2].toString()
+
                         mBinding.historicalBaseTv.text =
-                            String.format("Base currency: %s", mBaseCurrency)
+                            String.format(getString(R.string.formatted_base_currency), mBaseCurrency)
                         currencies.clear()
                         currencies.addAll(mAlLCurrencies)
+
                         deleteBaseFromTheList(currencies)
                         setupListView(currencies)
                         adapter.notifyDataSetChanged()
@@ -176,6 +209,7 @@ class HistoricalRates : Fragment() {
             }
     }
 
+    //Prepare ListView to display available currencies to pick up, as a reference to historical rates of selected base currency
     private fun setupListView(list: MutableList<CurrencyNamesModel>) {
         val currencies: MutableList<CurrencyNamesModel> = mutableListOf()
         val adapter =
@@ -183,7 +217,7 @@ class HistoricalRates : Fragment() {
 
         Toast.makeText(
             activity,
-            "Select up to 30 currencies, and then, click on the save button",
+            getString(R.string.select_up_to_30_currencies),
             Toast.LENGTH_SHORT
         ).show()
 
@@ -197,13 +231,16 @@ class HistoricalRates : Fragment() {
                     position: Int,
                     id: Long
                 ) {
+
                     /** After every click, check if total selected amount of symbols is <= 30.
-                    //  If user will try to select more than 30 symbols, inform him that he can't select more than 30 **/
+                     * If user will try to select more than 30 symbols, inform him that he can't select more than 30
+                     * The limitation is result from not getting data from the server. Probably because of the retrofit wait time limit
+                     * **/
 
                     if (mBinding.historicalSymbolsLv.checkedItemCount > 30) {
                         Toast.makeText(
                             requireContext(),
-                            "You can't select anymore currencies.",
+                            getString(R.string.cant_select_more_currencies),
                             Toast.LENGTH_SHORT
                         ).show()
                         mBinding.historicalSymbolsLv.setItemChecked(position, false)
@@ -211,7 +248,13 @@ class HistoricalRates : Fragment() {
                 }
             }
         mBinding.historicalSaveSymbols.setOnClickListener {
-            //          Add to the created list all of the checked symbols. Next function will convert them into String
+            // Check if the fragment was refreshed (by SwiperRefreshLayout) if yes, clear currencies list.
+            /** If this list will not be cleared, then after refresh, previously picked currencies will be pushed to the api call.  */
+            if (mIsRefreshed) {
+                currencies.clear()
+            }
+
+            /** Add to the created list all of the checked symbols. Next function will convert them into String */
             for (i in 0 until list.size) {
                 if (mBinding.historicalSymbolsLv.isItemChecked(i)) {
                     currencies.add(list[i])
@@ -221,26 +264,20 @@ class HistoricalRates : Fragment() {
         }
     }
 
-
+    /*  Fetch data from the api, and observe it.
+     After whole data is fetched, pass it into adapter which will display it in RecyclerView    */
     private fun getCurrencies(list: MutableList<CurrencyNamesModel>) {
-        for (i in 0 until list.size) {
-            mConcatenatedSymbols += list[i].toString() + ", "
-        }
-//      Pass converted symbols list to the ViewModel as a String. These symbols will be one of the endpoints needed to perform the call
-        mViewModel.selectedCurrencies = mConcatenatedSymbols
+        mViewModel.fetchHistoricalData(mBaseCurrency, list.joinToString(separator = ", "))
         prepareViewsForRv()
-
-        //  Fetch data from the api, and observe it. After whole data is fetched, pass it into adapter which will display it in RecyclerView
-        mViewModel.fetchHistoricalData(mBaseCurrency)
     }
 
     //  Prepare views to display RecyclerView. Delete unneeded views
     private fun prepareViewsForRv() {
-        mBinding.historicalSelectInfo.visibility = View.GONE
-        mBinding.historicalSymbolsLv.visibility = View.GONE
-        mBinding.historicalSaveSymbols.visibility = View.GONE
-        mBinding.historicalChangeInfo.visibility = View.GONE
-        mBinding.historicalChangeBase.visibility = View.GONE
+        mBinding.historicalSelectInfo.visibility = View.INVISIBLE
+        mBinding.historicalSymbolsLv.visibility = View.INVISIBLE
+        mBinding.historicalSaveSymbols.visibility = View.INVISIBLE
+        mBinding.historicalChangeInfo.visibility = View.INVISIBLE
+        mBinding.historicalChangeBase.visibility = View.INVISIBLE
 
         mBinding.historicalDateTv.visibility = View.VISIBLE
         mBinding.historicalRv.visibility = View.VISIBLE

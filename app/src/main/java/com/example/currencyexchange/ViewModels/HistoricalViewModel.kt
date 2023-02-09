@@ -14,14 +14,13 @@ class HistoricalViewModel constructor(
     private val retrofitRepository: CurrencyRetrofitRepository,
     private val databaseRepository: CurrencyDatabaseRepository
 ) : ViewModel() {
-    val currencyList = databaseRepository.allCurrencies.asLiveData()
-    val baseCurrency = databaseRepository.baseCurrency.asLiveData()
-    var historicalData = MutableLiveData<HistoricalRatesModel>()
-
-    var selectedCurrencies: String = "default"
     var date: String = "default"
+    var historicalData  = MutableLiveData<HistoricalRatesModel?>()
 
-    fun fetchHistoricalData(baseCurrency: String) {
+    val mBaseCurrency = databaseRepository.baseCurrency.asLiveData()
+    val currencyList = databaseRepository.allCurrencies.asLiveData()
+
+    fun fetchHistoricalData(baseCurrency: String, selectedCurrencies: String) {
         viewModelScope.launch {
             val response =
                 retrofitRepository.fetchHistoricalData(date, selectedCurrencies, baseCurrency)
@@ -31,16 +30,20 @@ class HistoricalViewModel constructor(
                     response: Response<HistoricalRatesModel>
                 ) {
                     if (response.isSuccessful) {
-                        Log.i(TAG, "onResponse: $selectedCurrencies")
                         historicalData.value = response.body()
                     }
                 }
-
                 override fun onFailure(call: Call<HistoricalRatesModel>, t: Throwable) {
                     Log.i(TAG, "onFailure: FETCHING HISTORICAL DATA ERROR\n${t.message}")
                 }
             })
         }
+    }
+    fun getBaseCurrency (): String{
+        return mBaseCurrency.value.toString()
+    }
+    fun clearApiResponse(){
+        historicalData.value = null
     }
 }
 

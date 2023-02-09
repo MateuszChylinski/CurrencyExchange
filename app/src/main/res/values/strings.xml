@@ -8,10 +8,11 @@
     <string name="change_pct_rate">Change pct: 00.00</string>
     <string name="select_new_base_currency">Select new base currency</string>
     <string name="toolbar_info">You can change base currency\nby clicking on the currency icon</string>
+    <string name="cant_select_more_currencies">You can\'t select more currencies</string>
     <string name="enter_value">Enter value:</string>
     <string name="convert">Convert</string>
-    <string name="from">From</string>
-    <string name="to">To</string>
+    <string name="from">From:</string>
+    <string name="to">To:</string>
     <string name="ok">OK</string>
     <string name="from_date" tools:ignore="TypographyDashes">From: 00–00-0000</string>
     <string name="to_date" tools:ignore="TypographyDashes">To: 00-00-0000</string>
@@ -22,6 +23,7 @@
     <string name="date" tools:ignore="TypographyDashes">Date: 0000–00-00</string>
     <string name="change_base_currency">Change base currency:</string>
     <string name="select_currencies">Select currencies</string>
+    <string name="select_up_to_30_currencies">Select up to 30 currencies, and then, click on the save button</string>
     <string name="currency_item_name">UNK</string>
     <string name="currency_item_value">00.00</string>
 </resources>
