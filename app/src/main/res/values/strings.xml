@@ -35,4 +35,10 @@
     <!--  String resources with specific format  -->
     <string name="formatted_base_currency">Base currency: %1$s</string>
     <string name="formatted_date">Date: %1$s</string>
+    <string name="formatted_from">From: %1$s</string>
+    <string name="formatted_to">To: %1$s</string>
+    <string name="formatted_start_rate">Start: %1$.2f</string>
+    <string name="formatted_end_rate">End: %1$.2f</string>
+    <string name="formatted_change_rate">Change: %1$.2f</string>
+    <string name="formatted_change_pct">Change PCT: %1$.2f</string>
 </resources>

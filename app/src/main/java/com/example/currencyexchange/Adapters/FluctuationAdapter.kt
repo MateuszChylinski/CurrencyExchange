@@ -3,28 +3,18 @@ package com.example.currencyexchange.Adapters
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
+import com.example.currencyexchange.Models.FluctuationRates
+import com.example.currencyexchange.R
 import com.example.currencyexchange.databinding.FluctuationItemsBinding
 
 class FluctuationAdapter : RecyclerView.Adapter<FluctuationAdapter.ViewHolder>() {
-    private var mCurrenciesNames: List<String> = arrayListOf()
-    private var mCurrenciesStartRates: List<Double> = arrayListOf()
-    private var mCurrenciesEndRates: List<Double> = arrayListOf()
-    private var mCurrenciesChange: List<Double> = arrayListOf()
-    private var mCurrenciesChangePct: List<Double> = arrayListOf()
 
+    private var mData: Map<String, FluctuationRates>? = mapOf()
+    private var mCurrencies: MutableList<String>? = mutableListOf()
 
-    fun setData(
-        currencyNames: List<String>,
-        currencyStartRates: List<Double>,
-        currencyEndRates: List<Double>,
-        currencyChange: List<Double>,
-        currencyChangePct: List<Double>
-    ) {
-        this.mCurrenciesNames = currencyNames
-        this.mCurrenciesStartRates = currencyStartRates
-        this.mCurrenciesEndRates = currencyEndRates
-        this.mCurrenciesChange = currencyChange
-        this.mCurrenciesChangePct = currencyChangePct
+    fun setData(data: Map<String, FluctuationRates>?) {
+        this.mData = data
+        mCurrencies?.addAll(mData?.keys!!)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -34,22 +24,34 @@ class FluctuationAdapter : RecyclerView.Adapter<FluctuationAdapter.ViewHolder>()
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        holder.binding.fluctuationRvForeignCurrency.text =
-            String.format("Currency name: %s", mCurrenciesNames[position])
-        holder.binding.fluctuationRvStartRate.text =
-            String.format("Currency start rate: %.2f".format(mCurrenciesStartRates[position]))
-        holder.binding.fluctuationRvEndRate.text =
-            String.format("Currency end rate: %.2f".format(mCurrenciesEndRates[position]))
-        holder.binding.fluctuationRvChange.text =
-            String.format("Currency change: %.2f".format(mCurrenciesChange[position]))
-        holder.binding.fluctuationRvChangePct.text =
-            String.format("Currency change pct: %.2f".format(mCurrenciesChangePct[position]))
+        with(holder) {
+            binding.fluctuationRvForeignCurrency.text = String.format(
+                binding.fluctuationRvForeignCurrency.context.getString(R.string.formatted_base_currency),
+                mCurrencies!![position]
+            )
+            binding.fluctuationRvStartRate.text = String.format(
+                binding.fluctuationRvStartRate.context.getString(R.string.formatted_start_rate),
+                mData?.get(mCurrencies!![position])?.start_rate
+            )
+            binding.fluctuationRvEndRate.text = String.format(
+                binding.fluctuationRvEndRate.context.getString(R.string.formatted_end_rate),
+                mData?.get(mCurrencies!![position])?.end_rate
+            )
+            binding.fluctuationRvChange.text = String.format(
+                binding.fluctuationRvChange.context.getString(R.string.formatted_change_rate),
+                mData?.get(mCurrencies!![position])?.change
+            )
+            binding.fluctuationRvChangePct.text = String.format(
+                binding.fluctuationRvChangePct.context.getString(R.string.formatted_change_pct),
+                mData?.get(mCurrencies!![position])?.change_pct
+            )
+        }
     }
 
     override fun getItemCount(): Int {
-        return mCurrenciesNames.size
+        return mCurrencies?.size!!
     }
 
-    inner class ViewHolder(var binding: FluctuationItemsBinding) :
+    inner class ViewHolder(val binding: FluctuationItemsBinding) :
         RecyclerView.ViewHolder(binding.root)
 }
