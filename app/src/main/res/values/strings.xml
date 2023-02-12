@@ -26,15 +26,7 @@
     <string name="select_up_to_30_currencies">Select up to 30 currencies, and then, click on the save button</string>
     <string name="currency_item_name">UNK</string>
     <string name="currency_item_value">00.00</string>
-    <string name="historical_fragment_name">Historical\nrates</string>
-    <string name="latest_fragment_name">Latest\nrates</string>
-    <string name="conversion_fragment_name">Conversion</string>
-    <string name="fluctuation_fragment_name">Fluctuation\nrates</string>
-    <string name="change_base_content_description">By clicking on the currency icon, you can change your base currency</string>
 
-    <!--  String resources with specific format  -->
-    <string name="formatted_base_currency">Base currency: %1$s</string>
-    <string name="formatted_date">Date: %1$s</string>
     <string name="formatted_from">From: %1$s</string>
     <string name="formatted_to">To: %1$s</string>
     <string name="formatted_start_rate">Start: %1$.2f</string>
