@@ -4,6 +4,7 @@ import android.content.ContentValues.TAG
 import android.util.Log
 import androidx.lifecycle.*
 import com.example.currencyexchange.Models.FluctuationModel
+import com.example.currencyexchange.Models.FluctuationRates
 import com.example.currencyexchange.Repository.CurrencyDatabaseRepository
 import com.example.currencyexchange.Repository.CurrencyRetrofitRepository
 import kotlinx.coroutines.launch
@@ -20,17 +21,11 @@ class FluctuationViewModel constructor(
 
     var startDate: String = "default"
     var endDate: String = "default"
-    var selectedCurrencies: String = "default"
-    var isDone = MutableLiveData<Boolean>()
 
-    var currenciesNames = MutableLiveData<String>()
-    var currenciesStartRates = MutableLiveData<Double>()
-    var currenciesEndRates = MutableLiveData<Double>()
+    var data = MutableLiveData<Map<String, FluctuationRates>?>()
 
-    var currenciesChange = MutableLiveData<Double>()
-    var currenciesChangePct = MutableLiveData<Double>()
-
-    fun fetchFluctuation(baseCurrency: String) {
+    // Fetch the data from the server, and store it in 'data' variable, which can be observer in fragment.
+    fun fetchFluctuation(baseCurrency: String, selectedCurrencies: String) {
         viewModelScope.launch {
             val response =
                 apiRepository.fetchFluctuation(startDate, endDate, baseCurrency, selectedCurrencies)
@@ -39,25 +34,23 @@ class FluctuationViewModel constructor(
                     call: Call<FluctuationModel>,
                     response: Response<FluctuationModel>
                 ) {
+                    Log.i(TAG, "onResponse: RETROFIT\n${response.body()}")
                     if (response.isSuccessful) {
-                        for (i in response.body()?.rates?.keys!!) {
-                            currenciesNames.value = i
-                            currenciesStartRates.value =
-                                response.body()?.rates?.getValue(i)?.start_rate
-                            currenciesEndRates.value = response.body()?.rates?.getValue(i)?.end_rate
-                            currenciesChange.value = response.body()?.rates?.getValue(i)?.change
-                            currenciesChangePct.value =
-                                response.body()?.rates?.getValue(i)?.change_pct
-                        }
-                        isDone.value = true
+                        data.value = response.body()?.rates
                     }
                 }
-
                 override fun onFailure(call: Call<FluctuationModel>, t: Throwable) {
                     Log.i(TAG, "onFailure: ${t.message}")
                 }
             })
         }
+    }
+    // TODO - do I need it? Isn't it "clear" itself after each api call?
+    fun clearResponseData() {
+        data.value = null
+    }
+    fun getBaseCurrency(): String {
+        return baseCurrency.value.toString()
     }
 }
 

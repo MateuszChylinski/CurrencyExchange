@@ -26,4 +26,11 @@
     <string name="select_up_to_30_currencies">Select up to 30 currencies, and then, click on the save button</string>
     <string name="currency_item_name">UNK</string>
     <string name="currency_item_value">00.00</string>
+
+    <string name="formatted_from">From: %1$s</string>
+    <string name="formatted_to">To: %1$s</string>
+    <string name="formatted_start_rate">Start: %1$.2f</string>
+    <string name="formatted_end_rate">End: %1$.2f</string>
+    <string name="formatted_change_rate">Change: %1$.2f</string>
+    <string name="formatted_change_pct">Change PCT: %1$.2f</string>
 </resources>

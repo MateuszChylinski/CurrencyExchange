@@ -14,10 +14,10 @@ data class FluctuationModel(
     @SerializedName("base")
     val base: String,
     @SerializedName("rates")
-    val rates: Map<String, Rates>
+    val rates: Map<String, FluctuationRates>
 )
 
-data class Rates(
+data class FluctuationRates(
     @SerializedName("start_rate")
     val start_rate: Double,
     @SerializedName("end_rate")
