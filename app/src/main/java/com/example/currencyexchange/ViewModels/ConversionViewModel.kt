@@ -3,7 +3,7 @@ package com.example.currencyexchange.ViewModels
 import android.content.ContentValues.TAG
 import android.util.Log
 import androidx.lifecycle.*
-import com.example.currencyexchange.Models.CurrencyModel
+import com.example.currencyexchange.Models.ConversionModel
 import com.example.currencyexchange.Models.CurrencyNamesModel
 import com.example.currencyexchange.Repository.CurrencyDatabaseRepository
 import com.example.currencyexchange.Repository.CurrencyRetrofitRepository
@@ -19,22 +19,29 @@ class ConversionViewModel constructor(
     val currencyList: LiveData<List<CurrencyNamesModel>> =
         databaseRepository.allCurrencies.asLiveData()
     var baseCurrency: LiveData<String> = databaseRepository.baseCurrency.asLiveData()
-    var conversionResult = MutableLiveData<Double>()
+    var conversionResult = MutableLiveData<ConversionModel?>()
 
 
     fun conversionCall(from: String, to: String, amount: String) {
         val response = apiRepository.convertCurrency(from, to, amount)
-        response.enqueue(object : retrofit2.Callback<CurrencyModel> {
-            override fun onResponse(call: Call<CurrencyModel>, response: Response<CurrencyModel>) {
+        response.enqueue(object : retrofit2.Callback<ConversionModel> {
+            override fun onResponse(
+                call: Call<ConversionModel>,
+                response: Response<ConversionModel>
+            ) {
                 if (response.isSuccessful) {
-                    conversionResult.value = response.body()?.result
+                    conversionResult.value = response.body()
                 }
             }
 
-            override fun onFailure(call: Call<CurrencyModel>, t: Throwable) {
-                Log.i(TAG, "onFailure (Conversion): ${t.message}")
+            override fun onFailure(call: Call<ConversionModel>, t: Throwable) {
+                Log.i(TAG, "onFailure (CONVERT) : ${t.message}")
             }
         })
+    }
+
+    fun getBaseCurrency(): String {
+        return baseCurrency.value.toString()
     }
 }
 

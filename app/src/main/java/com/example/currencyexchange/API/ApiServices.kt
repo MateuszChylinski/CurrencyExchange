@@ -20,7 +20,7 @@ interface ApiServices {
         @Query("to") from: String,
         @Query("amount") amount: String,
         @Query("apikey") apiKey: String
-    ): Call<CurrencyModel>
+    ): Call<ConversionModel>
 
     @GET("/fixer/fluctuation")
     fun getFluctuationData(
