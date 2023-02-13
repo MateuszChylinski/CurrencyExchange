@@ -24,7 +24,6 @@ import com.example.currencyexchange.databinding.FragmentConversionBinding
 class Conversion : Fragment() {
     private val TAG = "Conversion"
 
-    private var mAmount: String = "none"
     private var mConversionBinding: FragmentConversionBinding? = null
     private val mBinding get() = mConversionBinding!!
 
@@ -34,8 +33,10 @@ class Conversion : Fragment() {
 
     private var mBaseCurrency: String = "default"
     private var mDesiredCurrency: String = "default"
-    private var mCurrencies: MutableList<CurrencyNamesModel> = mutableListOf()
+    private var mIsRefreshed: Boolean = false
 
+    private var mCurrencyList: MutableList<CurrencyNamesModel> = mutableListOf()
+    private var mAllCurrencies: MutableList<CurrencyNamesModel> = mutableListOf()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -49,15 +50,29 @@ class Conversion : Fragment() {
             this,
             ConversionFactory(CurrencyRetrofitRepository(mApiInstance), mDatabaseInstance!!)
         )[ConversionViewModel::class.java]
-        mBinding.conversionRefreshContainer.setOnRefreshListener {
-            val id = findNavController().currentDestination?.id
-            findNavController().popBackStack(id!!, true)
-            findNavController().navigate(id)
 
-            mBinding.conversionRefreshContainer.isRefreshing = false
-        }
-
-
+        mViewModel.baseCurrency.observe(viewLifecycleOwner, Observer {
+            mBaseCurrency = it
+            mBinding.conversionFromTv.text =
+                String.format(getString(R.string.formatted_from), mBaseCurrency)
+        })
+        /** The reason why I'm creating two lists with all of the currencies,
+         *  is because the 'mCurrencyList' is will NOT contain base currency, and desired currency.
+         *  In other hand, the 'mAllCurrencies' are not changed while program is running,
+         *  so it can provide new list of currencies to the 'mCurrencyList'*/
+        mViewModel.currencyList.observe(viewLifecycleOwner, Observer {
+            mCurrencyList.addAll(it)
+            mAllCurrencies.addAll(it)
+            prepareFromSpinner(mCurrencyList)
+            prepareToSpinner(mCurrencyList)
+        })
+        mViewModel.conversionResult.observe(viewLifecycleOwner, Observer {
+            mBinding.conversionConvertedData.visibility = View.VISIBLE
+            mBinding.conversionConvertedData.text = String.format(
+                getString(R.string.formatted_you_will_receive),
+                it?.result, it?.query?.to
+            )
+        })
         return view
     }
 
@@ -67,22 +82,40 @@ class Conversion : Fragment() {
             setFragmentResult("request_key", bundleOf("fragment_name" to TAG))
             findNavController().navigate(R.id.action_from_base_to_change)
         }
-        mViewModel.baseCurrency.observe(viewLifecycleOwner, Observer {
-            mBinding.conversionFromTv.text = String.format("From: %s", it)
-            mBaseCurrency = it.toString()
-            Log.i(TAG, "onViewCreate: $mBaseCurrency")
-
-        })
-        mViewModel.currencyList.observe(viewLifecycleOwner, Observer {
-            mCurrencies.addAll(it)
-            prepareFromSpinner(mCurrencies)
-            prepareToSpinner(mCurrencies)
-        })
         mBinding.conversionConverseBtn.setOnClickListener(View.OnClickListener {
             getValueFromEditText()
         })
+
+        // Refresh layout
+        mBinding.conversionRefreshContainer.setOnRefreshListener {
+            // Clear variables
+            mCurrencyList.clear()
+            mCurrencyList.addAll(mAllCurrencies)
+            mDesiredCurrency = String()
+
+            mIsRefreshed = true
+            mBaseCurrency = mViewModel.getBaseCurrency()
+            defaultViewsSetup()
+            mBinding.conversionRefreshContainer.isRefreshing = false
+        }
     }
 
+    /**  After refreshing the layout, clear text in convertedData TextView, and make it invisible.  */
+    private fun defaultViewsSetup() {
+        if (mIsRefreshed) {
+            mBinding.conversionEnterValue.text.clear()
+            mBinding.conversionConvertedData.text = ""
+            mBinding.conversionConvertedData.visibility = View.INVISIBLE
+
+            mBinding.conversionToTv.text = getString(R.string.currency_name)
+            mBinding.conversionFromTv.text =
+                String.format(getString(R.string.formatted_from), mBaseCurrency)
+            deleteBaseFromSpinner(mCurrencyList)
+        }
+    }
+
+    /** Check if given list contains base currency, and desired currency (if user have already picked one).
+     * If list contains these currencies, delete it, so user will not see them in spinner anymore.*/
     private fun deleteBaseFromSpinner(
         list: MutableList<CurrencyNamesModel>
     ) {
@@ -115,17 +148,15 @@ class Conversion : Fragment() {
                         isTouched = false
                         mBaseCurrency = currencyList[position].toString()
                         mBinding.conversionFromTv.text =
-                            String.format("From: %s", mBaseCurrency)
-
+                            String.format(getString(R.string.formatted_from), mBaseCurrency)
                         deleteBaseFromSpinner(currencyList)
-
                     } else {
                         isTouched = true
                     }
                 }
 
                 override fun onNothingSelected(parent: AdapterView<*>?) {
-                    Log.i(TAG, "onNothingSelected: NOTHING SELECTED!")
+                    Log.i(TAG, "onNothingSelected in 'from' spinner")
                 }
             }
     }
@@ -147,9 +178,9 @@ class Conversion : Fragment() {
                         isTouched = false
                         mDesiredCurrency = currencyList[position].toString()
                         mBinding.conversionToTv.text =
-                            String.format("To: %s", mDesiredCurrency)
+                            String.format(getString(R.string.formatted_to), mDesiredCurrency)
 
-                        deleteBaseFromSpinner(mCurrencies)
+                        deleteBaseFromSpinner(currencyList)
                     } else {
                         isTouched = true
                     }
@@ -161,24 +192,16 @@ class Conversion : Fragment() {
             }
     }
 
+    /** get given value from EditText, and if it contains any value, perform an api call, and fetch the data.
+     * if base/desired currency are empty, or the EditText does not contain any value, inform user to complete data*/
     private fun getValueFromEditText() {
-        mAmount = mBinding.conversionEnterValue.text.toString()
-
+        val mAmount = mBinding.conversionEnterValue.text.toString()
         if (mBaseCurrency != "default" && mDesiredCurrency != "default" && mAmount.isNotEmpty()) {
             mViewModel.conversionCall(mBaseCurrency, mDesiredCurrency, mAmount)
-            mViewModel.conversionResult.observe(viewLifecycleOwner, Observer {
-
-                mBinding.conversionConvertedData.visibility = View.VISIBLE
-                mBinding.conversionConvertedData.text = String.format(
-                    "You will receive %.2f %s",
-                    it,
-                    mDesiredCurrency
-                )
-            })
         } else {
             Toast.makeText(
                 requireActivity(),
-                "You have to select desired currency, and enter amount of currency that you want to exchange in order to make a conversion!",
+                getString(R.string.select_desired_currency),
                 Toast.LENGTH_LONG
             ).show()
         }

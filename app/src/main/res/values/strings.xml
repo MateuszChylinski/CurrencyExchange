@@ -31,6 +31,7 @@
     <string name="conversion_fragment_name">Conversion</string>
     <string name="fluctuation_fragment_name">Fluctuation\nrates</string>
     <string name="change_base_content_description">By clicking on the currency icon, you can change your base currency</string>
+    <string name="select_desired_currency">You have to select desired currency, and enter amount of currency that you want to exchange in order to make a conversion</string>
 
     <!--  String resources with specific format  -->
     <string name="formatted_base_currency">Base currency: %1$s</string>
@@ -41,4 +42,5 @@
     <string name="formatted_end_rate">End: %1$.2f</string>
     <string name="formatted_change_rate">Change: %1$.2f</string>
     <string name="formatted_change_pct">Change PCT: %1$.2f</string>
+    <string name="formatted_you_will_receive">You will receive: %1$.2f %2$s</string>
 </resources>
