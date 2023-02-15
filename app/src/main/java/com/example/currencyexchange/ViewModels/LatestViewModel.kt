@@ -1,7 +1,5 @@
 package com.example.currencyexchange.ViewModels
 
-import android.content.ContentValues.TAG
-import android.util.Log
 import androidx.lifecycle.*
 import com.example.currencyexchange.Models.CurrencyNamesModel
 import com.example.currencyexchange.Models.LatestRates
@@ -17,29 +15,31 @@ class LatestViewModel constructor(
     private val databaseRepository: CurrencyDatabaseRepository
 ) : ViewModel() {
 
-    var latestRates = MutableLiveData<LatestRates>()
-    var baseCurrency: LiveData<String> = databaseRepository.baseCurrency.asLiveData()
-    var latestError = MutableLiveData<String>()
+    var mLatestRates = MutableLiveData<LatestRates>()
+    var mLatestError = MutableLiveData<String>()
     var mCurrenciesSet = sortedSetOf<String>()
+    var mBaseCurrency = databaseRepository.baseCurrency.asLiveData()
 
     fun fetchLatestRates(baseCurrency: String) {
         val response = apiRepository.fetchLatestRates(baseCurrency)
         response.enqueue(object : retrofit2.Callback<LatestRates> {
             override fun onResponse(call: Call<LatestRates>, response: Response<LatestRates>) {
-                Log.i(TAG, "onResponse: LATEST ${response.code()}")
                 if (response.isSuccessful) {
-                    latestRates.postValue(response.body())
+                    mLatestRates.postValue(response.body())
                     response.body()?.latestRates?.keys?.let { mCurrenciesSet.addAll(it) }
                     if (mCurrenciesSet.size > 0) {
                         viewModelScope.launch { populateDB() }
                     }
                 }
             }
-
             override fun onFailure(call: Call<LatestRates>, t: Throwable) {
-                latestError.postValue(t.message)
+                mLatestError.postValue(t.message)
             }
         })
+    }
+
+    fun getBaseCurrency(): String{
+        return mBaseCurrency.value.toString()
     }
 
     suspend fun populateDB() {
@@ -64,4 +64,3 @@ class LatestFactory(
         throw IllegalArgumentException("Unknown retrofit ViewModel")
     }
 }
-// TODO - IN ORDER TO FILL UP DATABASE WITH CURRENCIES, CHECK THE INTERNET CONNECTION BEFORE CALLING ANYTHING IN OTHER FRAGMENTS?
