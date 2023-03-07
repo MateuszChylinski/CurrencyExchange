@@ -16,33 +16,33 @@ class ConversionViewModel constructor(
     private val databaseRepository: CurrencyDatabaseRepository
 ) : ViewModel() {
 
-    val currencyList: LiveData<List<CurrencyNamesModel>> =
-        databaseRepository.allCurrencies.asLiveData()
-    var baseCurrency: LiveData<String> = databaseRepository.baseCurrency.asLiveData()
+//    val currencyList: LiveData<List<CurrencyNamesModel>> =
+//        databaseRepository.allCurrencies.asLiveData()
+//    var baseCurrency: LiveData<String> = databaseRepository.baseCurrency.asLiveData()
     var conversionResult = MutableLiveData<ConversionModel?>()
 
 
-    fun conversionCall(from: String, to: String, amount: String) {
-        val response = apiRepository.convertCurrency(from, to, amount)
-        response.enqueue(object : retrofit2.Callback<ConversionModel> {
-            override fun onResponse(
-                call: Call<ConversionModel>,
-                response: Response<ConversionModel>
-            ) {
-                if (response.isSuccessful) {
-                    conversionResult.value = response.body()
-                }
-            }
-
-            override fun onFailure(call: Call<ConversionModel>, t: Throwable) {
-                Log.i(TAG, "onFailure (CONVERT) : ${t.message}")
-            }
-        })
-    }
-
-    fun getBaseCurrency(): String {
-        return baseCurrency.value.toString()
-    }
+//    fun conversionCall(from: String, to: String, amount: String) {
+//        val response = apiRepository.convertCurrency(from, to, amount)
+//        response.enqueue(object : retrofit2.Callback<ConversionModel> {
+//            override fun onResponse(
+//                call: Call<ConversionModel>,
+//                response: Response<ConversionModel>
+//            ) {
+//                if (response.isSuccessful) {
+//                    conversionResult.value = response.body()
+//                }
+//            }
+//
+//            override fun onFailure(call: Call<ConversionModel>, t: Throwable) {
+//                Log.i(TAG, "onFailure (CONVERT) : ${t.message}")
+//            }
+//        })
+//    }
+//
+//    fun getBaseCurrency(): String {
+//        return baseCurrency.value.toString()
+//    }
 }
 
 class ConversionFactory(

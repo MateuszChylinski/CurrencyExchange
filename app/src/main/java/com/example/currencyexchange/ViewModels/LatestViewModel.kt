@@ -1,13 +1,19 @@
 package com.example.currencyexchange.ViewModels
 
+import android.content.ContentValues.TAG
+import android.util.Log
 import androidx.lifecycle.*
+import com.example.currencyexchange.API.ApiResult
+import com.example.currencyexchange.API.DatabaseState
+import com.example.currencyexchange.BuildConfig
 import com.example.currencyexchange.Models.CurrencyNamesModel
 import com.example.currencyexchange.Models.LatestRates
 import com.example.currencyexchange.Repository.CurrencyDatabaseRepository
 import com.example.currencyexchange.Repository.CurrencyRetrofitRepository
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
-import retrofit2.Call
-import retrofit2.Response
+import java.io.IOException
 import java.lang.IllegalArgumentException
 
 class LatestViewModel constructor(
@@ -15,45 +21,66 @@ class LatestViewModel constructor(
     private val databaseRepository: CurrencyDatabaseRepository
 ) : ViewModel() {
 
-    var mLatestRates = MutableLiveData<LatestRates>()
-    var mLatestError = MutableLiveData<String>()
-    var mCurrenciesSet = sortedSetOf<String>()
-    var mBaseCurrency = databaseRepository.baseCurrency.asLiveData()
+    /** Setup states for base currency*/
+    private val _baseCurrencyState: MutableSharedFlow<DatabaseState> = MutableSharedFlow(replay = 1)
+    val baseCurrency: SharedFlow<DatabaseState> get() = _baseCurrencyState
 
-    fun fetchLatestRates(baseCurrency: String) {
-        val response = apiRepository.fetchLatestRates(baseCurrency)
-        response.enqueue(object : retrofit2.Callback<LatestRates> {
-            override fun onResponse(call: Call<LatestRates>, response: Response<LatestRates>) {
-                if (response.isSuccessful) {
-                    mLatestRates.postValue(response.body())
-                    response.body()?.latestRates?.keys?.let { mCurrenciesSet.addAll(it) }
-                    if (mCurrenciesSet.size > 0) {
-                        viewModelScope.launch { populateDB() }
-                    }
+    /** Setup states for all currencies*/
+    private val _allCurrencies: MutableSharedFlow<DatabaseState> = MutableSharedFlow(replay = 1)
+    val currencies: SharedFlow<DatabaseState> get() = _allCurrencies
+
+    private val _latestRateStatus = MutableLiveData<ApiResult<LatestRates>>()
+    val latestRates: LiveData<ApiResult<LatestRates>> get() = _latestRateStatus
+
+
+    /** Launch coroutines with Dispatchers of IO
+     *  Retrieve base currency from the database*/
+    fun getBaseCurrency() {
+        viewModelScope.launch(Dispatchers.IO) {
+            databaseRepository.baseCurrency
+                .catch { _baseCurrencyState.emit(DatabaseState.Error(it.cause)) }
+                .collect { currency ->
+                    _baseCurrencyState.emit(DatabaseState.Success(currency.baseCurr))
                 }
-            }
-            override fun onFailure(call: Call<LatestRates>, t: Throwable) {
-                mLatestError.postValue(t.message)
-            }
-        })
+        }
     }
 
-    fun getBaseCurrency(): String{
-        return mBaseCurrency.value.toString()
+    /** Launch coroutines with Dispatchers of IO
+     *  Insert new currencies to the database  */
+    private fun addCurrency(currencyNames: List<CurrencyNamesModel>) {
+        viewModelScope.launch(Dispatchers.IO) {
+            currencyNames.forEach { currency ->
+                databaseRepository.addCurrency(currency)
+            }
+        }
     }
 
-    suspend fun populateDB() {
-        val iterator = mCurrenciesSet.iterator()
-        while (iterator.hasNext()) {
-            val curr = CurrencyNamesModel(iterator.next())
-            databaseRepository.insertNewCurrency(curr)
+    /** Launch coroutines with Dispatchers of IO
+     *  Make an api call to get latest rates of specific base currency */
+    fun fetchData(baseCurrency: String) {
+        viewModelScope.launch {
+            try {
+                val response = apiRepository.getLatestRates(baseCurrency, BuildConfig.API_KEY)
+                _latestRateStatus.value = response
+            } catch (exception: IOException) {
+                Log.i(
+                    TAG,
+                    "Failed to fetch data from repository for latest rates.\n${exception.message}"
+                )
+            } finally {
+                val currencyNames: MutableList<CurrencyNamesModel> = mutableListOf()
+                latestRates.value?.data?.latestRates?.keys?.forEach { currency ->
+                    currencyNames.add(CurrencyNamesModel(currency))
+                }
+                addCurrency(currencyNames)
+            }
         }
     }
 }
 
 class LatestFactory(
-    val retrofitRepository: CurrencyRetrofitRepository,
-    val databaseRepository: CurrencyDatabaseRepository
+    private val retrofitRepository: CurrencyRetrofitRepository,
+    private val databaseRepository: CurrencyDatabaseRepository
 ) :
     ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {

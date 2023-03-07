@@ -12,19 +12,19 @@ interface CurrencyDAO {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertDefaultCurrency(databaseModel: BaseCurrencyModel)
 
-    // Insert new currency into database
+    /** Insert new currency to the database. In case, where currency already exists in database, just ignore it*/
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insertNewCurrency(databaseModel: CurrencyNamesModel)
-
-    //  Get all currency names, and boolean "isBase" to check whenever the value is set as base currency or not (1 = yes / 0 = no)
-    @Query("SELECT currency_name FROM currency_names ORDER BY currency_name ASC ")
-    fun getCurrencies(): Flow<List<CurrencyNamesModel>>
-
-    //  Get base currency from the database
-    @Query("SELECT base FROM base_currency")
-    fun getBaseCurrency(): Flow<String>
 
     //  Update base currency
     @Update
     suspend fun updateBaseCurrency(baseCurrencyModel: BaseCurrencyModel)
+
+    @Query("SELECT currency_name FROM currency_names ORDER BY currency_name ASC ")
+    fun getCurrencies(): Flow<List<CurrencyNamesModel>>
+
+//    TODO CHANGE
+    //  Get base currency from the database
+    @Query("SELECT * from base_currency")
+    fun getBaseCurrency(): Flow<BaseCurrencyModel>
 }

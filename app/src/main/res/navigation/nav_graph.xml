@@ -10,10 +10,7 @@
         android:name="com.example.currencyexchange.Fragments.ChangeBaseCurrency"
         android:label="fragment_change_base_currency"
         tools:layout="@layout/fragment_change_base_currency" >
-        <argument
-            android:name="fragment_name"
-            app:argType="string"
-            android:defaultValue="def" />
+
         <action
             android:id="@+id/action_changeBaseCurrency_to_pagerBase"
             app:destination="@id/pagerBase" />
@@ -26,5 +23,6 @@
         <action
             android:id="@+id/action_from_base_to_change"
             app:destination="@id/changeBaseCurrency" />
+
     </fragment>
 </navigation>

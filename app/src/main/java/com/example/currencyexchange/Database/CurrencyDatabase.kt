@@ -12,7 +12,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
 @Database(
-    entities = arrayOf(CurrencyNamesModel::class, BaseCurrencyModel::class),
+    entities = [CurrencyNamesModel::class, BaseCurrencyModel::class],
     version = 1,
     exportSchema = false
 )
