@@ -6,11 +6,8 @@ import java.lang.IllegalArgumentException
 
 class PagerAdapter(fragment: Fragment, fragmentList: List<Fragment>) :
     FragmentStateAdapter(fragment) {
-    private val NUM_PAGES: List<Fragment> = fragmentList
 
-    override fun getItemCount(): Int {
-        return NUM_PAGES.size
-    }
+    private val NUM_PAGES: List<Fragment> = fragmentList
 
     override fun createFragment(position: Int): Fragment {
         return when (position) {
@@ -24,5 +21,9 @@ class PagerAdapter(fragment: Fragment, fragmentList: List<Fragment>) :
 
     override fun getItemId(position: Int): Long {
         return position.toLong()
+    }
+
+    override fun getItemCount(): Int {
+        return NUM_PAGES.size
     }
 }

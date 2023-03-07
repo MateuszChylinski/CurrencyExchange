@@ -2,42 +2,44 @@ package com.example.currencyexchange.API
 
 import com.example.currencyexchange.Models.*
 import retrofit2.Call
+import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.*
 import retrofit2.http.Query
+import java.util.SortedMap
 
 interface ApiServices {
     @GET("/fixer/latest")
-    fun getRatesData(
+    suspend fun getLatestRates(
         @Query("base") base: String,
         @Query("apikey") apikey: String
-    ): Call<LatestRates>
+    ): Response<LatestRates>
 
     @GET("/fixer/convert")
-    fun convertCurrency(
+    suspend fun convertCurrency(
         @Query("from") to: String,
         @Query("to") from: String,
         @Query("amount") amount: String,
         @Query("apikey") apiKey: String
-    ): Call<ConversionModel>
+    ): Response<ConversionModel>
 
     @GET("/fixer/fluctuation")
-    fun getFluctuationData(
+    suspend fun getFluctuationData(
         @Query("start_date") startDate: String,
         @Query("end_date") endDate: String,
         @Query("base") base: String,
         @Query("symbols") symbols: String,
         @Query("apikey") apikey: String
-    ): Call<FluctuationModel>
+    ): Response<FluctuationModel>
 
     @GET("/fixer/{date}")
-    fun getHistoricalData(
+    suspend fun getHistoricalData(
         @Path("date")date: String,
         @Query("symbols") symbols: String,
         @Query("base") baseCurrency: String,
         @Query("apikey") apiKey: String
-    ): Call<HistoricalRatesModel>
+    ): Response<HistoricalRatesModel>
 
     companion object {
         private const val url = "https://api.apilayer.com/"

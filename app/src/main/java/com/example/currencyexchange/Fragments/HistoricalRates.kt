@@ -10,6 +10,7 @@ import android.view.ViewGroup
 import android.widget.*
 import androidx.core.os.bundleOf
 import androidx.fragment.app.setFragmentResult
+import androidx.fragment.app.viewModels
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -20,6 +21,7 @@ import com.example.currencyexchange.Models.CurrencyNamesModel
 import com.example.currencyexchange.R
 import com.example.currencyexchange.Repository.CurrencyDatabaseRepository
 import com.example.currencyexchange.Repository.CurrencyRetrofitRepository
+import com.example.currencyexchange.ViewModels.FragmentTagViewModel
 import com.example.currencyexchange.ViewModels.HistoricalFactory
 import com.example.currencyexchange.ViewModels.HistoricalViewModel
 import com.example.currencyexchange.databinding.FragmentHistoricalRatesBinding
@@ -65,14 +67,14 @@ class HistoricalRates : Fragment() {
             HistoricalFactory(CurrencyRetrofitRepository(mApiInstance), mDatabaseInstance!!)
         ).get(HistoricalViewModel::class.java)
 
-        mViewModel.mBaseCurrency.observe(
-            requireActivity()){
-                mBaseCurrency = it
-            }
-        mViewModel.currencyList.observe(requireActivity()){
-            mCurrencyList.addAll(it)
-            mAlLCurrencies.addAll(it)
-        }
+//        mViewModel.mBaseCurrency.observe(
+//            requireActivity()){
+//                mBaseCurrency = it
+//            }
+//        mViewModel.currencyList.observe(requireActivity()){
+//            mCurrencyList.addAll(it)
+//            mAlLCurrencies.addAll(it)
+//        }
         mViewModel.historicalData.observe(requireActivity()) {
             mHistoricalAdapter = HistoricalAdapter()
             mHistoricalAdapter?.setData(((it?.rates ?: mutableMapOf()) as HashMap<String, Double>))
@@ -82,7 +84,7 @@ class HistoricalRates : Fragment() {
 
         mBinding.historicalRefreshContainer.setOnRefreshListener {
             mIsRefreshed = true
-            mBaseCurrency = mViewModel.getBaseCurrency()
+//            mBaseCurrency = mViewModel.getBaseCurrency()
             mViewModel.clearApiResponse()
 
             setDefaultVisibility()
@@ -99,8 +101,9 @@ class HistoricalRates : Fragment() {
         mBinding.historicalDt.maxDate = Calendar.getInstance().timeInMillis
 
         mBinding.historicalChangeBaseIcon.setOnClickListener {
-            setFragmentResult("request_key", bundleOf("fragment_name" to TAG))
-            findNavController().navigate(R.id.action_from_base_to_change)
+            val mFragmentTagViewModel: FragmentTagViewModel by viewModels(
+                ownerProducer = {requireParentFragment()})
+            mFragmentTagViewModel.setMoveFlag(true)
         }
         setDefaultVisibility()
     }

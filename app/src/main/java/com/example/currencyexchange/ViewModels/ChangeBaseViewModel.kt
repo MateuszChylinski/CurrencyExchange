@@ -1,28 +1,49 @@
 package com.example.currencyexchange.ViewModels
 
+import android.content.ContentValues.TAG
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.asLiveData
 import androidx.lifecycle.viewModelScope
-import com.example.currencyexchange.Models.BaseCurrencyModel
+import com.example.currencyexchange.API.DatabaseState
 import com.example.currencyexchange.Repository.CurrencyDatabaseRepository
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.launch
 
 class ChangeBaseViewModel constructor(
-    private val currencyDatabaseRepository: CurrencyDatabaseRepository
+    private val databaseRepository: CurrencyDatabaseRepository
 ) : ViewModel() {
 
-    val baseCurrency = currencyDatabaseRepository.baseCurrency.asLiveData()
-    val currencyList = currencyDatabaseRepository.allCurrencies.asLiveData()
+    /** Setup states for base currency*/
+    private val _baseCurrencyState: MutableSharedFlow<DatabaseState> = MutableSharedFlow(replay = 1)
+    val baseCurrency: SharedFlow<DatabaseState> get() = _baseCurrencyState
 
-    fun updateBaseCurrency(selectedCurrency: String) {
+    /** Setup states for all currencies*/
+    private val _allCurrencies: MutableSharedFlow<DatabaseState> = MutableSharedFlow(replay = 1)
+    val currencies: SharedFlow<DatabaseState> = _allCurrencies
+
+    fun getBaseCurrency() {
         viewModelScope.launch {
-            val newBase = currencyDatabaseRepository.updateBaseCurrency(
-                BaseCurrencyModel(
-                    1,
-                    selectedCurrency
-                )
-            )
+            databaseRepository.baseCurrency
+                .catch { _baseCurrencyState.emit(DatabaseState.Error(it.cause)) }
+                .collect { currency ->
+                    _baseCurrencyState.emit(DatabaseState.Success(currency.baseCurr))
+                }
+        }
+    }
+
+    fun getAllCurrencies() {
+        viewModelScope.launch {
+            databaseRepository.allCurrencies
+                .catch { _allCurrencies.emit(DatabaseState.Error(it.cause)) }
+                .collect { currencies ->
+                    Log.i(TAG, "getBaseCurrency: "+currencies::class.java.typeName)
+                    Log.i(TAG, "getAllCurrencies: $currencies")
+                    _allCurrencies.emit(DatabaseState.Success(currencies.map { it.currency}))
+                }
+            Log.i(TAG, "getAllCurrencies: $currencies")
         }
     }
 }

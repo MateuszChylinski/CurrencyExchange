@@ -9,5 +9,5 @@ import kotlinx.coroutines.SupervisorJob
 class CurrencyApplication : Application() {
     val coroutine = CoroutineScope(SupervisorJob())
     val database by lazy {CurrencyDatabase.getDatabase(this, coroutine)}
-    val repository by lazy {CurrencyDatabaseRepository(database.getDAO())}
+    val repository by lazy {CurrencyDatabaseRepository(database.getDAO(), coroutine)}
 }

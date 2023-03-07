@@ -7,29 +7,30 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
-import androidx.lifecycle.Observer
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
-import androidx.navigation.fragment.navArgs
+import com.example.currencyexchange.API.DatabaseState
 import com.example.currencyexchange.Application.CurrencyApplication
 import com.example.currencyexchange.Models.CurrencyNamesModel
+import com.example.currencyexchange.R
 import com.example.currencyexchange.Repository.CurrencyDatabaseRepository
 import com.example.currencyexchange.ViewModels.ChangeBaseFactory
 import com.example.currencyexchange.ViewModels.ChangeBaseViewModel
 import com.example.currencyexchange.databinding.FragmentChangeBaseCurrencyBinding
+import kotlinx.coroutines.launch
 
 class ChangeBaseCurrency : Fragment() {
+
     //  TAG
     private var TAG = "ChangeBaseCurrency"
-    private val mArgs: ChangeBaseCurrencyArgs by navArgs()
 
     //  Variables
-    private var mFragmentName: String = "default"
     private var mBaseCurrency: String = "default"
-    private var mCurrencyNames: MutableList<CurrencyNamesModel> = mutableListOf()
     private var mAllCurrencies: MutableList<CurrencyNamesModel> = mutableListOf()
     private var mIsInit = false
-
 
     //  View binding
     private var _binding: FragmentChangeBaseCurrencyBinding? = null
@@ -37,7 +38,6 @@ class ChangeBaseCurrency : Fragment() {
 
     //  Instance
     private var mDatabaseInstance: CurrencyDatabaseRepository? = null
-
     private lateinit var mViewModel: ChangeBaseViewModel
 
     override fun onCreateView(
@@ -46,8 +46,6 @@ class ChangeBaseCurrency : Fragment() {
     ): View {
         _binding = FragmentChangeBaseCurrencyBinding.inflate(inflater, container, false)
         val view = mBinding.root
-        mFragmentName = mArgs.fragmentName
-
 
         mDatabaseInstance = (activity?.application as CurrencyApplication).repository
         mViewModel = ViewModelProvider(
@@ -55,16 +53,38 @@ class ChangeBaseCurrency : Fragment() {
             ChangeBaseFactory(mDatabaseInstance!!)
         ).get(ChangeBaseViewModel::class.java)
 
-        mViewModel.baseCurrency.observe(requireActivity(), Observer {
-            mBaseCurrency = it
-            mBinding.changeBaseCurrentBase.text = String.format("Current base: %s", it)
+        /** Retrieve base currency from the database*/
+        viewLifecycleOwner.lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                mViewModel.getBaseCurrency()
+                mViewModel.baseCurrency.collect { baseCurrency ->
+                    when (baseCurrency) {
+                        is DatabaseState.Success<*> -> {
+                            mBinding.changeBaseCurrentBase.text = String.format(getString(R.string.formatted_current_base), baseCurrency.data)
+                        }
+                        is DatabaseState.Error<*> -> {
+                            Log.i(TAG, "onCreateView: ERROR $baseCurrency")}
+                    }
+                }
+            }
+        }
 
-        })
-        mViewModel.currencyList.observe(requireActivity(), Observer {
-            mCurrencyNames.addAll(it)
-            mAllCurrencies.addAll(it)
-            deleteBaseFromList(mCurrencyNames)
-        })
+        /**Retrieve list of all available currencies from the database*/
+        viewLifecycleOwner.lifecycleScope.launch{
+            repeatOnLifecycle(Lifecycle.State.STARTED){
+                mViewModel.getAllCurrencies()
+                mViewModel.currencies.collect{ currenciesObj ->
+                    when (currenciesObj){
+                        is DatabaseState.Success<*> -> {
+
+                        }
+                        is DatabaseState.Error<*> -> {
+                            Toast.makeText(requireContext(), "Failed to retrieve currencies", Toast.LENGTH_SHORT).show()
+                        }
+                    }
+                }
+            }
+        }
         return view
     }
 
@@ -99,13 +119,13 @@ class ChangeBaseCurrency : Fragment() {
                     if (isTouched) {
                         isTouched = false
                         mBaseCurrency = list[position].toString()
-                        mViewModel.updateBaseCurrency(mBaseCurrency)
-
+//                        mViewModel.updateBaseCurrency(mBaseCurrency)
                         moveToPreviousFragment()
                     } else {
                         isTouched = true
                     }
                 }
+
                 override fun onNothingSelected(parent: AdapterView<*>?) {
                     Log.i(TAG, "onNothingSelected: NOTHING SELECTED!")
                 }
@@ -113,6 +133,8 @@ class ChangeBaseCurrency : Fragment() {
     }
 
     private fun moveToPreviousFragment() {
-        findNavController().popBackStack()
+        val navCon = findNavController()
+        navCon.previousBackStackEntry?.savedStateHandle?.set("key_flag", true)
+        navCon.popBackStack()
     }
 }

@@ -1,19 +1,30 @@
 package com.example.currencyexchange.Fragments
 
+import android.content.ContentValues.TAG
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
+import androidx.lifecycle.Observer
+import androidx.lifecycle.lifecycleScope
+import androidx.navigation.fragment.findNavController
 import com.example.currencyexchange.Adapters.PagerAdapter
+import com.example.currencyexchange.ViewModels.FragmentTagViewModel
 import com.example.currencyexchange.databinding.FragmentPagerBaseBinding
-
+import kotlinx.coroutines.launch
+// TODO - Latest G // Conversion G //
+// TODO - can't select first currency from spinner (AED)
 
 class PagerBase : Fragment() {
     private var _binding: FragmentPagerBaseBinding? = null
     private val mBinding get() = _binding!!
     private lateinit var pagerAdapter: PagerAdapter
-    private val fragmentsList = listOf(Latest(), Conversion(), Fluctuation(), HistoricalRates())
+    private val mFragmentsList =
+        arrayListOf(Latest(), Conversion(), Fluctuation(), HistoricalRates())
+    val mViewModel: FragmentTagViewModel by viewModels()
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -23,46 +34,18 @@ class PagerBase : Fragment() {
         _binding = FragmentPagerBaseBinding.inflate(inflater, container, false)
         val view = mBinding.root
 
-
-        pagerAdapter = PagerAdapter(this, fragmentsList)
-        mBinding.pbViewpager.let {
-            it.adapter = pagerAdapter
+        pagerAdapter = PagerAdapter(this, mFragmentsList)
+        mBinding.pbViewpager.adapter = pagerAdapter
+        lifecycleScope.launch {
+            mViewModel.mIsMoved.observe(viewLifecycleOwner, Observer {
+                if (it) {
+                    val nav = findNavController()
+                    nav.navigate(PagerBaseDirections.actionFromBaseToChange())
+                    mViewModel.setMoveFlag(false)
+                }
+            })
         }
-        return view
-    }
 
-    /**
-    Find out which fragment called this fun, and navigate to change base fragment.
-    Set the argument as a name of fragment that this fun was called from
-     */
-    fun navigateToChangeBase(fragmentName: String) {
-//        when (fragmentName) {
-//            "Latest" -> {
-//                val provideLatest =
-//                    PagerBaseDirections.actionFromBaseToChange().setFragmentName(fragmentName)
-//                NavHostFragment.findNavController(this).navigate(provideLatest)
-//                Log.i(TAG, "navigateToChangeBase: FROM LATEST")
-//            }
-//            "Fluctuation" -> {
-//                val provideFluctuation =
-//                    PagerBaseDirections.actionFromBaseToChange().setFragmentName(fragmentName)
-//                NavHostFragment.findNavController(this).navigate(provideFluctuation)
-//                Log.i(TAG, "navigateToChangeBase: FROM FLUCTUATION")
-//
-//            }
-//            "Conversion" -> {
-//                val provideConversion =
-//                    PagerBaseDirections.actionFromBaseToChange().setFragmentName(fragmentName)
-//                NavHostFragment.findNavController(this).navigate(provideConversion)
-//                Log.i(TAG, "navigateToChangeBase: FROM CONVERSION")
-//
-//            }
-//            "HistoricalRates" -> {
-//                val provideHistoricalRates =
-//                    PagerBaseDirections.actionFromBaseToChange().setFragmentName(fragmentName)
-//                NavHostFragment.findNavController(this).navigate(provideHistoricalRates)
-//                Log.i(TAG, "navigateToChangeBase: FROM HISTORICAL")
-//            }
-//        }
+        return view
     }
 }

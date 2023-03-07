@@ -9,13 +9,11 @@ import android.view.ViewGroup
 import android.widget.*
 import android.widget.AdapterView.OnItemClickListener
 import android.widget.AdapterView.OnItemSelectedListener
-import androidx.core.os.bundleOf
 import androidx.core.view.size
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.setFragmentResult
+import androidx.fragment.app.viewModels
 import androidx.lifecycle.*
 import androidx.lifecycle.Observer
-import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.currencyexchange.API.ApiServices
 import com.example.currencyexchange.Adapters.FluctuationAdapter
@@ -31,23 +29,20 @@ import java.util.*
 
 class Fluctuation : Fragment() {
     private val TAG = "Fluctuation"
+
     private val mYearInMs = 31556926000
     private val mDayInMs = 86400000
-
-    // VARIABLES
-    private var mFluctuationAdapter: FluctuationAdapter? = null
-
-    private var mBaseCurrency: String = "default"
-
-    private var mIsSpinnerInit = false
-    private var mIsLayoutRefreshed: Boolean = false
-
-    private var mAllCurrencies: MutableList<CurrencyNamesModel> = arrayListOf()
-    private var mCurrencyList: MutableList<CurrencyNamesModel> = arrayListOf()
 
     @SuppressLint("SimpleDateFormat")
     private val mSdf = SimpleDateFormat("yyyy-MM-dd")
     private val mCalendar = Calendar.getInstance()
+    private var mFluctuationAdapter: FluctuationAdapter? = null
+
+
+    // Variables
+    private var mBaseCurrency: String = "default"
+    private var mIsChanged: Boolean = false
+    private var mAllCurrencies: MutableList<CurrencyNamesModel> = arrayListOf()
 
     //  ViewModel
     private val mApiInstance = ApiServices.getInstance()
@@ -69,40 +64,45 @@ class Fluctuation : Fragment() {
         mViewModel = ViewModelProvider(
             this,
             FluctuationFactory(CurrencyRetrofitRepository(mApiInstance), mDatabaseInstance!!)
-        ).get(FluctuationViewModel::class.java)
+        )[FluctuationViewModel::class.java]
 
-        mViewModel.baseCurrency.observe(
-            requireActivity(),
-            androidx.lifecycle.Observer { mBaseCurrency = it })
-        mViewModel.allCurrencies.observe(requireActivity(), androidx.lifecycle.Observer {
-            mAllCurrencies.addAll(it)
-            mCurrencyList.addAll(it)
-        })
-        mViewModel.data.observe(requireActivity(), Observer {
-            mFluctuationAdapter = FluctuationAdapter()
-
-            mFluctuationAdapter?.setData(it ?: mapOf())
-            mBinding.fluctuationRv.layoutManager = LinearLayoutManager(this.requireContext())
-            mBinding.fluctuationRv.adapter = mFluctuationAdapter
-        })
-
-//      Refresh fragment
-        mBinding.fluctuationRefreshContainer.setOnRefreshListener {
-            mIsLayoutRefreshed = true
-            mViewModel.clearResponseData()
-            mBaseCurrency = mViewModel.getBaseCurrency()
-
-            defaultViewsSetup()
-            mBinding.fluctuationRefreshContainer.isRefreshing = false
-        }
+//        /** Observe base currency from the database.    */
+//        mViewModel.baseCurrency.observe(
+//            requireActivity(),
+//            androidx.lifecycle.Observer { mBaseCurrency = it })
+//
+//        /** Observe all of the available currencies, and add them to the list.*/
+//        mViewModel.allCurrencies.observe(requireActivity(), androidx.lifecycle.Observer {
+//            if (mAllCurrencies.isEmpty()) {
+//                mAllCurrencies.addAll(it)
+//            }
+//
+//        })
+//        /** Observe response from the server.   */
+//        mViewModel.data.observe(requireActivity(), Observer {
+//            mFluctuationAdapter = FluctuationAdapter()
+//            mFluctuationAdapter?.setData(it ?: mapOf())
+//
+//            mBinding.fluctuationRv.layoutManager = LinearLayoutManager(this.requireContext())
+//            mBinding.fluctuationRv.adapter = mFluctuationAdapter
+//        })
+//
+//        /** Reload UI to 'default' state (as it was while entering the layout for the first time) */
+//        mBinding.fluctuationRefreshContainer.setOnRefreshListener {
+//            mIsChanged = true
+//            mBaseCurrency = mViewModel.getBaseCurrency()
+//            defaultViewsSetup()
+//
+//            mBinding.fluctuationRefreshContainer.isRefreshing = false
+//        }
         return view
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         /**
-         * Setup date picker where user can set from where he want to display fluctuation from.
-         * Since the API allow to see fluctuation back to 365 days, the minimum date is set to display max a year before actual date
+         * Setup date picker where user can choose since when he would like to display fluctuation from
+         * Since the API allow to see fluctuation back to 365 days, the minimum date to pick is set to be year ago from current date
          */
         mBinding.fluctuationFromDt.minDate = Calendar.getInstance().timeInMillis - mYearInMs
         mBinding.fluctuationFromDt.maxDate = Calendar.getInstance().timeInMillis
@@ -113,17 +113,21 @@ class Fluctuation : Fragment() {
         }
         mBinding.fluctuationSetToOk.setOnClickListener {
             getDateFromUser(2)
-            setupViewsForListView()
+            prepareViewsForListView()
         }
+        /** Prepare a flag, which can trigger the Navigation Components in the PagerBase fragment (which is ViewHolder host)
+         * to move user to the ChangeBaseCurrency fragment, where user can set new base currency (permanently, in database) */
         mBinding.fluctuationChangeBaseCurrency.setOnClickListener {
-            setFragmentResult("request_key", bundleOf("fragment_name" to TAG))
-            findNavController().navigate(R.id.action_from_base_to_change)
+            val mFragmentTagViewModel: FragmentTagViewModel by viewModels(
+                ownerProducer = { requireParentFragment() })
+            mFragmentTagViewModel.setMoveFlag(true)
         }
     }
 
     /** When user will refresh layout, by using the SwiperRefreshLayout, this function will be called.
-     *  It'll reset the UI to the "default" state. As it was when user entered the fragment for the first time*/
+     *  It'll reset the UI to the "default" state. As it was when user entered the fragment for the first time  */
     private fun defaultViewsSetup() {
+
         mBinding.fluctuationBaseCurrencyTv.visibility = View.INVISIBLE
         mBinding.fluctuationRv.visibility = View.INVISIBLE
         mBinding.fluctuationBaseInRv.visibility = View.INVISIBLE
@@ -135,33 +139,37 @@ class Fluctuation : Fragment() {
         mBinding.fluctuationSelectSymbolsTv.visibility = View.INVISIBLE
         mBinding.fluctuationSaveSymbols.visibility = View.INVISIBLE
 
-        //Uncheck previously checked by user currencies.
+        /** Uncheck previously checked by user currencies    .*/
         for (i in 0 until mBinding.fluctuationSelectSymbolsLv.size) {
             if (mBinding.fluctuationSelectSymbolsLv.isItemChecked(i)) {
                 mBinding.fluctuationSelectSymbolsLv.setItemChecked(i, false)
             }
         }
-
         mBinding.fluctuationFromCenterTv.visibility = View.VISIBLE
         mBinding.fluctuationFromDt.visibility = View.VISIBLE
         mBinding.fluctuationSetFromOk.visibility = View.VISIBLE
+
+        /** Clear from/to date after reset  */
+//        mViewModel.startDate = String()
+//        mViewModel.endDate = String()
     }
 
     /** Provide data from DatePicker to the ViewModel.
      * Later on, these values can be useful for displaying picked date, and performing api call*/
     @SuppressLint("SimpleDateFormat")
     private fun getDateFromUser(selection: Int) {
-        /* Selection stands for DatePicker.
-           Since there will be two DatePickers, the first one (start date) will be marked as '1'.
-           The second (end date) will be marked as '2'   */
+
+        /** Selection is an integer, which allow to select appropriate DatePicker
+        Since there will be two DatePickers, the first one (start date) will be marked as '1'.
+        The second (end date) will be marked as '2'   */
         when (selection) {
             1 -> {
                 mCalendar.set(Calendar.YEAR, mBinding.fluctuationFromDt.year)
                 mCalendar.set(Calendar.MONTH, mBinding.fluctuationFromDt.month)
                 mCalendar.set(Calendar.DAY_OF_MONTH, mBinding.fluctuationFromDt.dayOfMonth)
-                mViewModel.startDate = mSdf.format(mCalendar.time).toString()
+//                mViewModel.startDate = mSdf.format(mCalendar.time).toString()
 
-//              After picking starting date, set "ending" date picker. As a minimum date, provide the selected earlier minimum date+1 day.
+                /** After choosing starting date, set the "ending" date, to be a year later after the "from" date. */
                 mBinding.fluctuationToDt.minDate = (mCalendar.timeInMillis + mDayInMs)
                 mBinding.fluctuationToDt.maxDate = Calendar.getInstance().timeInMillis
             }
@@ -169,7 +177,7 @@ class Fluctuation : Fragment() {
                 mCalendar.set(Calendar.YEAR, mBinding.fluctuationToDt.year)
                 mCalendar.set(Calendar.MONTH, mBinding.fluctuationToDt.month)
                 mCalendar.set(Calendar.DAY_OF_MONTH, mBinding.fluctuationToDt.dayOfMonth)
-                mViewModel.endDate = mSdf.format(mCalendar.time).toString()
+//                mViewModel.endDate = mSdf.format(mCalendar.time).toString()
             }
         }
     }
@@ -184,7 +192,7 @@ class Fluctuation : Fragment() {
         mBinding.fluctuationSetToOk.visibility = View.VISIBLE
     }
 
-    private fun setupViewsForListView() {
+    private fun prepareViewsForListView() {
         mBinding.fluctuationToCenterTv.visibility = View.INVISIBLE
         mBinding.fluctuationToDt.visibility = View.INVISIBLE
         mBinding.fluctuationSetToOk.visibility = View.INVISIBLE
@@ -200,35 +208,34 @@ class Fluctuation : Fragment() {
         mBinding.fluctuationSelectSymbolsTv.visibility = View.VISIBLE
         mBinding.fluctuationSaveSymbols.visibility = View.VISIBLE
 
-        mBinding.fluctuationFromDate.text =
-            String.format(getString(R.string.formatted_from), mViewModel.startDate)
-        mBinding.fluctuationToDate.text =
-            String.format(getString(R.string.formatted_to), mViewModel.endDate)
+//        mBinding.fluctuationFromDate.text =
+//            String.format(getString(R.string.formatted_from), mViewModel.startDate)
+//        mBinding.fluctuationToDate.text =
+//            String.format(getString(R.string.formatted_to), mViewModel.endDate)
 
+        // Make sure that the base currency has some value, before deleting it from the list.
         if (mBaseCurrency != "default") {
             deleteBaseCurrencyFromList(mAllCurrencies)
         }
     }
 
-    //  This function will delete base currency from list that will be forwarded to 'setupBaseCurrencySpinner' to populate spinner
+    /** This function will delete base currency from the list, that will be forwarded as an input later on  */
     private fun deleteBaseCurrencyFromList(list: MutableList<CurrencyNamesModel>) {
-        if (list.toString().contains(mBaseCurrency)) {
-            val index = list.indices.find {
-                list[it].toString() == mBaseCurrency
+        val currencyList = list.toMutableList()
+
+        if (currencyList.toString().contains(mBaseCurrency)) {
+            val index = currencyList.indices.find {
+                currencyList[it].toString() == mBaseCurrency
             }
-            list.removeAt(index!!)
+            currencyList.removeAt(index!!)
         }
-        if (!mIsSpinnerInit) {
-            setupBaseCurrencySpinner(list)
-            setupListView(list)
-            mIsSpinnerInit = true
-        }
+        setupBaseCurrencySpinner(currencyList)
+        setupListView(currencyList)
     }
 
     /** Setup spinner that allow user to change the base currency. It will NOT affect the database, it will be a temporary change. */
     private fun setupBaseCurrencySpinner(currencyNames: MutableList<CurrencyNamesModel>) {
         var mIsTouched = false
-
         val mSpinnerAdapter =
             ArrayAdapter(requireActivity(), android.R.layout.simple_spinner_item, currencyNames)
         mBinding.fluctuationSelectBaseCurrency.adapter = mSpinnerAdapter
@@ -242,12 +249,7 @@ class Fluctuation : Fragment() {
                                 getString(R.string.formatted_base_currency),
                                 mBaseCurrency
                             )
-
-                        currencyNames.clear()
-                        currencyNames.addAll(mCurrencyList)
-                        deleteBaseCurrencyFromList(currencyNames)
-                        setupListView(currencyNames)
-                        mSpinnerAdapter.notifyDataSetChanged()
+                        deleteBaseCurrencyFromList(mAllCurrencies)
                     } else {
                         mIsTouched = true
                     }
@@ -259,8 +261,9 @@ class Fluctuation : Fragment() {
             }
     }
 
-    /** Setup ListView, so user can pick currencies, that he would like to compare with base currency*/
+    /** Setup ListView, so user can pick currencies, that he would like to compare with base currency   */
     private fun setupListView(list: MutableList<CurrencyNamesModel>) {
+
         val symbols: MutableList<CurrencyNamesModel> = mutableListOf()
         val adapter =
             ArrayAdapter(requireActivity(), android.R.layout.simple_list_item_multiple_choice, list)
@@ -295,7 +298,7 @@ class Fluctuation : Fragment() {
 
         mBinding.fluctuationSaveSymbols.setOnClickListener {
             // Whenever layout will be refreshed, clear the symbols list, so it will not contain previously picked currencies.
-            if (mIsLayoutRefreshed) {
+            if (mIsChanged) {
                 symbols.clear()
             }
 
@@ -311,7 +314,7 @@ class Fluctuation : Fragment() {
 
     private fun getCurrencies(list: MutableList<CurrencyNamesModel>) {
         //Perform an api call by given base currency, and checked currencies from the ListView, and change views visibility, to display RecyclerView.
-        mViewModel.fetchFluctuation(mBaseCurrency, list.joinToString(separator = ", "))
+//        mViewModel.fetchFluctuation(mBaseCurrency, list.joinToString(separator = ", "))
         prepareRecyclerView()
     }
 

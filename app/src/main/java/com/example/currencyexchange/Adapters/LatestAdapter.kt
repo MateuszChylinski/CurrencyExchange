@@ -6,11 +6,11 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.currencyexchange.databinding.LatestRowBinding
 import java.util.*
 
-class LatestAdapter() : RecyclerView.Adapter<LatestAdapter.ViewHolder>() {
-    private var data = sortedMapOf<String, Double>()
+class LatestAdapter : RecyclerView.Adapter<LatestAdapter.ViewHolder>() {
+    private var ratesData = sortedMapOf<String, Double>()
 
     fun setData(data: SortedMap<String, Double>) {
-        this.data = data
+        this.ratesData = data
         notifyDataSetChanged()
     }
 
@@ -21,16 +21,16 @@ class LatestAdapter() : RecyclerView.Adapter<LatestAdapter.ViewHolder>() {
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         with(holder) {
-            binding.latestCurrencyOrigin.text = data.keys.toTypedArray()[position]
-            binding.latestCurrencyValue.text = String.format("%.2f", data.values.toTypedArray()[position])
+            binding.latestCurrencyOrigin.text = ratesData.keys.toTypedArray()[position]
+            binding.latestCurrencyValue.text =
+                String.format("%.2f", ratesData.values.toTypedArray()[position])
         }
     }
 
     override fun getItemCount(): Int {
-        return data.size
+        return ratesData.size
     }
 
     inner class ViewHolder(val binding: LatestRowBinding) :
-        RecyclerView.ViewHolder(binding.root) {
-    }
+        RecyclerView.ViewHolder(binding.root)
 }
