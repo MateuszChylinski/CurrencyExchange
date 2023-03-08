@@ -62,7 +62,6 @@ class Latest : Fragment() {
                     when (status) {
                         is ApiResult.Success<*> -> {
                             mAdapter.setData(status.data?.latestRates!!)
-                            Log.i(TAG, "onCreateView: " + status.data.latestRates.size)
                         }
                         is ApiResult.Error -> {
                             Log.w(

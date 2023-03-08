@@ -47,16 +47,17 @@ class LatestViewModel constructor(
 
     /** Launch coroutines with Dispatchers of IO
      *  Insert new currencies to the database  */
-    private fun addCurrency(currencyNames: List<CurrencyNamesModel>) {
+    private fun addCurrency(currencyNames: MutableList<CurrencyNamesModel>) {
         viewModelScope.launch(Dispatchers.IO) {
-            currencyNames.forEach { currency ->
-                databaseRepository.addCurrency(currency)
-            }
+            databaseRepository.addCurrency(currencyNames)
         }
     }
 
     /** Launch coroutines with Dispatchers of IO
-     *  Make an api call to get latest rates of specific base currency */
+     *  Make an api call to get latest rates of specific base currency
+     *  When server will return some values, execute finally block,
+     *  where the list of objects with given names of currencies are created,
+     *  invoke 'addCurrency' fun to push all of the currency names to the database. */
     fun fetchData(baseCurrency: String) {
         viewModelScope.launch {
             try {
@@ -68,11 +69,11 @@ class LatestViewModel constructor(
                     "Failed to fetch data from repository for latest rates.\n${exception.message}"
                 )
             } finally {
-                val currencyNames: MutableList<CurrencyNamesModel> = mutableListOf()
-                latestRates.value?.data?.latestRates?.keys?.forEach { currency ->
-                    currencyNames.add(CurrencyNamesModel(currency))
+                val currencyObjects: MutableList<CurrencyNamesModel> = mutableListOf()
+                latestRates.value?.data?.latestRates?.keys?.forEach { curr ->
+                    currencyObjects.add(CurrencyNamesModel(curr))
                 }
-                addCurrency(currencyNames)
+                addCurrency(currencyObjects)
             }
         }
     }
