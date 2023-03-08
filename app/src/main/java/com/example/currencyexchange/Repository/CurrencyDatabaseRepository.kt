@@ -19,7 +19,7 @@ class CurrencyDatabaseRepository constructor(val currencyDAO: CurrencyDAO, scope
         scope, replay = 1, started = SharingStarted.WhileSubscribed()
     )
 
-    suspend fun addCurrency(currencyNamesModel: CurrencyNamesModel){
+    suspend fun addCurrency(currencyNamesModel: List<CurrencyNamesModel>){
         currencyDAO.insertNewCurrency(currencyNamesModel)
     }
 }
