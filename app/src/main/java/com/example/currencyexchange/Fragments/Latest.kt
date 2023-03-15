@@ -27,11 +27,12 @@ class Latest : Fragment() {
 
     private var mLatestBinding: FragmentLatestBinding? = null
     private val mBinding get() = mLatestBinding!!
-    private val mAdapter = LatestAdapter()
-    private var mBaseCurrency: String = ""
 
     private val mRetrofitService = ApiServices.getInstance()
     private var mDatabaseServices: CurrencyDatabaseRepository? = null
+
+    private var mBaseCurrency: String = ""
+    private val mAdapter = LatestAdapter()
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -50,6 +51,33 @@ class Latest : Fragment() {
                 this,
                 LatestFactory(CurrencyRetrofitRepository(mRetrofitService), mDatabaseServices!!)
             ).get(LatestViewModel::class.java)
+
+
+        viewLifecycleOwner.lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                mViewModel.baseCurrencyState.collect { currency ->
+                    when (currency) {
+                        is DatabaseState.Success -> {
+                            mBaseCurrency = currency.data?.baseCurrency.toString()
+                            mBinding.latestBase.text = String.format(
+                                getString(R.string.formatted_base_currency),
+                                mBaseCurrency
+                            )
+                            mBinding.latestDate.text = String.format(
+                                getString(R.string.rates_from_date),
+                                currency.data?.ratesDate.toString()
+                            )
+                        }
+                        is DatabaseState.Error -> {
+                            Log.w(
+                                TAG,
+                                "onCreateView getBaseCurrency Failed to retrieve the base currency from the database:\n${currency.message}"
+                            )
+                        }
+                    }
+                }
+            }
+        }
 
         /** Launch new coroutine, and trigger ViewModel to make an api call
          *  Observe data that came as result from the api
@@ -74,37 +102,27 @@ class Latest : Fragment() {
             }
         }
 
-        /** Launch new coroutine, and trigger ViewModel to retrieve base currency from the database
-         *  Observe base currency
-         *  If ViewModel successfully retrieved base currency, set 'mBaseCurrency' with base currency from database. Set 'latestBase' text to display base currency
-         *  If in ViewModel occur some error, display it in log*/
-        viewLifecycleOwner.lifecycleScope.launch {
-            repeatOnLifecycle(Lifecycle.State.STARTED) {
-                mViewModel.getBaseCurrency()
-                mViewModel.baseCurrency.collect { currency ->
-                    when (currency) {
-                        is DatabaseState.Success<*> -> {
-                            mBaseCurrency = currency.data.toString()
-                            mBinding.latestBase.text = String.format(
-                                getString(
-                                    R.string.formatted_base_currency,
-                                    mBaseCurrency
-                                )
-                            )
-                        }
-                        is DatabaseState.Error<*> -> {
-                            Log.w(
-                                TAG,
-                                "Failed to retrieve the base currency from the database:\n${currency.error}"
-                            )
-                        }
-                    }
-                }
-            }
-        }
+//        /** Will be used when there's no internet connection    */
+//        viewLifecycleOwner.lifecycleScope.launch {
+//            repeatOnLifecycle(Lifecycle.State.STARTED) {
+//                mViewModel.currenciesDataState.collect { currencyData ->
+//                    when (currencyData) {
+//                        is DatabaseState.Success -> {
+//                            Log.i(TAG, "onCreateView: "+currencyData.data?.currencyData?.entries)
+//                        }
+//                        is DatabaseState.Error -> {
+//                            Log.e(
+//                                TAG,
+//                                "onCreateView: Failed to get currency data\n${currencyData.message}",
+//                            )
+//                        }
+//                    }
+//                }
+//            }
+//        }
 
         /** By clicking on a icon, inside of the toolbar, set a move flag to the 'ChangeBaseCurrency' fragment
-         *  where user can select new base currency which will be saved in database*/
+         *  where user can select new base currency which will be saved in database */
         mBinding.latestChangeBase.setOnClickListener {
             val testVM: FragmentTagViewModel by viewModels(
                 ownerProducer = { requireParentFragment() })
