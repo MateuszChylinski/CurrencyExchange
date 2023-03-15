@@ -6,11 +6,11 @@ import androidx.lifecycle.*
 import com.example.currencyexchange.API.ApiResult
 import com.example.currencyexchange.API.DatabaseState
 import com.example.currencyexchange.BuildConfig
-import com.example.currencyexchange.Models.CurrencyNamesModel
+import com.example.currencyexchange.Models.CurrenciesDatabaseDetailed
+import com.example.currencyexchange.Models.CurrenciesDatabaseMain
 import com.example.currencyexchange.Models.LatestRates
 import com.example.currencyexchange.Repository.CurrencyDatabaseRepository
 import com.example.currencyexchange.Repository.CurrencyRetrofitRepository
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import java.io.IOException
@@ -21,59 +21,51 @@ class LatestViewModel constructor(
     private val databaseRepository: CurrencyDatabaseRepository
 ) : ViewModel() {
 
-    /** Setup states for base currency*/
-    private val _baseCurrencyState: MutableSharedFlow<DatabaseState> = MutableSharedFlow(replay = 1)
-    val baseCurrency: SharedFlow<DatabaseState> get() = _baseCurrencyState
+    val baseCurrencyState: SharedFlow<DatabaseState<CurrenciesDatabaseMain>> =
+        databaseRepository.baseCurrency
+            .catch {
+                DatabaseState.Error(it.message)
+            }
+            .map {
+                DatabaseState.Success(it)
+            }
+            .shareIn(viewModelScope, SharingStarted.WhileSubscribed(), replay = 1)
 
-    /** Setup states for all currencies*/
-    private val _allCurrencies: MutableSharedFlow<DatabaseState> = MutableSharedFlow(replay = 1)
-    val currencies: SharedFlow<DatabaseState> get() = _allCurrencies
+    val currenciesDataState: SharedFlow<DatabaseState<CurrenciesDatabaseDetailed>> =
+        databaseRepository.currencyData
+            .catch { DatabaseState.Error(it.message) }
+            .map { DatabaseState.Success(it) }
+            .shareIn(viewModelScope, SharingStarted.WhileSubscribed(), replay = 1)
+
 
     private val _latestRateStatus = MutableLiveData<ApiResult<LatestRates>>()
     val latestRates: LiveData<ApiResult<LatestRates>> get() = _latestRateStatus
 
 
-    /** Launch coroutines with Dispatchers of IO
-     *  Retrieve base currency from the database*/
-    fun getBaseCurrency() {
-        viewModelScope.launch(Dispatchers.IO) {
-            databaseRepository.baseCurrency
-                .catch { _baseCurrencyState.emit(DatabaseState.Error(it.cause)) }
-                .collect { currency ->
-                    _baseCurrencyState.emit(DatabaseState.Success(currency.baseCurr))
-                }
-        }
-    }
-
-    /** Launch coroutines with Dispatchers of IO
-     *  Insert new currencies to the database  */
-    private fun addCurrency(currencyNames: MutableList<CurrencyNamesModel>) {
-        viewModelScope.launch(Dispatchers.IO) {
-            databaseRepository.addCurrency(currencyNames)
-        }
-    }
-
-    /** Launch coroutines with Dispatchers of IO
-     *  Make an api call to get latest rates of specific base currency
-     *  When server will return some values, execute finally block,
-     *  where the list of objects with given names of currencies are created,
-     *  invoke 'addCurrency' fun to push all of the currency names to the database. */
+    /** Launch coroutines and perform an api call
+     * In case the call will be successfully, assign the response data to LiveData
+     * In case the call will fail, display exception
+     * Finally, insert/update map with currencies, and their rates in database, and update date, to let user know, from when the rates are  */
     fun fetchData(baseCurrency: String) {
         viewModelScope.launch {
             try {
                 val response = apiRepository.getLatestRates(baseCurrency, BuildConfig.API_KEY)
                 _latestRateStatus.value = response
+
             } catch (exception: IOException) {
-                Log.i(
+                Log.e(
                     TAG,
                     "Failed to fetch data from repository for latest rates.\n${exception.message}"
                 )
             } finally {
-                val currencyObjects: MutableList<CurrencyNamesModel> = mutableListOf()
-                latestRates.value?.data?.latestRates?.keys?.forEach { curr ->
-                    currencyObjects.add(CurrencyNamesModel(curr))
-                }
-                addCurrency(currencyObjects)
+                //Insert map with currencies, and their rates into database
+                databaseRepository.insertCurrencyData(
+                    CurrenciesDatabaseDetailed(0, latestRates.value?.data?.latestRates!!)
+                )
+                /** Update date of rates.
+                In case there will be no internet connection, program will display rates from the last time,
+                when program successfully retrieved data from the server */
+                databaseRepository.updateRatesDate(latestRates.value?.data?.date)
             }
         }
     }

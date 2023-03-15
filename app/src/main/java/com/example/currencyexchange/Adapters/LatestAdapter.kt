@@ -4,12 +4,11 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.example.currencyexchange.databinding.LatestRowBinding
-import java.util.*
 
 class LatestAdapter : RecyclerView.Adapter<LatestAdapter.ViewHolder>() {
-    private var ratesData = sortedMapOf<String, Double>()
+    private var ratesData = mapOf<String, Double>()
 
-    fun setData(data: SortedMap<String, Double>) {
+    fun setData(data: Map<String, Double>) {
         this.ratesData = data
         notifyDataSetChanged()
     }
