@@ -1,25 +1,34 @@
 package com.example.currencyexchange.Repository
 
 import com.example.currencyexchange.DAO.CurrencyDAO
-import com.example.currencyexchange.Models.BaseCurrencyModel
-import com.example.currencyexchange.Models.CurrencyNamesModel
+import com.example.currencyexchange.Models.CurrenciesDatabaseDetailed
+import com.example.currencyexchange.Models.CurrenciesDatabaseMain
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.shareIn
 
-class CurrencyDatabaseRepository constructor(val currencyDAO: CurrencyDAO, scope: CoroutineScope) {
+class CurrencyDatabaseRepository constructor(
+    private val currencyDAO: CurrencyDAO,
+    scope: CoroutineScope
+) {
 
-    val baseCurrency: Flow<BaseCurrencyModel> =
-        currencyDAO.getBaseCurrency().shareIn(
-           scope, replay = 1, started = SharingStarted.WhileSubscribed())
-
-    val allCurrencies: Flow<List<CurrencyNamesModel>> =
-        currencyDAO.getCurrencies().shareIn(
-        scope, replay = 1, started = SharingStarted.WhileSubscribed()
-    )
-
-    suspend fun addCurrency(currencyNamesModel: List<CurrencyNamesModel>){
-        currencyDAO.insertNewCurrency(currencyNamesModel)
+    /** Insert map with currency names, and their rates */
+    suspend fun insertCurrencyData(currenciesDatabaseDetailed: CurrenciesDatabaseDetailed) {
+        currencyDAO.insertCurrencyData(currenciesDatabaseDetailed)
     }
+
+
+    /** Get base currency   */
+    val baseCurrency: Flow<CurrenciesDatabaseMain> = currencyDAO.getBaseCurrency()
+
+    /** Get data about currencies (names, and their rates) to make operations on them, when there's no internet connection available    */
+    val currencyData: Flow<CurrenciesDatabaseDetailed> = currencyDAO.getCurrencyData()
+
+
+    /** Update currency rates, to let user know, from when they are  */
+    suspend fun updateRatesDate(date: String?) {
+        currencyDAO.updateRatesDate(date) }
+
+    /** Update base currency    */
+    suspend fun updateBaseCurrency(currency: String?) {
+        currencyDAO.updateBaseCurrency(currency) }
 }

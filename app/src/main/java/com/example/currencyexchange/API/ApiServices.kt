@@ -1,13 +1,11 @@
 package com.example.currencyexchange.API
 
 import com.example.currencyexchange.Models.*
-import retrofit2.Call
 import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.*
 import retrofit2.http.Query
-import java.util.SortedMap
 
 interface ApiServices {
     @GET("/fixer/latest")
