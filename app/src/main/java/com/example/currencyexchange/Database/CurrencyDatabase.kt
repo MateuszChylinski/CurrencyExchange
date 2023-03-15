@@ -1,5 +1,6 @@
 package com.example.currencyexchange.Database
 
+import android.annotation.SuppressLint
 import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
@@ -12,7 +13,8 @@ import com.example.currencyexchange.Models.CurrenciesDatabaseDetailed
 import com.example.currencyexchange.Models.CurrenciesDatabaseMain
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
-import java.util.Calendar
+import java.text.SimpleDateFormat
+import java.util.*
 
 @Database(
     entities = [CurrenciesDatabaseMain::class, CurrenciesDatabaseDetailed::class],
@@ -28,7 +30,7 @@ abstract class CurrencyDatabase : RoomDatabase() {
         @Volatile
         private var INSTANCE: CurrencyDatabase? = null
         private val DB_NAME = "currency_database"
-        tr
+
         fun getDatabase(
             context: Context,
             coroutineScope: CoroutineScope
@@ -58,8 +60,9 @@ abstract class CurrencyDatabase : RoomDatabase() {
                 }
             }
         }
+        @SuppressLint("SimpleDateFormat") // Since the date in api is already specified, there is no need to use 'locales'
         suspend fun insertDefaultCurrency(currencyDAO: CurrencyDAO){
-            val defaultCurrency = CurrenciesDatabaseMain(0, "EUR", Calendar.getInstance().timeInMillis)
+            val defaultCurrency = CurrenciesDatabaseMain(0, "EUR", SimpleDateFormat("yyyy-MM-dd").format(Calendar.getInstance().time))
             currencyDAO.insertDefaultCurrency(defaultCurrency)
         }
     }

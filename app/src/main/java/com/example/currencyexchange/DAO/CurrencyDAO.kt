@@ -1,8 +1,8 @@
 package com.example.currencyexchange.DAO
 
 import androidx.room.*
-import com.example.currencyexchange.Models.BaseCurrencyModel
-import com.example.currencyexchange.Models.CurrencyNamesModel
+import com.example.currencyexchange.Models.CurrenciesDatabaseDetailed
+import com.example.currencyexchange.Models.CurrenciesDatabaseMain
 import kotlinx.coroutines.flow.Flow
 
 @Dao
@@ -10,21 +10,25 @@ interface CurrencyDAO {
 
     /**  Insert base curr whenever database is created. Default currency is set to EUR  */
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertDefaultCurrency(databaseModel: BaseCurrencyModel)
+    suspend fun insertDefaultCurrency(databaseModel: CurrenciesDatabaseMain)
 
-    /** Insert new currency to the database. In case, where currency already exists in database, just ignore it */
-    @Insert(onConflict = OnConflictStrategy.IGNORE)
-    suspend fun insertNewCurrency(databaseModel: List<CurrencyNamesModel>)
+    /** Insert map with currency names, and their rates into database   */
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertCurrencyData(detailed: CurrenciesDatabaseDetailed)
+
+    /** Update currency rates, to let user know, from when they are */
+    @Query("UPDATE currency_main SET rates_date = :date WHERE id = 1")
+    suspend fun updateRatesDate(date: String?)
+
+    /** Get id, base currency, and date of rates from database  */
+    @Query("SELECT * FROM currency_main")
+    fun getBaseCurrency(): Flow<CurrenciesDatabaseMain>
+
+    /** Get data about currencies (names, and their rates) to make operations on them, when there's no internet connection available    */
+    @Query("SELECT * FROM currency_detailed")
+    fun getCurrencyData(): Flow<CurrenciesDatabaseDetailed>
 
     /** Update base currency */
-    @Update
-    suspend fun updateBaseCurrency(baseCurrencyModel: BaseCurrencyModel)
-
-    /** Get list with all of the available currencies from the database */
-    @Query("SELECT currency_name FROM currency_names ORDER BY currency_name ASC ")
-    fun getCurrencies(): Flow<List<CurrencyNamesModel>>
-
-    /** Get base currency from the database*/
-    @Query("SELECT * from base_currency")
-    fun getBaseCurrency(): Flow<BaseCurrencyModel>
+    @Query("UPDATE currency_main SET base_currency = :currency WHERE id = 1")
+    suspend fun updateBaseCurrency(currency: String?)
 }
