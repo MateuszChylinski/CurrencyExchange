@@ -14,7 +14,6 @@ import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import com.example.currencyexchange.API.DatabaseState
 import com.example.currencyexchange.Application.CurrencyApplication
-import com.example.currencyexchange.Models.CurrencyNamesModel
 import com.example.currencyexchange.R
 import com.example.currencyexchange.Repository.CurrencyDatabaseRepository
 import com.example.currencyexchange.ViewModels.ChangeBaseFactory
@@ -23,13 +22,11 @@ import com.example.currencyexchange.databinding.FragmentChangeBaseCurrencyBindin
 import kotlinx.coroutines.launch
 
 class ChangeBaseCurrency : Fragment() {
-
     //  TAG
     private var TAG = "ChangeBaseCurrency"
 
     //  Variables
-    private var mBaseCurrency: String = "default"
-    private var mAllCurrencies: MutableList<CurrencyNamesModel> = mutableListOf()
+    private var mBaseCurrency: String = ""
     private var mIsInit = false
 
     //  View binding
@@ -53,33 +50,47 @@ class ChangeBaseCurrency : Fragment() {
             ChangeBaseFactory(mDatabaseInstance!!)
         ).get(ChangeBaseViewModel::class.java)
 
-        /** Retrieve base currency from the database*/
+        /** Retrieve base currency from the database    */
         viewLifecycleOwner.lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
-                mViewModel.getBaseCurrency()
-                mViewModel.baseCurrency.collect { baseCurrency ->
-                    when (baseCurrency) {
+                mViewModel.baseCurrencyState.collect { currency ->
+                    when (currency) {
                         is DatabaseState.Success<*> -> {
-                            mBinding.changeBaseCurrentBase.text = String.format(getString(R.string.formatted_current_base), baseCurrency.data)
+                            mBaseCurrency = currency.data?.baseCurrency.toString()
+                            mBinding.changeBaseCurrentBase.text = String.format(
+                                getString(R.string.formatted_current_base),
+                                mBaseCurrency
+                            )
                         }
                         is DatabaseState.Error<*> -> {
-                            Log.i(TAG, "onCreateView: ERROR $baseCurrency")}
+                            Log.w(
+                                TAG,
+                                "ChangeBaseCurrency: failed to retrieve base currency from the database: ${currency.message}"
+                            )
+                        }
                     }
                 }
             }
         }
 
-        /**Retrieve list of all available currencies from the database*/
-        viewLifecycleOwner.lifecycleScope.launch{
-            repeatOnLifecycle(Lifecycle.State.STARTED){
-                mViewModel.getAllCurrencies()
-                mViewModel.currencies.collect{ currenciesObj ->
-                    when (currenciesObj){
-                        is DatabaseState.Success<*> -> {
-
+        /** Retrieve list of all available currencies from the database */
+        viewLifecycleOwner.lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                mViewModel.currencyNames.collect { currency ->
+                    when (currency) {
+                        is DatabaseState.Success -> {
+                            val currencyList: MutableList<String> = mutableListOf()
+                            currency.data?.currencyData?.keys?.map {
+                                currencyList.add(it)
+                            }
+                            deleteBaseFromList(currencyList)
                         }
-                        is DatabaseState.Error<*> -> {
-                            Toast.makeText(requireContext(), "Failed to retrieve currencies", Toast.LENGTH_SHORT).show()
+
+                        is DatabaseState.Error -> {
+                            Log.e(
+                                TAG,
+                                "onCreateView: Failed to get currency data from the ViewModel in $tag\n${currency.message}",
+                            )
                         }
                     }
                 }
@@ -88,10 +99,11 @@ class ChangeBaseCurrency : Fragment() {
         return view
     }
 
-    //  Look for base currency in given list, and delete it.
-    private fun deleteBaseFromList(list: MutableList<CurrencyNamesModel>) {
+    //      Look for base currency in given list, and delete it.
+    private fun deleteBaseFromList(list: MutableList<String>) {
+
         if (list.toString().contains(mBaseCurrency)) {
-            val index = list.indices.find { list[it].toString() == mBaseCurrency }
+            val index = list.indices.find { list[it] == mBaseCurrency }
             list.removeAt(index!!)
         }
         // To avoid infinite loop in spinner's 'onItemSelected' set mIsInit flag.
@@ -102,7 +114,7 @@ class ChangeBaseCurrency : Fragment() {
     }
 
     //  Prepare spinner, fill with data without base currency. To avoid selecting by program the first value from the spinner, I've used the 'setSelection'
-    private fun setupSpinner(list: MutableList<CurrencyNamesModel>) {
+    private fun setupSpinner(list: MutableList<String>) {
         var isTouched = false
 
         val adapter =
@@ -118,8 +130,8 @@ class ChangeBaseCurrency : Fragment() {
                 ) {
                     if (isTouched) {
                         isTouched = false
-                        mBaseCurrency = list[position].toString()
-//                        mViewModel.updateBaseCurrency(mBaseCurrency)
+                        mBaseCurrency = list[position]
+                        mViewModel.updateBaseCurrency(mBaseCurrency)
                         moveToPreviousFragment()
                     } else {
                         isTouched = true

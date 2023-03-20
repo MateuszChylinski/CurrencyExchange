@@ -6,44 +6,39 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.example.currencyexchange.API.DatabaseState
+import com.example.currencyexchange.Models.CurrenciesDatabaseDetailed
+import com.example.currencyexchange.Models.CurrenciesDatabaseMain
 import com.example.currencyexchange.Repository.CurrencyDatabaseRepository
-import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.SharedFlow
-import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
 class ChangeBaseViewModel constructor(
     private val databaseRepository: CurrencyDatabaseRepository
 ) : ViewModel() {
 
-    /** Setup states for base currency*/
-    private val _baseCurrencyState: MutableSharedFlow<DatabaseState> = MutableSharedFlow(replay = 1)
-    val baseCurrency: SharedFlow<DatabaseState> get() = _baseCurrencyState
+    val baseCurrencyState: SharedFlow<DatabaseState<CurrenciesDatabaseMain>> =
+        databaseRepository.baseCurrency
+            .catch { DatabaseState.Error(it.message) }
+            .map { DatabaseState.Success(it) }
+            .shareIn(viewModelScope, SharingStarted.WhileSubscribed(), replay = 1)
 
-    /** Setup states for all currencies*/
-    private val _allCurrencies: MutableSharedFlow<DatabaseState> = MutableSharedFlow(replay = 1)
-    val currencies: SharedFlow<DatabaseState> = _allCurrencies
+    val currencyNames: SharedFlow<DatabaseState<CurrenciesDatabaseDetailed>> =
+        databaseRepository.currencyData
+            .catch { DatabaseState.Error(it.message) }
+            .map { DatabaseState.Success(it) }
+            .shareIn(viewModelScope, SharingStarted.WhileSubscribed(), replay = 1)
 
-    fun getBaseCurrency() {
+
+    fun updateBaseCurrency(currency: String?) {
         viewModelScope.launch {
-            databaseRepository.baseCurrency
-                .catch { _baseCurrencyState.emit(DatabaseState.Error(it.cause)) }
-                .collect { currency ->
-                    _baseCurrencyState.emit(DatabaseState.Success(currency.baseCurr))
-                }
-        }
-    }
-
-    fun getAllCurrencies() {
-        viewModelScope.launch {
-            databaseRepository.allCurrencies
-                .catch { _allCurrencies.emit(DatabaseState.Error(it.cause)) }
-                .collect { currencies ->
-                    Log.i(TAG, "getBaseCurrency: "+currencies::class.java.typeName)
-                    Log.i(TAG, "getAllCurrencies: $currencies")
-                    _allCurrencies.emit(DatabaseState.Success(currencies.map { it.currency}))
-                }
-            Log.i(TAG, "getAllCurrencies: $currencies")
+            try {
+                databaseRepository.updateBaseCurrency(currency)
+            } catch (exception: Exception) {
+                Log.e(
+                    TAG,
+                    "updateBaseCurrency: Failed to update base currency in $TAG\n${exception.message}"
+                )
+            }
         }
     }
 }

@@ -1,6 +1,7 @@
 package com.example.currencyexchange.ViewModels
 
 import android.content.ContentValues.TAG
+import android.provider.ContactsContract.Data
 import android.util.Log
 import androidx.lifecycle.*
 import com.example.currencyexchange.API.ApiResult
@@ -20,6 +21,7 @@ class LatestViewModel constructor(
     private val apiRepository: CurrencyRetrofitRepository,
     private val databaseRepository: CurrencyDatabaseRepository
 ) : ViewModel() {
+    var isRatesPresent = false
 
     val baseCurrencyState: SharedFlow<DatabaseState<CurrenciesDatabaseMain>> =
         databaseRepository.baseCurrency
@@ -28,8 +30,9 @@ class LatestViewModel constructor(
             }
             .map {
                 DatabaseState.Success(it)
+
             }
-            .shareIn(viewModelScope, SharingStarted.WhileSubscribed(), replay = 1)
+            .shareIn(viewModelScope, SharingStarted.WhileSubscribed())
 
     val currenciesDataState: SharedFlow<DatabaseState<CurrenciesDatabaseDetailed>> =
         databaseRepository.currencyData
@@ -51,6 +54,8 @@ class LatestViewModel constructor(
             try {
                 val response = apiRepository.getLatestRates(baseCurrency, BuildConfig.API_KEY)
                 _latestRateStatus.value = response
+                Log.i(TAG, " onCreateView fetchData: *********** (PARAMETER) $baseCurrency || (API) ${response.data?.baseCurrency} ****************\n" +
+                        "${_latestRateStatus.value?.data?.latestRates}\n****************************")
 
             } catch (exception: IOException) {
                 Log.e(
@@ -58,10 +63,16 @@ class LatestViewModel constructor(
                     "Failed to fetch data from repository for latest rates.\n${exception.message}"
                 )
             } finally {
-                //Insert map with currencies, and their rates into database
-                databaseRepository.insertCurrencyData(
-                    CurrenciesDatabaseDetailed(0, latestRates.value?.data?.latestRates!!)
-                )
+//                Insert map with currencies, and their rates into database
+                if (isRatesPresent) {
+                    databaseRepository.updateCurrencyData(latestRates.value?.data?.latestRates!!)
+                } else {
+                    databaseRepository.insertCurrencyData(
+                        CurrenciesDatabaseDetailed(0, latestRates.value?.data?.latestRates!!)
+                    )
+                    isRatesPresent = true
+                }
+
                 /** Update date of rates.
                 In case there will be no internet connection, program will display rates from the last time,
                 when program successfully retrieved data from the server */

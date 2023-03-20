@@ -18,6 +18,7 @@ import com.example.currencyexchange.Repository.CurrencyDatabaseRepository
 import com.example.currencyexchange.Repository.CurrencyRetrofitRepository
 import com.example.currencyexchange.ViewModels.*
 import com.example.currencyexchange.databinding.FragmentLatestBinding
+import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.launch
 
 class Latest : Fragment() {
@@ -53,6 +54,34 @@ class Latest : Fragment() {
             ).get(LatestViewModel::class.java)
 
 
+        /** Launch LAZY coroutine. It'll be triggered when needed.
+         * In this case, whenever retrieved base currency (from database) will obtain specific value (!= "null")
+         * Check if status of call was either Success/Error
+         * If call was successful , push Map that contains data about currencies (their names, and rates) to the adapter, and display it in RecyclerView
+         * If call was NOT successful, log error message   */
+
+        val apiCallCoroutine =
+            viewLifecycleOwner.lifecycleScope.launch(start = CoroutineStart.LAZY) {
+                repeatOnLifecycle(Lifecycle.State.STARTED) {
+                    mViewModel.fetchData(mBaseCurrency)
+                    mViewModel.latestRates.observe(viewLifecycleOwner, Observer { status ->
+                        when (status) {
+                            is ApiResult.Success<*> -> {
+                                mAdapter.setData(status.data?.latestRates!!)
+                            }
+                            is ApiResult.Error -> {
+                                Log.w(
+                                    TAG,
+                                    "onCreateView: Failed to get latest rates:\n${status.throwable}"
+                                )
+                            }
+                        }
+                    })
+                }
+            }
+
+        /** Launch coroutine that will retrieve main data about currency.
+         * Whenever retrieved base currency will NOT be "null", launch coroutine, that will trigger api call*/
         viewLifecycleOwner.lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 mViewModel.baseCurrencyState.collect { currency ->
@@ -67,6 +96,9 @@ class Latest : Fragment() {
                                 getString(R.string.rates_from_date),
                                 currency.data?.ratesDate.toString()
                             )
+                            if (mBaseCurrency != "null") {
+                                apiCallCoroutine.start()
+                            }
                         }
                         is DatabaseState.Error -> {
                             Log.w(
@@ -75,32 +107,11 @@ class Latest : Fragment() {
                             )
                         }
                     }
+
                 }
             }
         }
 
-        /** Launch new coroutine, and trigger ViewModel to make an api call
-         *  Observe data that came as result from the api
-         *  If the call was success, push obtained data to the adapter
-         *  If call was NOT successful, log the error   */
-        viewLifecycleOwner.lifecycleScope.launch {
-            repeatOnLifecycle(Lifecycle.State.STARTED) {
-                mViewModel.fetchData(mBaseCurrency)
-                mViewModel.latestRates.observe(viewLifecycleOwner, Observer { status ->
-                    when (status) {
-                        is ApiResult.Success<*> -> {
-                            mAdapter.setData(status.data?.latestRates!!)
-                        }
-                        is ApiResult.Error -> {
-                            Log.w(
-                                TAG,
-                                "onCreateView: Failed to get latest rates:\n${status.throwable}"
-                            )
-                        }
-                    }
-                })
-            }
-        }
 
 //        /** Will be used when there's no internet connection    */
 //        viewLifecycleOwner.lifecycleScope.launch {
