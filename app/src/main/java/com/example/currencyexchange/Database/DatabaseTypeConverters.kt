@@ -1,4 +1,4 @@
-package com.example.currencyexchange
+package com.example.currencyexchange.Database
 
 import androidx.room.TypeConverter
 import com.google.gson.Gson

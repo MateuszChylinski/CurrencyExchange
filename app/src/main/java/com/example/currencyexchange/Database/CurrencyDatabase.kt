@@ -8,7 +8,6 @@ import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 import androidx.sqlite.db.SupportSQLiteDatabase
 import com.example.currencyexchange.DAO.CurrencyDAO
-import com.example.currencyexchange.DatabaseTypeConverters
 import com.example.currencyexchange.Models.CurrenciesDatabaseDetailed
 import com.example.currencyexchange.Models.CurrenciesDatabaseMain
 import kotlinx.coroutines.CoroutineScope

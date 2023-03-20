@@ -1,5 +1,6 @@
 package com.example.currencyexchange.Adapters
 
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
@@ -10,6 +11,7 @@ class LatestAdapter : RecyclerView.Adapter<LatestAdapter.ViewHolder>() {
 
     fun setData(data: Map<String, Double>) {
         this.ratesData = data
+        println("onCreateView ADAPTER .... ${ratesData.size} || ${data.size}")
         notifyDataSetChanged()
     }
 

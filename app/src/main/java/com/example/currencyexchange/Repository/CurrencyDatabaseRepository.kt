@@ -16,7 +16,6 @@ class CurrencyDatabaseRepository constructor(
         currencyDAO.insertCurrencyData(currenciesDatabaseDetailed)
     }
 
-
     /** Get base currency   */
     val baseCurrency: Flow<CurrenciesDatabaseMain> = currencyDAO.getBaseCurrency()
 
@@ -26,9 +25,16 @@ class CurrencyDatabaseRepository constructor(
 
     /** Update currency rates, to let user know, from when they are  */
     suspend fun updateRatesDate(date: String?) {
-        currencyDAO.updateRatesDate(date) }
+        currencyDAO.updateRatesDate(date)
+    }
 
     /** Update base currency    */
     suspend fun updateBaseCurrency(currency: String?) {
-        currencyDAO.updateBaseCurrency(currency) }
+        currencyDAO.updateBaseCurrency(currency)
+    }
+
+    /** Update currency data    */
+    suspend fun updateCurrencyData(data: Map<String, Double>){
+        currencyDAO.updatesCurrencyData(data)
+    }
 }
