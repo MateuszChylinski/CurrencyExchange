@@ -12,7 +12,6 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.example.currencyexchange.Adapters.PagerAdapter
-import com.example.currencyexchange.ViewModels.FragmentTagViewModel
 import com.example.currencyexchange.databinding.FragmentPagerBaseBinding
 import kotlinx.coroutines.launch
 // TODO - Latest G // Conversion G //
@@ -24,7 +23,7 @@ class PagerBase : Fragment() {
     private lateinit var pagerAdapter: PagerAdapter
     private val mFragmentsList =
         arrayListOf(Latest(), Conversion(), Fluctuation(), HistoricalRates())
-    val mViewModel: FragmentTagViewModel by viewModels()
+//    val mViewModel: FragmentTagViewModel by viewModels()
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -37,14 +36,14 @@ class PagerBase : Fragment() {
         pagerAdapter = PagerAdapter(this, mFragmentsList)
         mBinding.pbViewpager.adapter = pagerAdapter
         lifecycleScope.launch {
-            mViewModel.mIsMoved.observe(viewLifecycleOwner, Observer {
-                if (it) {
-                    val nav = findNavController()
-                    nav.navigate(PagerBaseDirections.actionFromBaseToChange())
-                    mViewModel.setMoveFlag(false)
+//            mViewModel.mIsMoved.observe(viewLifecycleOwner, Observer {
+//                if (it) {
+//                    val nav = findNavController()
+//                    nav.navigate(PagerBaseDirections.actionFromBaseToChange())
+//                    mViewModel.setMoveFlag(false)
                 }
-            })
-        }
+//            })
+//        }
 
         return view
     }
