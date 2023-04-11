@@ -11,9 +11,10 @@ import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import javax.inject.Inject
+import javax.inject.Provider
 
 class CallbackModule @Inject constructor(
-    private val dao: CurrencyDAO): RoomDatabase.Callback() {
+    private val provider: Provider<CurrencyDAO>): RoomDatabase.Callback() {
 
     private val scope = CoroutineScope(SupervisorJob())
 
@@ -27,6 +28,7 @@ class CallbackModule @Inject constructor(
     @SuppressLint("SimpleDateFormat")
     private suspend fun insertDefaultCurrency(){
         val defaultCurrency = CurrenciesDatabaseMain(0, "EUR", SimpleDateFormat("yyy-MM-DD").format(Calendar.getInstance().time))
-        dao.insertDefaultCurrency(defaultCurrency)
+//        dao.insertDefaultCurrency(defaultCurrency)
+        provider.get().insertDefaultCurrency(defaultCurrency)
     }
 }
