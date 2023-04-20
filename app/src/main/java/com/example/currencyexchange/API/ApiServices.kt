@@ -12,13 +12,13 @@ interface ApiServices {
     suspend fun getLatestRates(
         @Query("base") base: String,
         @Query("apikey") apikey: String
-    ): Response<LatestRates>
+    ): Response<LatestRates>?
 
     @GET("/fixer/convert")
     suspend fun convertCurrency(
         @Query("from") to: String,
         @Query("to") from: String,
-        @Query("amount") amount: String,
+        @Query("amount") amount: Int,
         @Query("apikey") apiKey: String
     ): Response<ConversionModel>
 
@@ -39,19 +39,19 @@ interface ApiServices {
         @Query("apikey") apiKey: String
     ): Response<HistoricalRatesModel>
 
-    companion object {
-        private const val url = "https://api.apilayer.com/"
-
-        var apiServices: ApiServices? = null
-        fun getInstance(): ApiServices {
-            if (apiServices == null) {
-                val retrofit = Retrofit.Builder()
-                    .baseUrl(url)
-                    .addConverterFactory(GsonConverterFactory.create())
-                    .build()
-                apiServices = retrofit.create(ApiServices::class.java)
-            }
-            return apiServices!!
-        }
-    }
+//    companion object {
+//
+//
+//        var apiServices: ApiServices? = null
+//        fun getInstance(): ApiServices {
+//            if (apiServices == null) {
+//                val retrofit = Retrofit.Builder()
+//                    .baseUrl(url)
+//                    .addConverterFactory(GsonConverterFactory.create())
+//                    .build()
+//                apiServices = retrofit.create(ApiServices::class.java)
+//            }
+//            return apiServices!!
+//        }
+//    }
 }

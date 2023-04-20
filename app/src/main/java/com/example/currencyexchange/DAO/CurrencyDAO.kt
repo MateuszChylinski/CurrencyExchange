@@ -22,16 +22,6 @@ interface CurrencyDAO {
     @Query("UPDATE currency_detailed SET currency_data =:data WHERE id = 1")
     suspend fun updatesCurrencyData(data: Map<String, Double>)
 
-    /*
-    @Entity(tableName = "currency_detailed")
-    data class CurrenciesDatabaseDetailed(
-        @PrimaryKey(autoGenerate = true)
-        val id: Int = 0,
-        @ColumnInfo(name = "currency_data")
-        val currencyData: Map<String, Double> = mapOf())
-
-     */
-
     /** Get id, base currency, and date of rates from database  */
     @Query("SELECT * FROM currency_main")
     fun getBaseCurrency(): Flow<CurrenciesDatabaseMain>
