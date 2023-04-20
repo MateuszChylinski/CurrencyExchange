@@ -7,7 +7,7 @@ import com.example.currencyexchange.Repository.Interfaces.DatabaseRepository
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
-class CurrencyDatabaseRepository @Inject constructor(
+class DatabaseRepositoryImplementation @Inject constructor(
     private val currencyDAO: CurrencyDAO
 ) : DatabaseRepository {
 

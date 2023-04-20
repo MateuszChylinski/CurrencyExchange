@@ -1,18 +1,12 @@
 package com.example.currencyexchange.Database
 
-import android.annotation.SuppressLint
-import android.content.Context
 import androidx.room.Database
-import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
-import androidx.sqlite.db.SupportSQLiteDatabase
 import com.example.currencyexchange.DAO.CurrencyDAO
+import com.example.currencyexchange.DataWrapper.CustomTypeConverters
 import com.example.currencyexchange.Models.CurrenciesDatabaseDetailed
 import com.example.currencyexchange.Models.CurrenciesDatabaseMain
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.launch
-import java.text.SimpleDateFormat
 import java.util.*
 
 @Database(
@@ -20,50 +14,7 @@ import java.util.*
     version = 1,
     exportSchema = false
 )
-@TypeConverters(DatabaseTypeConverters::class)
+@TypeConverters(CustomTypeConverters::class)
 abstract class CurrencyDatabase : RoomDatabase() {
     abstract fun getDAO(): CurrencyDAO
 }
-//
-//    companion object {
-//        @Volatile
-//        private var INSTANCE: CurrencyDatabase? = null
-//        private val DB_NAME = "currency_database"
-//
-//        fun getDatabase(
-//            context: Context,
-//            coroutineScope: CoroutineScope
-//        ): CurrencyDatabase {
-//            return INSTANCE ?: synchronized(this) {
-//                val instance = Room.databaseBuilder(
-//                    context.applicationContext,
-//                    CurrencyDatabase::class.java,
-//                    DB_NAME
-//                ).addCallback(CurrencyDatabaseCallback(coroutineScope))
-//                    .build()
-//                INSTANCE = instance
-//                instance
-//            }
-//        }
-//    }
-
-//    private class CurrencyDatabaseCallback(
-//        private val scope: CoroutineScope
-//    ) : Callback() {
-//        override fun onCreate(db: SupportSQLiteDatabase) {
-//            super.onCreate(db)
-//
-//            INSTANCE?.let { database ->
-//                scope.launch {
-//                    insertDefaultCurrency(database.getDAO())
-//                }
-//            }
-//        }
-//        @SuppressLint("SimpleDateFormat") // Since the date in api is already specified, there is no need to use 'locales'
-//        suspend fun insertDefaultCurrency(currencyDAO: CurrencyDAO){
-//            val defaultCurrency = CurrenciesDatabaseMain(0, "EUR", SimpleDateFormat("yyyy-MM-dd").format(Calendar.getInstance().time))
-//            currencyDAO.insertDefaultCurrency(defaultCurrency)
-//        }
-//    }
-//}
-

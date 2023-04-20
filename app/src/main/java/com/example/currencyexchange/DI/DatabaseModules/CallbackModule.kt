@@ -1,4 +1,4 @@
-package com.example.currencyexchange.DI
+package com.example.currencyexchange.DI.DatabaseModules
 
 import android.annotation.SuppressLint
 import androidx.room.RoomDatabase
@@ -15,7 +15,6 @@ import javax.inject.Provider
 
 class CallbackModule @Inject constructor(
     private val provider: Provider<CurrencyDAO>): RoomDatabase.Callback() {
-
     private val scope = CoroutineScope(SupervisorJob())
 
     override fun onCreate(db: SupportSQLiteDatabase) {
@@ -24,11 +23,9 @@ class CallbackModule @Inject constructor(
             insertDefaultCurrency()
         }
     }
-
     @SuppressLint("SimpleDateFormat")
     private suspend fun insertDefaultCurrency(){
-        val defaultCurrency = CurrenciesDatabaseMain(0, "EUR", SimpleDateFormat("yyy-MM-DD").format(Calendar.getInstance().time))
-//        dao.insertDefaultCurrency(defaultCurrency)
+        val defaultCurrency = CurrenciesDatabaseMain(0, "EUR", SimpleDateFormat("yyy-MM-dd").format(Calendar.getInstance().time))
         provider.get().insertDefaultCurrency(defaultCurrency)
     }
 }

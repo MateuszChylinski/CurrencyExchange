@@ -21,7 +21,7 @@ data class ConversionQuery(
     @SerializedName("to")
     val to: String,
     @SerializedName("amount")
-    val amount: String
+    val amount: Int
 )
 
 data class ConversionInfo(

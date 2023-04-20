@@ -1,8 +1,7 @@
-package com.example.currencyexchange.DI
+package com.example.currencyexchange.DI.DatabaseModules
 
 import android.content.Context
 import androidx.room.Room
-import androidx.room.RoomDatabase
 import com.example.currencyexchange.DAO.CurrencyDAO
 import com.example.currencyexchange.Database.CurrencyDatabase
 import dagger.Module
@@ -16,7 +15,6 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 object DatabaseModule {
-
     @Singleton
     @Provides
     fun createDatabase(
