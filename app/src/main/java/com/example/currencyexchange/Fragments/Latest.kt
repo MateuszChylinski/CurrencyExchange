@@ -52,7 +52,11 @@ class Latest : Fragment() {
                     mViewModel.latestRates.observe(viewLifecycleOwner, Observer { status ->
                         when (status) {
                             is DataWrapper.Success<*> -> {
-                                mAdapter.setData(status.data?.latestRates!!)
+
+                                // Convert currencies from the database to the mutable map, and remove base currency with it's value, push modified data to the adapter
+                                val x = status.data?.latestRates!!.toMutableMap()
+                                x.remove(mBaseCurrency)
+                                mAdapter.setData(x)
                             }
 
                             is DataWrapper.Error -> {
