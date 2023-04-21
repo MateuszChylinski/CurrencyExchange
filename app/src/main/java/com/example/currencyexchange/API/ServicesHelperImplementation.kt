@@ -1,11 +1,9 @@
 package com.example.currencyexchange.API
 
-import com.example.currencyexchange.API.ApiServices
 import com.example.currencyexchange.Models.ConversionModel
 import com.example.currencyexchange.Models.FluctuationModel
 import com.example.currencyexchange.Models.HistoricalRatesModel
 import com.example.currencyexchange.Models.LatestRates
-import com.example.currencyexchange.API.ServicesHelper
 import retrofit2.Response
 import javax.inject.Inject
 

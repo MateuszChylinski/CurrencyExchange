@@ -65,7 +65,7 @@ class Latest : Fragment() {
                     })
                 }
             }
-//
+
         /** Launch coroutine that will retrieve main data about currency.
          * Whenever retrieved base currency will NOT be "null", launch coroutine, that will trigger api call*/
         viewLifecycleOwner.lifecycleScope.launch {
@@ -98,6 +98,7 @@ class Latest : Fragment() {
                 }
             }
         }
+
         /** By clicking on a icon, inside of the toolbar, set a move flag to the 'ChangeBaseCurrency' fragment
          *  where user can select new base currency which will be saved in database */
         mBinding.latestChangeBase.setOnClickListener {
