@@ -2,8 +2,6 @@ package com.example.currencyexchange.API
 
 import com.example.currencyexchange.Models.*
 import retrofit2.Response
-import retrofit2.Retrofit
-import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.*
 import retrofit2.http.Query
 
@@ -16,12 +14,11 @@ interface ApiServices {
 
     @GET("/fixer/convert")
     suspend fun convertCurrency(
-        @Query("from") to: String,
-        @Query("to") from: String,
-        @Query("amount") amount: Int,
+        @Query("from") from: String,
+        @Query("to") to: String,
+        @Query("amount") amount: String,
         @Query("apikey") apiKey: String
     ): Response<ConversionModel>
-
     @GET("/fixer/fluctuation")
     suspend fun getFluctuationData(
         @Query("start_date") startDate: String,
@@ -38,20 +35,4 @@ interface ApiServices {
         @Query("base") baseCurrency: String,
         @Query("apikey") apiKey: String
     ): Response<HistoricalRatesModel>
-
-//    companion object {
-//
-//
-//        var apiServices: ApiServices? = null
-//        fun getInstance(): ApiServices {
-//            if (apiServices == null) {
-//                val retrofit = Retrofit.Builder()
-//                    .baseUrl(url)
-//                    .addConverterFactory(GsonConverterFactory.create())
-//                    .build()
-//                apiServices = retrofit.create(ApiServices::class.java)
-//            }
-//            return apiServices!!
-//        }
-//    }
 }

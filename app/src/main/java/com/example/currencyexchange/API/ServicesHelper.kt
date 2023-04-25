@@ -8,7 +8,7 @@ import retrofit2.Response
 
 interface ServicesHelper {
     suspend fun getLatestRates(apiKey: String, baseCurrency: String): Response<LatestRates>?
+    suspend fun convertCurrency(baseCurrency: String, wantedCurrency: String, amount: String, apiKey: String, ): Response<ConversionModel>
     suspend fun getFluctuation(apiKey: String, startDate: String, endDate: String, baseCurrency: String, currencies: String): Response<FluctuationModel>
     suspend fun getHistorical(apiKey: String, baseCurrency: String, currencies: String, date: String): Response<HistoricalRatesModel>
-    suspend fun convertCurrency(apiKey: String, baseCurrency: String, wantedCurrency: String, amount: Int): Response<ConversionModel>
 }

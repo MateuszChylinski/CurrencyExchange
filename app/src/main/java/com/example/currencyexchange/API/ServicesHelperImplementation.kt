@@ -16,6 +16,19 @@ class ServicesHelperImplementation @Inject constructor(private val services: Api
     ): Response<LatestRates>? =
         services.getLatestRates(apikey = apiKey, base = baseCurrency)
 
+    override suspend fun convertCurrency(
+        baseCurrency: String,
+        wantedCurrency: String,
+        amount: String,
+        apiKey: String
+    ): Response<ConversionModel> =
+        services.convertCurrency(
+            from = baseCurrency,
+            to = wantedCurrency,
+            amount = amount,
+            apiKey = apiKey
+        )
+
     override suspend fun getFluctuation(
         apiKey: String,
         startDate: String,
@@ -42,18 +55,5 @@ class ServicesHelperImplementation @Inject constructor(private val services: Api
             baseCurrency = baseCurrency,
             symbols = currencies,
             date = date
-        )
-
-    override suspend fun convertCurrency(
-        apiKey: String,
-        baseCurrency: String,
-        wantedCurrency: String,
-        amount: Int
-    ): Response<ConversionModel> =
-        services.convertCurrency(
-            apiKey = apiKey,
-            from = baseCurrency,
-            to = wantedCurrency,
-            amount = amount
         )
 }
