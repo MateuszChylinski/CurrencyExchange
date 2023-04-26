@@ -1,7 +1,7 @@
 package com.example.currencyexchange.ViewModels
 
 import androidx.lifecycle.*
-import com.example.currencyexchange.API.ServicesHelperImplementation
+import com.example.currencyexchange.Repository.Implementation.RetrofitRepositoryImplementation
 import com.example.currencyexchange.BuildConfig
 import com.example.currencyexchange.DataWrapper.DataWrapper
 import com.example.currencyexchange.Models.ConversionModel
@@ -20,7 +20,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class ConversionViewModel @Inject constructor(
-    private val apiRepository: ServicesHelperImplementation,
+    private val apiRepository: RetrofitRepositoryImplementation,
     private val databaseRepository: DatabaseRepositoryImplementation
 ) : ViewModel() {
 

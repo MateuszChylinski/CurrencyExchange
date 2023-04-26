@@ -10,7 +10,12 @@ data class CurrenciesDatabaseMain(
     @ColumnInfo("base_currency")
     val baseCurrency: String,
     @ColumnInfo("rates_date")
-    val ratesDate: String?)
+    val ratesDate: String?){
+
+//    override fun toString(): String {
+//        return super.toString()
+//    }
+}
 
 @Entity(tableName = "currency_detailed")
 data class CurrenciesDatabaseDetailed(

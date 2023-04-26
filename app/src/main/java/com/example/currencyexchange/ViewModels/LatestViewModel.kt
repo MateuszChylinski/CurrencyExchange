@@ -9,7 +9,7 @@ import com.example.currencyexchange.Models.CurrenciesDatabaseDetailed
 import com.example.currencyexchange.Models.CurrenciesDatabaseMain
 import com.example.currencyexchange.Models.LatestRates
 import com.example.currencyexchange.Repository.Implementation.DatabaseRepositoryImplementation
-import com.example.currencyexchange.API.ServicesHelperImplementation
+import com.example.currencyexchange.Repository.Implementation.RetrofitRepositoryImplementation
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
@@ -20,19 +20,18 @@ import javax.inject.Inject
 @HiltViewModel
 class LatestViewModel @Inject constructor(
     private val databaseRepository: DatabaseRepositoryImplementation,
-    private val retrofitRepository: ServicesHelperImplementation
+    private val retrofitRepository: RetrofitRepositoryImplementation
 ) : ViewModel() {
 
     private var doesContainData = false
+
     private val _latestRatesCall = MutableLiveData<DataWrapper<LatestRates>>()
     val latestRates: LiveData<DataWrapper<LatestRates>> get() = _latestRatesCall
 
-
-
     val baseCurrencyState: SharedFlow<DataWrapper<CurrenciesDatabaseMain>> =
         databaseRepository.baseCurrency
-            .catch { DataWrapper.Error(it.message)}
             .map { DataWrapper.Success(it)}
+            .catch { DataWrapper.Error(it.message)}
             .shareIn(viewModelScope, SharingStarted.WhileSubscribed())
 
     val currenciesDataState: SharedFlow<DataWrapper<CurrenciesDatabaseDetailed>> =
@@ -56,7 +55,7 @@ class LatestViewModel @Inject constructor(
                 _latestRatesCall.postValue(DataWrapper.Success(response.body()!!))
             }
         } catch (exception: Exception) {
-            _latestRatesCall.postValue(DataWrapper.Error(error = exception.message))
+            _latestRatesCall.postValue(DataWrapper.Error(error = exception.message, data = null))
         } finally {
             insertCurrencies(CurrenciesDatabaseDetailed(currencyData = response?.body()?.latestRates!!))
         }
