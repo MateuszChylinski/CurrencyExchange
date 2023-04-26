@@ -19,6 +19,7 @@ interface ApiServices {
         @Query("amount") amount: String,
         @Query("apikey") apiKey: String
     ): Response<ConversionModel>
+
     @GET("/fixer/fluctuation")
     suspend fun getFluctuationData(
         @Query("start_date") startDate: String,

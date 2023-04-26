@@ -1,51 +1,72 @@
-//package com.example.currencyexchange.ViewModels
-//
-//import android.content.ContentValues.TAG
-//import android.util.Log
-//import androidx.lifecycle.*
-//import com.example.currencyexchange.Models.FluctuationModel
-//import com.example.currencyexchange.Models.FluctuationRates
-//import com.example.currencyexchange.Repository.Implementation.CurrencyDatabaseRepository
-//import com.example.currencyexchange.Repository.CurrencyRetrofitRepository
-//import kotlinx.coroutines.launch
-//import retrofit2.Call
-//import retrofit2.Response
-//
-//class FluctuationViewModel constructor(
-////    private val apiRepository: CurrencyRetrofitRepository,
-////    private val databaseRepository: CurrencyDatabaseRepository
-//) : ViewModel() {
-//
-////    var baseCurrency = databaseRepository.baseCurrency.asLiveData()
-////    var allCurrencies = databaseRepository.allCurrencies.asLiveData()
-////
-////    var startDate: String = "default"
-////    var endDate: String = "default"
-////
-////    var data = MutableLiveData<Map<String, FluctuationRates>?>()
-////
-////    // Fetch the data from the server, and store it in 'data' variable, which can be observer in fragment.
-////    fun fetchFluctuation(baseCurrency: String, selectedCurrencies: String) {
-////        viewModelScope.launch {
-////            val response =
-////                apiRepository.fetchFluctuation(startDate, endDate, baseCurrency, selectedCurrencies)
-////            response.enqueue(object : retrofit2.Callback<FluctuationModel> {
-////                override fun onResponse(
-////                    call: Call<FluctuationModel>,
-////                    response: Response<FluctuationModel>
-////                ) {
-////                    Log.i(TAG, "onResponse: RETROFIT\n${response.body()}")
-////                    if (response.isSuccessful) {
-////                        data.value = response.body()?.rates
-////                    }
-////                }
-////                override fun onFailure(call: Call<FluctuationModel>, t: Throwable) {
-////                    Log.i(TAG, "onFailure: ${t.message}")
-////                }
-////            })
-////        }
-////    }
-////    fun getBaseCurrency(): String {
-////        return baseCurrency.value.toString()
-////    }
-//}
+package com.example.currencyexchange.ViewModels
+
+import android.content.ContentValues.TAG
+import android.util.Log
+import androidx.lifecycle.*
+import com.example.currencyexchange.BuildConfig
+import com.example.currencyexchange.DataWrapper.DataWrapper
+import com.example.currencyexchange.Models.CurrenciesDatabaseDetailed
+import com.example.currencyexchange.Models.CurrenciesDatabaseMain
+import com.example.currencyexchange.Models.FluctuationModel
+import com.example.currencyexchange.Repository.Implementation.DatabaseRepositoryImplementation
+import com.example.currencyexchange.Repository.Implementation.RetrofitRepositoryImplementation
+import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.shareIn
+import kotlinx.coroutines.launch
+import java.lang.Exception
+import javax.inject.Inject
+
+@HiltViewModel
+class FluctuationViewModel @Inject constructor(
+    private val apiRepository: RetrofitRepositoryImplementation,
+    private val databaseRepository: DatabaseRepositoryImplementation
+) : ViewModel() {
+
+    private val _fluctuation = MutableLiveData<DataWrapper<FluctuationModel>>()
+    val fluctuation: LiveData<DataWrapper<FluctuationModel>> get() = _fluctuation
+
+    val baseCurrency: SharedFlow<DataWrapper<CurrenciesDatabaseMain>> =
+        databaseRepository.baseCurrency
+            .map { DataWrapper.Success(it) }
+            .catch { DataWrapper.Error(it.message) }
+            .shareIn(viewModelScope, SharingStarted.WhileSubscribed())
+
+    val allCurrencies: SharedFlow<DataWrapper<CurrenciesDatabaseDetailed>> =
+        databaseRepository.currencyData
+            .map { DataWrapper.Success(it) }
+            .catch { DataWrapper.Error(it.message) }
+            .shareIn(viewModelScope, SharingStarted.WhileSubscribed(), replay = 1)
+
+    fun fetchFluctuation(
+        baseCurrency: String,
+        selectedCurrencies: String,
+        startDate: String,
+        endDate: String
+    ) {
+        viewModelScope.launch {
+            try {
+                val response = apiRepository.getFluctuation(
+                    baseCurrency = baseCurrency,
+                    currencies = selectedCurrencies,
+                    startDate = startDate,
+                    endDate = endDate,
+                    apiKey = BuildConfig.API_KEY
+                )
+                if (response.isSuccessful) {
+                    _fluctuation.postValue(DataWrapper.Success(response.body()!!))
+                } else {
+                    Log.e(
+                        TAG,
+                        "fetchFluctuation: response from the server was not successful. Response code: ${response.code()}"
+                    )
+                }
+            } catch (exception: Exception) {
+                Log.e(TAG, "fetchFluctuation: Couldn't perform an api call. $exception")
+            }
+        }
+    }
+}

@@ -1,14 +1,16 @@
-package com.example.currencyexchange.API
+package com.example.currencyexchange.Repository.Implementation
 
+import com.example.currencyexchange.API.ApiServices
 import com.example.currencyexchange.Models.ConversionModel
 import com.example.currencyexchange.Models.FluctuationModel
 import com.example.currencyexchange.Models.HistoricalRatesModel
 import com.example.currencyexchange.Models.LatestRates
+import com.example.currencyexchange.Repository.Interfaces.RetrofitRepository
 import retrofit2.Response
 import javax.inject.Inject
 
-class ServicesHelperImplementation @Inject constructor(private val services: ApiServices) :
-    ServicesHelper {
+class RetrofitRepositoryImplementation @Inject constructor(private val services: ApiServices) :
+    RetrofitRepository {
 
     override suspend fun getLatestRates(
         apiKey: String,
@@ -17,16 +19,16 @@ class ServicesHelperImplementation @Inject constructor(private val services: Api
         services.getLatestRates(apikey = apiKey, base = baseCurrency)
 
     override suspend fun convertCurrency(
+        apiKey: String,
         baseCurrency: String,
         wantedCurrency: String,
-        amount: String,
-        apiKey: String
+        amount: String
     ): Response<ConversionModel> =
         services.convertCurrency(
+            apiKey = apiKey,
             from = baseCurrency,
             to = wantedCurrency,
-            amount = amount,
-            apiKey = apiKey
+            amount = amount
         )
 
     override suspend fun getFluctuation(
