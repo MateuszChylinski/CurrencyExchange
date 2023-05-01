@@ -1,0 +1,1288 @@
+[1mdiff --git a/.idea/deploymentTargetDropDown.xml b/.idea/deploymentTargetDropDown.xml[m
+[1mindex 0824757..fe88a61 100644[m
+[1m--- a/.idea/deploymentTargetDropDown.xml[m
+[1m+++ b/.idea/deploymentTargetDropDown.xml[m
+[36m@@ -7,11 +7,11 @@[m
+         <deviceKey>[m
+           <Key>[m
+             <type value="VIRTUAL_DEVICE_PATH" />[m
+[31m-            <value value="C:\Users\Kacper\.android\avd\Pixel_3a_API_33_x86_64.avd" />[m
+[32m+[m[32m            <value value="C:\Users\Kacper\.android\avd\Pixel_6_Pro_API_33_2.avd" />[m
+           </Key>[m
+         </deviceKey>[m
+       </Target>[m
+     </targetSelectedWithDropDown>[m
+[31m-    <timeTargetWasSelectedWithDropDown value="2022-11-24T17:24:01.773065300Z" />[m
+[32m+[m[32m    <timeTargetWasSelectedWithDropDown value="2023-05-01T20:43:58.856364900Z" />[m
+   </component>[m
+ </project>[m
+\ No newline at end of file[m
+[1mdiff --git a/app/src/main/AndroidManifest.xml b/app/src/main/AndroidManifest.xml[m
+[1mindex 4142f93..53b7845 100644[m
+[1m--- a/app/src/main/AndroidManifest.xml[m
+[1m+++ b/app/src/main/AndroidManifest.xml[m
+[36m@@ -10,7 +10,6 @@[m
+         android:roundIcon="@mipmap/ic_launcher_round"[m
+         android:supportsRtl="true"[m
+         android:theme="@style/Theme.AppCompat.Light.NoActionBar">[m
+[31m-<!--        android:theme="@style/Theme.CurrencyExchange">-->[m
+         <activity[m
+             android:name=".MainActivity"[m
+             android:exported="true">[m
+[1mdiff --git a/app/src/main/java/com/example/currencyexchange/Adapters/HistoricalAdapter.kt b/app/src/main/java/com/example/currencyexchange/Adapters/HistoricalAdapter.kt[m
+[1mindex 5a8f6b6..e53a6c2 100644[m
+[1m--- a/app/src/main/java/com/example/currencyexchange/Adapters/HistoricalAdapter.kt[m
+[1m+++ b/app/src/main/java/com/example/currencyexchange/Adapters/HistoricalAdapter.kt[m
+[36m@@ -4,13 +4,11 @@[m [mimport android.view.LayoutInflater[m
+ import android.view.ViewGroup[m
+ import androidx.recyclerview.widget.RecyclerView[m
+ import com.example.currencyexchange.databinding.HistoricalItemsBinding[m
+[31m-import kotlin.collections.HashMap[m
+ [m
+ class HistoricalAdapter : RecyclerView.Adapter<HistoricalAdapter.ViewHolder>() {[m
+[31m-    private var mHashMap = HashMap<String, Double>()[m
+[31m-    private var mData = mHashMap[m
+[32m+[m[32m    private var mData: Map<String, Double> = mapOf()[m
+ [m
+[31m-    fun setData(data: HashMap<String, Double>) {[m
+[32m+[m[32m    fun setData(data: Map<String, Double>) {[m
+         this.mData = data[m
+     }[m
+ [m
+[1mdiff --git a/app/src/main/java/com/example/currencyexchange/Fragments/ChangeBaseCurrency.kt b/app/src/main/java/com/example/currencyexchange/Fragments/ChangeBaseCurrency.kt[m
+[1mindex b47259a..1fca212 100644[m
+[1m--- a/app/src/main/java/com/example/currencyexchange/Fragments/ChangeBaseCurrency.kt[m
+[1m+++ b/app/src/main/java/com/example/currencyexchange/Fragments/ChangeBaseCurrency.kt[m
+[36m@@ -29,7 +29,6 @@[m [mclass ChangeBaseCurrency : Fragment() {[m
+     private val mBinding get() = _binding!![m
+     private val mViewModel: ChangeBaseViewModel by activityViewModels()[m
+ [m
+[31m-[m
+     override fun onCreateView([m
+         inflater: LayoutInflater, container: ViewGroup?,[m
+         savedInstanceState: Bundle?[m
+[1mdiff --git a/app/src/main/java/com/example/currencyexchange/Fragments/Conversion.kt b/app/src/main/java/com/example/currencyexchange/Fragments/Conversion.kt[m
+[1mindex b44ffd8..81fbfa4 100644[m
+[1m--- a/app/src/main/java/com/example/currencyexchange/Fragments/Conversion.kt[m
+[1m+++ b/app/src/main/java/com/example/currencyexchange/Fragments/Conversion.kt[m
+[36m@@ -31,6 +31,9 @@[m [mclass Conversion : Fragment() {[m
+     private val mBinding get() = mConversionBinding!![m
+     private val mViewModel: ConversionViewModel by activityViewModels()[m
+ [m
+[32m+[m[32m//TODO[m
+[32m+[m[32m// Trace if there's internet connection.[m
+[32m+[m[32m// Implement rates from db in latest/conversion if there's no internet[m
+ [m
+     override fun onCreateView([m
+         inflater: LayoutInflater, container: ViewGroup?,[m
+[36m@@ -68,8 +71,11 @@[m [mclass Conversion : Fragment() {[m
+                             currencies.data?.currencyData?.keys?.forEach {[m
+                                 mCurrencyList.add(it)[m
+                             }[m
+[31m-                            prepareFromSpinner(mCurrencyList)[m
+[31m-                            prepareToSpinner(mCurrencyList)[m
+[32m+[m[32m                            if (!mCurrencyList.contains("Select currency")) {[m
+[32m+[m[32m                                mCurrencyList.add(0, "Select currency")[m
+[32m+[m[32m                            }[m
+[32m+[m[32m                            deleteBaseCurrency()[m
+[32m+[m
+                         }[m
+ [m
+                         is DataWrapper.Error -> {[m
+[36m@@ -82,6 +88,20 @@[m [mclass Conversion : Fragment() {[m
+                 }[m
+             }[m
+         }[m
+[32m+[m
+[32m+[m[32m        viewLifecycleOwner.lifecycleScope.launch {[m
+[32m+[m[32m            mViewModel.exchangeState.observe(viewLifecycleOwner, Observer {[m
+[32m+[m[32m                mBinding.conversionConvertedData.visibility = View.VISIBLE[m
+[32m+[m[32m                mBinding.conversionConvertedData.text = String.format([m
+[32m+[m[32m                    getString([m
+[32m+[m[32m                        R.string.formatted_you_will_receive,[m
+[32m+[m[32m                        it.data?.result,[m
+[32m+[m[32m                        it?.data?.query?.to[m
+[32m+[m[32m                    )[m
+[32m+[m[32m                )[m
+[32m+[m[32m            })[m
+[32m+[m[32m        }[m
+[32m+[m
+         return view[m
+     }[m
+ [m
+[36m@@ -105,19 +125,58 @@[m [mclass Conversion : Fragment() {[m
+ [m
+         /** Refresh layout UI*/[m
+         mBinding.conversionRefreshContainer.setOnRefreshListener {[m
+[31m-            mDesiredCurrency = String()[m
+ [m
+[31m-            //TODO check lifecycle state after refresh?[m
+[31m-//            mBaseCurrency = mViewModel.getBaseCurrency()[m
+[31m-            defaultViewsSetup(mCurrencyList)[m
+[32m+[m[32m            viewLifecycleOwner.lifecycleScope.launch {[m
+[32m+[m[32m                mViewModel.baseCurrency.collect { baseCurrency ->[m
+[32m+[m[32m                    when (baseCurrency) {[m
+[32m+[m[32m                        is DataWrapper.Success -> {[m
+[32m+[m[32m                            mBaseCurrency = baseCurrency.data?.baseCurrency.toString()[m
+[32m+[m[32m                            mBinding.conversionFromTv.text =[m
+[32m+[m[32m                                String.format(getString(R.string.formatted_from), mBaseCurrency)[m
+[32m+[m[32m                        }[m
+[32m+[m
+[32m+[m[32m                        is DataWrapper.Error -> {[m
+[32m+[m[32m                            Log.e([m
+[32m+[m[32m                                TAG,[m
+[32m+[m[32m                                "onViewCreated: couldn't retrieve base currency from the database"[m
+[32m+[m[32m                            )[m
+[32m+[m[32m                        }[m
+[32m+[m[32m                    }[m
+[32m+[m[32m                }[m
+[32m+[m[32m            }[m
+[32m+[m[32m            defaultViewsSetup()[m
+[32m+[m[32m            mDesiredCurrency = String()[m
+             mBinding.conversionRefreshContainer.isRefreshing = false[m
+         }[m
+     }[m
+ [m
+[32m+[m[32m    /** Copy list of all currencies,[m
+[32m+[m[32m     *  check if given list contains base currency, and desired currency (if user have already picked one).[m
+[32m+[m[32m     *  If list contains these currencies, delete it, so user will not see them in spinner anymore.  */[m
+[32m+[m[32m    private fun deleteBaseCurrency() {[m
+[32m+[m[32m        val currencyList: MutableList<String> = mutableListOf()[m
+[32m+[m
+[32m+[m[32m        mCurrencyList.forEach {[m
+[32m+[m[32m            currencyList.add(it)[m
+[32m+[m[32m        }[m
+[32m+[m
+[32m+[m[32m        if (mDesiredCurrency != "default") {[m
+[32m+[m[32m            val desiredIndex =[m
+[32m+[m[32m                currencyList.indices.find { currencyList[it] == mDesiredCurrency }[m
+[32m+[m[32m            desiredIndex?.let { currencyList.removeAt(it) }[m
+[32m+[m[32m        }[m
+[32m+[m[32m        val baseIndex =[m
+[32m+[m[32m            currencyList.indices.find { currencyList[it] == mBaseCurrency }[m
+[32m+[m[32m        baseIndex?.let { currencyList.removeAt(it) }[m
+[32m+[m
+[32m+[m[32m        prepareFromSpinner(currencyList)[m
+[32m+[m[32m        prepareToSpinner(currencyList)[m
+[32m+[m[32m    }[m
+[32m+[m
+[32m+[m
+     /** Prepare 'from' spinner. This spinner allow to pick new, temporary base currency  */[m
+     private fun prepareFromSpinner(currencyList: MutableList<String>) {[m
+         var isTouched = false[m
+[31m-[m
+         val fromAdapter =[m
+             ArrayAdapter([m
+                 requireActivity(),[m
+[36m@@ -141,7 +200,8 @@[m [mclass Conversion : Fragment() {[m
+                                 getString(R.string.formatted_from),[m
+                                 mBaseCurrency[m
+                             )[m
+[31m-                        deleteBaseFromSpinner(currencyList)[m
+[32m+[m
+[32m+[m[32m                        deleteBaseCurrency()[m
+                     } else {[m
+                         isTouched = true[m
+                     }[m
+[36m@@ -153,6 +213,7 @@[m [mclass Conversion : Fragment() {[m
+             }[m
+     }[m
+ [m
+[32m+[m
+     /** Prepare 'to' spinner. Picked currency from this spinner, will be marked as desired currency in api call later on*/[m
+     private fun prepareToSpinner(currencyList: MutableList<String>) {[m
+         var isTouched = false[m
+[36m@@ -180,7 +241,7 @@[m [mclass Conversion : Fragment() {[m
+                                 mDesiredCurrency[m
+                             )[m
+ [m
+[31m-                        deleteBaseFromSpinner(currencyList)[m
+[32m+[m[32m                        deleteBaseCurrency()[m
+                     } else {[m
+                         isTouched = true[m
+                     }[m
+[36m@@ -192,22 +253,6 @@[m [mclass Conversion : Fragment() {[m
+             }[m
+     }[m
+ [m
+[31m-    /** Copy list of all currencies,[m
+[31m-     *  check if given list contains base currency, and desired currency (if user have already picked one).[m
+[31m-     *  If list contains these currencies, delete it, so user will not see them in spinner anymore.  */[m
+[31m-    private fun deleteBaseFromSpinner(currencyList: MutableList<String>) {[m
+[31m-        if (mDesiredCurrency != "default") {[m
+[31m-            val desiredIndex =[m
+[31m-                currencyList.indices.find { currencyList[it] == mDesiredCurrency }[m
+[31m-            desiredIndex?.let { currencyList.removeAt(it) }[m
+[31m-        }[m
+[31m-        val baseIndex =[m
+[31m-            currencyList.indices.find { currencyList[it] == mBaseCurrency }[m
+[31m-        baseIndex?.let { currencyList.removeAt(it) }[m
+[31m-[m
+[31m-        prepareFromSpinner(currencyList)[m
+[31m-        prepareToSpinner(currencyList)[m
+[31m-    }[m
+ [m
+     /** get given value from EditText, and if it contains any value, perform an api call, and fetch the data.[m
+      * if base/desired currency are empty, or the EditText does not contain any value, inform user to complete data*/[m
+[36m@@ -220,23 +265,6 @@[m [mclass Conversion : Fragment() {[m
+                 selectedCurrency = mDesiredCurrency,[m
+                 amount = mBinding.conversionEnterValue.text.toString()[m
+             )[m
+[31m-            //TODO TEST[m
+[31m-            viewLifecycleOwner.lifecycleScope.launch {[m
+[31m-                mViewModel.exchangeState.observe(viewLifecycleOwner, Observer {[m
+[31m-                    mBinding.conversionConvertedData.visibility = View.VISIBLE[m
+[31m-                    mBinding.conversionConvertedData.text = String.format([m
+[31m-                        getString([m
+[31m-                            R.string.formatted_you_will_receive,[m
+[31m-                            it.data?.result,[m
+[31m-                            it?.data?.query?.to[m
+[31m-                        )[m
+[31m-                    )[m
+[31m-                    Log.i([m
+[31m-                        TAG,[m
+[31m-                        "getValueFromEditText: FROM ${it.data?.query?.from} TO ${it.data?.query?.to} AMOUNT ${it.data?.query?.amount} RESULT = ${it.data?.result}"[m
+[31m-                    )[m
+[31m-                })[m
+[31m-            }[m
+         } else {[m
+             Toast.makeText([m
+                 requireActivity(),[m
+[36m@@ -248,9 +276,7 @@[m [mclass Conversion : Fragment() {[m
+ [m
+     /** After refreshing the layout, copy list of all currencies, delete base currency from the list,[m
+      * clear TextView that display converted currency, make it invisible */[m
+[31m-    private fun defaultViewsSetup(currencyList: MutableList<String>) {[m
+[31m-        deleteBaseFromSpinner(currencyList)[m
+[31m-[m
+[32m+[m[32m    private fun defaultViewsSetup() {[m
+         mBinding.conversionEnterValue.text.clear()[m
+         mBinding.conversionConvertedData.text = ""[m
+         mBinding.conversionConvertedData.visibility = View.INVISIBLE[m
+[1mdiff --git a/app/src/main/java/com/example/currencyexchange/Fragments/Fluctuation.kt b/app/src/main/java/com/example/currencyexchange/Fragments/Fluctuation.kt[m
+[1mindex 8539bf4..5484a29 100644[m
+[1m--- a/app/src/main/java/com/example/currencyexchange/Fragments/Fluctuation.kt[m
+[1m+++ b/app/src/main/java/com/example/currencyexchange/Fragments/Fluctuation.kt[m
+[36m@@ -21,7 +21,6 @@[m [mimport androidx.lifecycle.repeatOnLifecycle[m
+ import androidx.recyclerview.widget.LinearLayoutManager[m
+ import com.example.currencyexchange.Adapters.FluctuationAdapter[m
+ import com.example.currencyexchange.DataWrapper.DataWrapper[m
+[31m-import com.example.currencyexchange.Models.FluctuationRates[m
+ import com.example.currencyexchange.R[m
+ import com.example.currencyexchange.ViewModels.FluctuationViewModel[m
+ import com.example.currencyexchange.ViewModels.FragmentTagViewModel[m
+[36m@@ -82,7 +81,6 @@[m [mclass Fluctuation : Fragment() {[m
+                 }[m
+             }[m
+         }[m
+[31m-[m
+         viewLifecycleOwner.lifecycleScope.launch {[m
+             repeatOnLifecycle(Lifecycle.State.STARTED) {[m
+                 mViewModel.allCurrencies.collect { currencies ->[m
+[36m@@ -91,6 +89,10 @@[m [mclass Fluctuation : Fragment() {[m
+                             currencies.data?.currencyData?.forEach {[m
+                                 mCurrencies.add(it.key)[m
+                             }[m
+[32m+[m[32m                            if (!mCurrencies.contains("Select currency")) {[m
+[32m+[m[32m                                mCurrencies.add(0, "Select currency")[m
+[32m+[m[32m                            }[m
+[32m+[m[32m                            deleteBaseCurrencyFromList()[m
+                         }[m
+ [m
+                         is DataWrapper.Error -> {[m
+[36m@@ -114,13 +116,10 @@[m [mclass Fluctuation : Fragment() {[m
+             }[m
+         }[m
+ [m
+[31m-        //    TODO finish refreshing layout[m
+         /** Reload UI to 'default' state (as it was while entering the layout for the first time) */[m
+[31m-        mBinding.fluctuationRefreshContainer.setOnRefreshListener{[m
+[32m+[m[32m        mBinding.fluctuationRefreshContainer.setOnRefreshListener {[m
+             mIsChanged = true[m
+[31m-//            mBaseCurrency = mViewModel.getBaseCurrency()[m
+[31m-//            defaultViewsSetup()[m
+[31m-//[m
+[32m+[m[32m            defaultViewsSetup()[m
+             mBinding.fluctuationRefreshContainer.isRefreshing = false[m
+         }[m
+         return view[m
+[36m@@ -141,7 +140,7 @@[m [mclass Fluctuation : Fragment() {[m
+         }[m
+         mBinding.fluctuationSetToOk.setOnClickListener {[m
+             getDateFromUser(2)[m
+[31m-            prepareViewsForListView(mCurrencies)[m
+[32m+[m[32m            prepareViewsForListView()[m
+         }[m
+         /** Prepare a flag, which can trigger the Navigation Components in the PagerBase fragment (which is ViewHolder host)[m
+          * to move user to the ChangeBaseCurrency fragment, where user can set new base currency (permanently, in database) */[m
+[36m@@ -192,7 +191,7 @@[m [mclass Fluctuation : Fragment() {[m
+         mBinding.fluctuationSetToOk.visibility = View.VISIBLE[m
+     }[m
+ [m
+[31m-    private fun prepareViewsForListView(currencies: MutableList<String>) {[m
+[32m+[m[32m    private fun prepareViewsForListView() {[m
+         mBinding.fluctuationToCenterTv.visibility = View.INVISIBLE[m
+         mBinding.fluctuationToDt.visibility = View.INVISIBLE[m
+         mBinding.fluctuationSetToOk.visibility = View.INVISIBLE[m
+[36m@@ -211,24 +210,43 @@[m [mclass Fluctuation : Fragment() {[m
+         mBinding.fluctuationToDate.text =[m
+             String.format(getString(R.string.formatted_to), endDate)[m
+ [m
+[32m+[m[32m        Toast.makeText([m
+[32m+[m[32m            activity,[m
+[32m+[m[32m            getString(R.string.select_up_to_30_currencies),[m
+[32m+[m[32m            Toast.LENGTH_SHORT[m
+[32m+[m[32m        ).show()[m
+[32m+[m
+         // Make sure that the base currency has some value, before deleting it from the list.[m
+         if (mBaseCurrency != "default") {[m
+[31m-            deleteBaseCurrencyFromList(currencies)[m
+[32m+[m[32m            deleteBaseCurrencyFromList()[m
+         }[m
+     }[m
+ [m
+[31m-    /** This function will delete base currency from the list, that will be forwarded as an input later on  */[m
+[31m-    private fun deleteBaseCurrencyFromList(list: MutableList<String>) {[m
+[31m-        val currencyList = list.toMutableList()[m
+[32m+[m[32m    /** This function is kind of a bypass, since we can't just clear the list, and initiate it with 'mCurrencyList' because there will be no effect of it[m
+[32m+[m[32m    The list has some "deeper" reference. There will be two, separated list. One, for spinner, with "Currency" header inside, and second one without this header  */[m
+[32m+[m[32m    private fun deleteBaseCurrencyFromList() {[m
+[32m+[m[32m        val spinnerList: MutableList<String> = mutableListOf()[m
+[32m+[m[32m        val lvList: MutableList<String> = mutableListOf()[m
+ [m
+[31m-        if (currencyList.toString().contains(mBaseCurrency)) {[m
+[31m-            val index = currencyList.indices.find {[m
+[31m-                currencyList[it] == mBaseCurrency[m
+[31m-            }[m
+[31m-            currencyList.removeAt(index!!)[m
+[32m+[m[32m        mCurrencies.forEach {[m
+[32m+[m[32m            spinnerList.add(it)[m
+[32m+[m[32m            lvList.add(it)[m
+         }[m
+[31m-        setupBaseCurrencySpinner(currencyList)[m
+[31m-        setupListView(currencyList)[m
+[32m+[m
+[32m+[m[32m        if (spinnerList.toString().contains(mBaseCurrency) && lvList.toString()[m
+[32m+[m[32m                .contains(mBaseCurrency)[m
+[32m+[m[32m        ) {[m
+[32m+[m[32m            val spinnerIndex = spinnerList.indices.find { spinnerList[it] == mBaseCurrency }[m
+[32m+[m[32m            val listIndex = lvList.indices.find { lvList[it] == mBaseCurrency }[m
+[32m+[m[32m            spinnerIndex?.let { spinnerList.removeAt(it) }[m
+[32m+[m[32m            listIndex?.let { lvList.removeAt(it) }[m
+[32m+[m[32m        }[m
+[32m+[m
+[32m+[m[32m        //Delete "Select currency" value from the list intended for ListView.[m
+[32m+[m[32m        lvList.removeAt(0)[m
+[32m+[m
+[32m+[m[32m        setupBaseCurrencySpinner(spinnerList)[m
+[32m+[m[32m        setupListView(lvList)[m
+     }[m
+ [m
+     /** Setup spinner that allow user to change the base currency. It will NOT affect the database, it will be a temporary change. */[m
+[36m@@ -247,7 +265,7 @@[m [mclass Fluctuation : Fragment() {[m
+                                 getString(R.string.formatted_base_currency),[m
+                                 mBaseCurrency[m
+                             )[m
+[31m-                        deleteBaseCurrencyFromList(currencyNames)[m
+[32m+[m[32m                        deleteBaseCurrencyFromList()[m
+                     } else {[m
+                         mIsTouched = true[m
+                     }[m
+[36m@@ -264,11 +282,6 @@[m [mclass Fluctuation : Fragment() {[m
+         val adapter =[m
+             ArrayAdapter(requireActivity(), android.R.layout.simple_list_item_multiple_choice, list)[m
+ [m
+[31m-        Toast.makeText([m
+[31m-            activity,[m
+[31m-            getString(R.string.select_up_to_30_currencies),[m
+[31m-            Toast.LENGTH_SHORT[m
+[31m-        ).show()[m
+ [m
+         mBinding.fluctuationSelectSymbolsLv.choiceMode = ListView.CHOICE_MODE_MULTIPLE[m
+         mBinding.fluctuationSelectSymbolsLv.adapter = adapter[m
+[36m@@ -294,10 +307,7 @@[m [mclass Fluctuation : Fragment() {[m
+             }[m
+ [m
+         mBinding.fluctuationSaveSymbols.setOnClickListener {[m
+[31m-            // Whenever layout will be refreshed, clear the symbols list, so it will not contain previously picked currencies.[m
+[31m-            if (mIsChanged) {[m
+[31m-                list.clear()[m
+[31m-            }[m
+[32m+[m
+             //Add to the created list all of the checked symbols. Next function will convert them into String[m
+             val selectedCurrencies: MutableList<String> = mutableListOf()[m
+ [m
+[36m@@ -312,10 +322,7 @@[m [mclass Fluctuation : Fragment() {[m
+ [m
+     private fun getCurrencies(list: MutableList<String>) {[m
+ //        Perform an api call by given base currency, and checked currencies from the ListView, and change views visibility, to display RecyclerView.[m
+[31m-        Log.i([m
+[31m-            TAG,[m
+[31m-            "getCurrencies: BASE $mBaseCurrency START DATE $startDate END DATE $endDate SELECTED CURRENCIES $list"[m
+[31m-        )[m
+[32m+[m
+         mViewModel.fetchFluctuation([m
+             baseCurrency = mBaseCurrency,[m
+             selectedCurrencies = list.joinToString(separator = ","),[m
+[36m@@ -326,7 +333,8 @@[m [mclass Fluctuation : Fragment() {[m
+     }[m
+ [m
+     private fun prepareRecyclerView() {[m
+[31m-        mBinding.fluctuationBaseCurrencyTv.text = mBaseCurrency[m
+[32m+[m[32m        mBinding.fluctuationBaseCurrencyTv.text =[m
+[32m+[m[32m            String.format(getString(R.string.formatted_base_currency), mBaseCurrency)[m
+         mBinding.fluctuationBaseInRv.text =[m
+             String.format(getString(R.string.formatted_base_currency), mBaseCurrency)[m
+         mBinding.fluctuationRv.layoutManager = LinearLayoutManager(this.requireContext())[m
+[1mdiff --git a/app/src/main/java/com/example/currencyexchange/Fragments/HistoricalRates.kt b/app/src/main/java/com/example/currencyexchange/Fragments/HistoricalRates.kt[m
+[1mindex 34b2554..672ad34 100644[m
+[1m--- a/app/src/main/java/com/example/currencyexchange/Fragments/HistoricalRates.kt[m
+[1m+++ b/app/src/main/java/com/example/currencyexchange/Fragments/HistoricalRates.kt[m
+[36m@@ -1,263 +1,347 @@[m
+ package com.example.currencyexchange.Fragments[m
+ [m
+[32m+[m[32mimport android.annotation.SuppressLint[m
+[32m+[m[32mimport android.os.Bundle[m
+[32m+[m[32mimport android.util.Log[m
+[32m+[m[32mimport android.view.LayoutInflater[m
+[32m+[m[32mimport android.view.View[m
+[32m+[m[32mimport android.view.ViewGroup[m
+[32m+[m[32mimport android.widget.AdapterView[m
+[32m+[m[32mimport android.widget.ArrayAdapter[m
+[32m+[m[32mimport android.widget.ListView[m
+[32m+[m[32mimport android.widget.Toast[m
+ import androidx.fragment.app.Fragment[m
+[32m+[m[32mimport androidx.fragment.app.activityViewModels[m
+[32m+[m[32mimport androidx.fragment.app.viewModels[m
+[32m+[m[32mimport androidx.lifecycle.Lifecycle[m
+[32m+[m[32mimport androidx.lifecycle.Observer[m
+[32m+[m[32mimport androidx.lifecycle.lifecycleScope[m
+[32m+[m[32mimport androidx.lifecycle.repeatOnLifecycle[m
+[32m+[m[32mimport androidx.recyclerview.widget.LinearLayoutManager[m
+[32m+[m[32mimport com.example.currencyexchange.Adapters.HistoricalAdapter[m
+[32m+[m[32mimport com.example.currencyexchange.DataWrapper.DataWrapper[m
+[32m+[m[32mimport com.example.currencyexchange.R[m
+[32m+[m[32mimport com.example.currencyexchange.ViewModels.FragmentTagViewModel[m
+[32m+[m[32mimport com.example.currencyexchange.ViewModels.HistoricalViewModel[m
+[32m+[m[32mimport com.example.currencyexchange.databinding.FragmentHistoricalRatesBinding[m
+[32m+[m[32mimport kotlinx.coroutines.launch[m
+[32m+[m[32mimport java.text.SimpleDateFormat[m
+[32m+[m[32mimport java.util.Calendar[m
+ [m
+ class HistoricalRates : Fragment() {[m
+[31m-//    //  View Binding[m
+[31m-//    private var _binding: FragmentHistoricalRatesBinding? = null[m
+[31m-//    private val mBinding get() = _binding!![m
+[31m-//[m
+[31m-//    // Instances[m
+[31m-//    private val mApiInstance = ApiServices.getInstance()[m
+[31m-//    private var mDatabaseInstance: CurrencyDatabaseRepository? = null[m
+[31m-//[m
+[31m-//    //  View Model[m
+[31m-//    lateinit var mViewModel: HistoricalViewModel[m
+[31m-//[m
+[31m-//    //  Variables[m
+[31m-//    private val TAG = "HistoricalRates"[m
+[31m-//    private var mDate: String = "default"[m
+[31m-//    private var mBaseCurrency = "default"[m
+[31m-//    private var mIsInit = false[m
+[31m-//    private var mIsTouched = false[m
+[31m-//    private var mHistoricalAdapter: HistoricalAdapter? = null[m
+[31m-//[m
+[31m-//    private val mCalendar = Calendar.getInstance()[m
+[31m-//    private var mCurrencyList: MutableList<CurrencyNamesModel> = arrayListOf()[m
+[31m-//    private var mAlLCurrencies: MutableList<CurrencyNamesModel> = mutableListOf()[m
+[31m-//    private var mIsRefreshed: Boolean = false[m
+[31m-//[m
+[31m-//    override fun onCreateView([m
+[31m-//        inflater: LayoutInflater, container: ViewGroup?,[m
+[31m-//        savedInstanceState: Bundle?[m
+[31m-//    ): View {[m
+[31m-//        _binding = FragmentHistoricalRatesBinding.inflate(inflater, container, false)[m
+[31m-//        val view = mBinding.root[m
+[31m-//[m
+[31m-//        mDatabaseInstance = (activity?.application as CurrencyApplication).repository[m
+[31m-//[m
+[31m-//        mViewModel = ViewModelProvider([m
+[31m-//            this,[m
+[31m-//            HistoricalFactory(CurrencyRetrofitRepository(mApiInstance), mDatabaseInstance!!)[m
+[31m-//        ).get(HistoricalViewModel::class.java)[m
+[31m-//[m
+[31m-////        mViewModel.mBaseCurrency.observe([m
+[31m-////            requireActivity()){[m
+[31m-////                mBaseCurrency = it[m
+[31m-////            }[m
+[31m-////        mViewModel.currencyList.observe(requireActivity()){[m
+[31m-////            mCurrencyList.addAll(it)[m
+[31m-////            mAlLCurrencies.addAll(it)[m
+[31m-////        }[m
+[31m-//        mViewModel.historicalData.observe(requireActivity()) {[m
+[31m-//            mHistoricalAdapter = HistoricalAdapter()[m
+[31m-//            mHistoricalAdapter?.setData(((it?.rates ?: mutableMapOf()) as HashMap<String, Double>))[m
+[31m-//            mBinding.historicalRv.layoutManager = LinearLayoutManager(this.context)[m
+[31m-//            mBinding.historicalRv.adapter = mHistoricalAdapter[m
+[31m-//        }[m
+[31m-//[m
+[31m-//        mBinding.historicalRefreshContainer.setOnRefreshListener {[m
+[31m-//            mIsRefreshed = true[m
+[31m-////            mBaseCurrency = mViewModel.getBaseCurrency()[m
+[31m-//            mViewModel.clearApiResponse()[m
+[31m-//[m
+[31m-//            setDefaultVisibility()[m
+[31m-//            mBinding.historicalRefreshContainer.isRefreshing = false[m
+[31m-//        }[m
+[31m-//        return view[m
+[31m-//    }[m
+[31m-//[m
+[31m-//    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {[m
+[31m-//        super.onViewCreated(view, savedInstanceState)[m
+[31m-//[m
+[31m-//        mCalendar.set(1999, 2, 1)[m
+[31m-//        mBinding.historicalDt.minDate = mCalendar.timeInMillis[m
+[31m-//        mBinding.historicalDt.maxDate = Calendar.getInstance().timeInMillis[m
+[31m-//[m
+[31m-//        mBinding.historicalChangeBaseIcon.setOnClickListener {[m
+[31m-//            val mFragmentTagViewModel: FragmentTagViewModel by viewModels([m
+[31m-//                ownerProducer = {requireParentFragment()})[m
+[31m-//            mFragmentTagViewModel.setMoveFlag(true)[m
+[31m-//        }[m
+[31m-//        setDefaultVisibility()[m
+[31m-//    }[m
+[31m-//[m
+[31m-//    // Prepare default visibility - it is mainly needed after user will refresh the layout[m
+[31m-//    private fun setDefaultVisibility() {[m
+[31m-//        /** If user refreshed layout uncheck every position in ListView */[m
+[31m-//        if (mIsRefreshed) {[m
+[31m-//            for (i in 0 until mBinding.historicalSymbolsLv.checkedItemCount) {[m
+[31m-//                mBinding.historicalSymbolsLv.setItemChecked(i, false)[m
+[31m-//            }[m
+[31m-//        }[m
+[31m-//        mBinding.historicalInfo.visibility = View.VISIBLE[m
+[31m-//        mBinding.historicalDt.visibility = View.VISIBLE[m
+[31m-//        mBinding.historicalSaveDate.visibility = View.VISIBLE[m
+[31m-//[m
+[31m-//        mBinding.historicalSelectInfo.visibility = View.INVISIBLE[m
+[31m-//        mBinding.historicalSymbolsLv.visibility = View.INVISIBLE[m
+[31m-//        mBinding.historicalSaveSymbols.visibility = View.INVISIBLE[m
+[31m-//        mBinding.historicalChangeInfo.visibility = View.INVISIBLE[m
+[31m-//        mBinding.historicalChangeBase.visibility = View.INVISIBLE[m
+[31m-//        mBinding.historicalBaseTv.visibility = View.INVISIBLE[m
+[31m-//        mBinding.historicalDateTv.visibility = View.INVISIBLE[m
+[31m-//[m
+[31m-//        mBinding.historicalDateTv.visibility = View.INVISIBLE[m
+[31m-//        mBinding.historicalRv.visibility = View.INVISIBLE[m
+[31m-//[m
+[31m-//        mBinding.historicalSaveDate.setOnClickListener {[m
+[31m-//            getDate()[m
+[31m-//        }[m
+[31m-//    }[m
+[31m-//[m
+[31m-//    //  Get picked date, and store it in mDate variable in format of 'yyyy-mm-dd'[m
+[31m-//    @SuppressLint("SimpleDateFormat")[m
+[31m-//    private fun getDate() {[m
+[31m-//        val cal = Calendar.getInstance()[m
+[31m-//        val sdf = SimpleDateFormat("yyyy-MM-dd")[m
+[31m-//        cal.set(Calendar.YEAR, mBinding.historicalDt.year)[m
+[31m-//        cal.set(Calendar.MONTH, mBinding.historicalDt.month)[m
+[31m-//        cal.set(Calendar.DATE, mBinding.historicalDt.dayOfMonth)[m
+[31m-//        mDate = sdf.format(cal.time).toString()[m
+[31m-//        mViewModel.date = mDate[m
+[31m-//        setVisibilityToLv()[m
+[31m-//    }[m
+[31m-//[m
+[31m-//    //  Prepare views to display ListView. Make unneeded views invisible[m
+[31m-//    private fun setVisibilityToLv() {[m
+[31m-//        mBinding.historicalInfo.visibility = View.INVISIBLE[m
+[31m-//        mBinding.historicalDt.visibility = View.INVISIBLE[m
+[31m-//        mBinding.historicalSaveDate.visibility = View.INVISIBLE[m
+[31m-//[m
+[31m-//        mBinding.historicalSelectInfo.visibility = View.VISIBLE[m
+[31m-//        mBinding.historicalSymbolsLv.visibility = View.VISIBLE[m
+[31m-//        mBinding.historicalSaveSymbols.visibility = View.VISIBLE[m
+[31m-//        mBinding.historicalChangeInfo.visibility = View.VISIBLE[m
+[31m-//        mBinding.historicalChangeBase.visibility = View.VISIBLE[m
+[31m-//        mBinding.historicalBaseTv.visibility = View.VISIBLE[m
+[31m-//        mBinding.historicalDateTv.visibility = View.VISIBLE[m
+[31m-//[m
+[31m-//        mBinding.historicalDateTv.text = String.format(getString(R.string.formatted_date), mDate)[m
+[31m-//        mBinding.historicalBaseTv.text = String.format(getString(R.string.formatted_base_currency), mBaseCurrency)[m
+[31m-//        deleteBaseFromTheList(mCurrencyList)[m
+[31m-//    }[m
+[31m-//[m
+[31m-//    // Delete base currency from the list, so it will not be presented in Spinner, and ListView[m
+[31m-//    private fun deleteBaseFromTheList(list: MutableList<CurrencyNamesModel>) {[m
+[31m-//        if (list.toString().contains(mBaseCurrency)) {[m
+[31m-//            val index = list.indices.find { list[it].toString() == mBaseCurrency }[m
+[31m-//            list.removeAt(index!!)[m
+[31m-//        }[m
+[31m-//        if (!mIsInit) {[m
+[31m-//            setupSpinner(list)[m
+[31m-//            setupListView(list)[m
+[31m-//            mIsInit = true[m
+[31m-//        }[m
+[31m-//    }[m
+[31m-//[m
+[31m-//    // Prepare spinner to display available currencies to change base currency, but only temporary. It will NOT affect the database.[m
+[31m-//    private fun setupSpinner(currencies: MutableList<CurrencyNamesModel>) {[m
+[31m-//        val adapter =[m
+[31m-//            ArrayAdapter(requireActivity(), android.R.layout.simple_spinner_item, currencies)[m
+[31m-//        mBinding.historicalChangeBase.adapter = adapter[m
+[31m-//        mBinding.historicalChangeBase.onItemSelectedListener =[m
+[31m-//            object : AdapterView.OnItemSelectedListener {[m
+[31m-//                override fun onItemSelected(p0: AdapterView<*>?, p1: View?, p2: Int, p3: Long) {[m
+[31m-//                    /** By using boolean variable: "mIsTouched" we can avoid self picking first value from the spinner   */[m
+[31m-//                    if (mIsTouched) {[m
+[31m-//                        mBaseCurrency = currencies[p2].toString()[m
+[31m-//[m
+[31m-//                        mBinding.historicalBaseTv.text =[m
+[31m-//                            String.format(getString(R.string.formatted_base_currency), mBaseCurrency)[m
+[31m-//                        currencies.clear()[m
+[31m-//                        currencies.addAll(mAlLCurrencies)[m
+[31m-//[m
+[31m-//                        deleteBaseFromTheList(currencies)[m
+[31m-//                        setupListView(currencies)[m
+[31m-//                        adapter.notifyDataSetChanged()[m
+[31m-//                    } else {[m
+[31m-//                        mIsTouched = true[m
+[31m-//                    }[m
+[31m-//                }[m
+[31m-//[m
+[31m-//                override fun onNothingSelected(p0: AdapterView<*>?) {[m
+[31m-//                    Log.i(TAG, "onNothingSelected in historical spinner ")[m
+[31m-//                }[m
+[31m-//            }[m
+[31m-//    }[m
+[31m-//[m
+[31m-//    //Prepare ListView to display available currencies to pick up, as a reference to historical rates of selected base currency[m
+[31m-//    private fun setupListView(list: MutableList<CurrencyNamesModel>) {[m
+[31m-//        val currencies: MutableList<CurrencyNamesModel> = mutableListOf()[m
+[31m-//        val adapter =[m
+[31m-//            ArrayAdapter(requireActivity(), android.R.layout.simple_list_item_multiple_choice, list)[m
+[31m-//[m
+[31m-//        Toast.makeText([m
+[31m-//            activity,[m
+[31m-//            getString(R.string.select_up_to_30_currencies),[m
+[31m-//            Toast.LENGTH_SHORT[m
+[31m-//        ).show()[m
+[31m-//[m
+[31m-//        mBinding.historicalSymbolsLv.adapter = adapter[m
+[31m-//        mBinding.historicalSymbolsLv.choiceMode = ListView.CHOICE_MODE_MULTIPLE[m
+[31m-//        mBinding.historicalSymbolsLv.onItemClickListener =[m
+[31m-//            object : AdapterView.OnItemClickListener {[m
+[31m-//                override fun onItemClick([m
+[31m-//                    parent: AdapterView<*>?,[m
+[31m-//                    view: View?,[m
+[31m-//                    position: Int,[m
+[31m-//                    id: Long[m
+[31m-//                ) {[m
+[31m-//[m
+[31m-//                    /** After every click, check if total selected amount of symbols is <= 30.[m
+[31m-//                     * If user will try to select more than 30 symbols, inform him that he can't select more than 30[m
+[31m-//                     * The limitation is result from not getting data from the server. Probably because of the retrofit wait time limit[m
+[31m-//                     * **/[m
+[31m-//[m
+[31m-//                    if (mBinding.historicalSymbolsLv.checkedItemCount > 30) {[m
+[31m-//                        Toast.makeText([m
+[31m-//                            requireContext(),[m
+[31m-//                            getString(R.string.cant_select_more_currencies),[m
+[31m-//                            Toast.LENGTH_SHORT[m
+[31m-//                        ).show()[m
+[31m-//                        mBinding.historicalSymbolsLv.setItemChecked(position, false)[m
+[31m-//                    }[m
+[31m-//                }[m
+[31m-//            }[m
+[31m-//        mBinding.historicalSaveSymbols.setOnClickListener {[m
+[31m-//            // Check if the fragment was refreshed (by SwiperRefreshLayout) if yes, clear currencies list.[m
+[31m-//            /** If this list will not be cleared, then after refresh, previously picked currencies will be pushed to the api call.  */[m
+[31m-//            if (mIsRefreshed) {[m
+[31m-//                currencies.clear()[m
+[31m-//            }[m
+[31m-//[m
+[31m-//            /** Add to the created list all of the checked symbols. Next function will convert them into String */[m
+[31m-//            for (i in 0 until list.size) {[m
+[31m-//                if (mBinding.historicalSymbolsLv.isItemChecked(i)) {[m
+[31m-//                    currencies.add(list[i])[m
+[31m-//                }[m
+[31m-//            }[m
+[31m-//            getCurrencies(currencies)[m
+[31m-//        }[m
+[31m-//    }[m
+[31m-//[m
+[31m-//    /*  Fetch data from the api, and observe it.[m
+[31m-//     After whole data is fetched, pass it into adapter which will display it in RecyclerView    */[m
+[31m-//    private fun getCurrencies(list: MutableList<CurrencyNamesModel>) {[m
+[31m-//        mViewModel.fetchHistoricalData(mBaseCurrency, list.joinToString(separator = ", "))[m
+[31m-//        prepareViewsForRv()[m
+[31m-//    }[m
+[31m-//[m
+[31m-//    //  Prepare views to display RecyclerView. Delete unneeded views[m
+[31m-//    private fun prepareViewsForRv() {[m
+[31m-//        mBinding.historicalSelectInfo.visibility = View.INVISIBLE[m
+[31m-//        mBinding.historicalSymbolsLv.visibility = View.INVISIBLE[m
+[31m-//        mBinding.historicalSaveSymbols.visibility = View.INVISIBLE[m
+[31m-//        mBinding.historicalChangeInfo.visibility = View.INVISIBLE[m
+[31m-//        mBinding.historicalChangeBase.visibility = View.INVISIBLE[m
+[31m-//[m
+[31m-//        mBinding.historicalDateTv.visibility = View.VISIBLE[m
+[31m-//        mBinding.historicalRv.visibility = View.VISIBLE[m
+[31m-//    }[m
+[32m+[m
+[32m+[m[32m    private val TAG = "HistoricalRates"[m
+[32m+[m[32m    private var mDate: String = "default"[m
+[32m+[m[32m    private var mBaseCurrency = "default"[m
+[32m+[m[32m    private var mIsRefreshed: Boolean = false[m
+[32m+[m
+[32m+[m[32m    private var _binding: FragmentHistoricalRatesBinding? = null[m
+[32m+[m[32m    private val mBinding get() = _binding!![m
+[32m+[m[32m    private val mViewModel: HistoricalViewModel by activityViewModels()[m
+[32m+[m[32m    private val mCalendar = Calendar.getInstance()[m
+[32m+[m
+[32m+[m[32m    private var mHistoricalAdapter: HistoricalAdapter? = null[m
+[32m+[m[32m    private var mCurrencyList: MutableList<String> = mutableListOf()[m
+[32m+[m
+[32m+[m[32m    override fun onCreateView([m
+[32m+[m[32m        inflater: LayoutInflater, container: ViewGroup?,[m
+[32m+[m[32m        savedInstanceState: Bundle?[m
+[32m+[m[32m    ): View {[m
+[32m+[m[32m        _binding = FragmentHistoricalRatesBinding.inflate(inflater, container, false)[m
+[32m+[m[32m        mBinding.historicalRv.layoutManager = LinearLayoutManager(this.context)[m
+[32m+[m[32m        val view = mBinding.root[m
+[32m+[m
+[32m+[m[32m        viewLifecycleOwner.lifecycleScope.launch {[m
+[32m+[m[32m            repeatOnLifecycle(Lifecycle.State.STARTED) {[m
+[32m+[m[32m                mViewModel.baseCurrency.collect { currency ->[m
+[32m+[m[32m                    when (currency) {[m
+[32m+[m[32m                        is DataWrapper.Success -> {[m
+[32m+[m[32m                            mBaseCurrency = currency.data?.baseCurrency.toString()[m
+[32m+[m[32m                        }[m
+[32m+[m
+[32m+[m[32m                        is DataWrapper.Error -> {[m
+[32m+[m[32m                            Log.e([m
+[32m+[m[32m                                TAG,[m
+[32m+[m[32m                                "onCreateView: couldn't retrieve base currency from the ViewModel. ${currency.message}",[m
+[32m+[m[32m                            )[m
+[32m+[m[32m                        }[m
+[32m+[m[32m                    }[m
+[32m+[m[32m                }[m
+[32m+[m[32m            }[m
+[32m+[m[32m        }[m
+[32m+[m
+[32m+[m[32m        viewLifecycleOwner.lifecycleScope.launch {[m
+[32m+[m[32m            mViewModel.allCurrencies.collect { currencies ->[m
+[32m+[m[32m                when (currencies) {[m
+[32m+[m[32m                    is DataWrapper.Success -> {[m
+[32m+[m[32m                        currencies.data?.currencyData?.keys?.forEach {[m
+[32m+[m[32m                            mCurrencyList.add(it)[m
+[32m+[m[32m                        }[m
+[32m+[m[32m                        /** Add to the currency list a value called 'Currency' as a row, since spinners by default are picking values when initiated.[m
+[32m+[m[32m                        By adding this "header", user will be able to pick first currency */[m
+[32m+[m
+[32m+[m[32m                        if (!mCurrencyList.contains("Currency")) {[m
+[32m+[m[32m                            mCurrencyList.add(0, "Currency")[m
+[32m+[m[32m                        }[m
+[32m+[m[32m                        deleteBaseFromTheList()[m
+[32m+[m
+[32m+[m[32m                    }[m
+[32m+[m
+[32m+[m[32m                    is DataWrapper.Error -> {[m
+[32m+[m[32m                        Log.e([m
+[32m+[m[32m                            TAG,[m
+[32m+[m[32m                            "onCreateView: couldn't retrieve all currencies from the viewmodel. ${currencies.message}",[m
+[32m+[m[32m                        )[m
+[32m+[m[32m                    }[m
+[32m+[m[32m                }[m
+[32m+[m[32m            }[m
+[32m+[m[32m        }[m
+[32m+[m
+[32m+[m[32m        viewLifecycleOwner.lifecycleScope.launch {[m
+[32m+[m[32m            repeatOnLifecycle(Lifecycle.State.STARTED) {[m
+[32m+[m[32m                mViewModel.historicalData.observe(viewLifecycleOwner, Observer {[m
+[32m+[m[32m                    mHistoricalAdapter = HistoricalAdapter()[m
+[32m+[m[32m                    mHistoricalAdapter?.setData(it.data?.rates!!)[m
+[32m+[m[32m                    mBinding.historicalRv.adapter = mHistoricalAdapter[m
+[32m+[m[32m                })[m
+[32m+[m[32m            }[m
+[32m+[m[32m        }[m
+[32m+[m[32m        // After refreshing layout, reset UI to the default state, and observe the base currency once again, so user will see "default" base currency[m
+[32m+[m[32m        mBinding.historicalRefreshContainer.setOnRefreshListener {[m
+[32m+[m[32m            mBinding.historicalRefreshContainer.isRefreshing = false[m
+[32m+[m
+[32m+[m[32m            lifecycleScope.launch {[m
+[32m+[m[32m                mViewModel.baseCurrency.collect { currency ->[m
+[32m+[m[32m                    when (currency) {[m
+[32m+[m[32m                        is DataWrapper.Success -> {[m
+[32m+[m[32m                            mBaseCurrency = currency.data?.baseCurrency.toString()[m
+[32m+[m[32m                            mBinding.historicalBaseTv.text = mBaseCurrency[m
+[32m+[m[32m                        }[m
+[32m+[m
+[32m+[m[32m                        is DataWrapper.Error -> {[m
+[32m+[m[32m                            Log.e([m
+[32m+[m[32m                                TAG,[m
+[32m+[m[32m                                "onCreateView: couldn't retrieve base currency from the viewmodel after refreshing the layout.\n${currency.message}",[m
+[32m+[m[32m                            )[m
+[32m+[m[32m                        }[m
+[32m+[m[32m                    }[m
+[32m+[m[32m                }[m
+[32m+[m[32m            }[m
+[32m+[m[32m            mIsRefreshed = true[m
+[32m+[m[32m            setDefaultVisibility()[m
+[32m+[m[32m        }[m
+[32m+[m[32m        return view[m
+[32m+[m[32m    }[m
+[32m+[m
+[32m+[m[32m    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {[m
+[32m+[m[32m        super.onViewCreated(view, savedInstanceState)[m
+[32m+[m
+[32m+[m[32m        mCalendar.set(1999, 2, 1)[m
+[32m+[m[32m        mBinding.historicalDt.minDate = mCalendar.timeInMillis[m
+[32m+[m[32m        mBinding.historicalDt.maxDate = Calendar.getInstance().timeInMillis[m
+[32m+[m
+[32m+[m[32m        mBinding.historicalChangeBaseIcon.setOnClickListener {[m
+[32m+[m[32m            val mFragmentTagViewModel: FragmentTagViewModel by viewModels([m
+[32m+[m[32m                ownerProducer = { requireParentFragment() })[m
+[32m+[m[32m            mFragmentTagViewModel.setMoveFlag(true)[m
+[32m+[m[32m        }[m
+[32m+[m[32m        setDefaultVisibility()[m
+[32m+[m[32m    }[m
+[32m+[m
+[32m+[m[32m    // Prepare default visibility - it is mainly needed after user will refresh the layout[m
+[32m+[m[32m    private fun setDefaultVisibility() {[m
+[32m+[m[32m        /** If user refreshed layout uncheck every position in ListView */[m
+[32m+[m[32m        if (mIsRefreshed) {[m
+[32m+[m[32m            for (i in 0 until mBinding.historicalSymbolsLv.checkedItemCount) {[m
+[32m+[m[32m                mBinding.historicalSymbolsLv.setItemChecked(i, false)[m
+[32m+[m[32m            }[m
+[32m+[m[32m        }[m
+[32m+[m[32m        mBinding.historicalInfo.visibility = View.VISIBLE[m
+[32m+[m[32m        mBinding.historicalDt.visibility = View.VISIBLE[m
+[32m+[m[32m        mBinding.historicalSaveDate.visibility = View.VISIBLE[m
+[32m+[m
+[32m+[m[32m        mBinding.historicalSelectInfo.visibility = View.INVISIBLE[m
+[32m+[m[32m        mBinding.historicalSymbolsLv.visibility = View.INVISIBLE[m
+[32m+[m[32m        mBinding.historicalSaveSymbols.visibility = View.INVISIBLE[m
+[32m+[m[32m        mBinding.historicalChangeInfo.visibility = View.INVISIBLE[m
+[32m+[m[32m        mBinding.historicalChangeBase.visibility = View.INVISIBLE[m
+[32m+[m[32m        mBinding.historicalBaseTv.visibility = View.INVISIBLE[m
+[32m+[m[32m        mBinding.historicalDateTv.visibility = View.INVISIBLE[m
+[32m+[m
+[32m+[m[32m        mBinding.historicalDateTv.visibility = View.INVISIBLE[m
+[32m+[m[32m        mBinding.historicalRv.visibility = View.INVISIBLE[m
+[32m+[m
+[32m+[m[32m        mBinding.historicalSaveDate.setOnClickListener {[m
+[32m+[m[32m            getDate()[m
+[32m+[m[32m        }[m
+[32m+[m[32m    }[m
+[32m+[m
+[32m+[m[32m    //  Get picked date, and store it in mDate variable in format of 'yyyy-mm-dd'[m
+[32m+[m[32m    @SuppressLint("SimpleDateFormat")[m
+[32m+[m[32m    private fun getDate() {[m
+[32m+[m[32m        val cal = Calendar.getInstance()[m
+[32m+[m[32m        val sdf = SimpleDateFormat("yyyy-MM-dd")[m
+[32m+[m[32m        cal.set(Calendar.YEAR, mBinding.historicalDt.year)[m
+[32m+[m[32m        cal.set(Calendar.MONTH, mBinding.historicalDt.month)[m
+[32m+[m[32m        cal.set(Calendar.DATE, mBinding.historicalDt.dayOfMonth)[m
+[32m+[m[32m        mDate = sdf.format(cal.time).toString()[m
+[32m+[m[32m        setVisibilityToLv()[m
+[32m+[m[32m    }[m
+[32m+[m
+[32m+[m[32m    //  Prepare views to display ListView. Make unneeded views invisible[m
+[32m+[m[32m    private fun setVisibilityToLv() {[m
+[32m+[m[32m        mBinding.historicalInfo.visibility = View.INVISIBLE[m
+[32m+[m[32m        mBinding.historicalDt.visibility = View.INVISIBLE[m
+[32m+[m[32m        mBinding.historicalSaveDate.visibility = View.INVISIBLE[m
+[32m+[m
+[32m+[m[32m        mBinding.historicalSelectInfo.visibility = View.VISIBLE[m
+[32m+[m[32m        mBinding.historicalSymbolsLv.visibility = View.VISIBLE[m
+[32m+[m[32m        mBinding.historicalSaveSymbols.visibility = View.VISIBLE[m
+[32m+[m[32m        mBinding.historicalChangeInfo.visibility = View.VISIBLE[m
+[32m+[m[32m        mBinding.historicalChangeBase.visibility = View.VISIBLE[m
+[32m+[m[32m        mBinding.historicalBaseTv.visibility = View.VISIBLE[m
+[32m+[m[32m        mBinding.historicalDateTv.visibility = View.VISIBLE[m
+[32m+[m
+[32m+[m[32m        mBinding.historicalDateTv.text = String.format(getString(R.string.formatted_date), mDate)[m
+[32m+[m[32m        mBinding.historicalBaseTv.text =[m
+[32m+[m[32m            String.format(getString(R.string.formatted_base_currency), mBaseCurrency)[m
+[32m+[m
+[32m+[m[32m        Toast.makeText([m
+[32m+[m[32m            activity,[m
+[32m+[m[32m            getString(R.string.select_up_to_30_currencies),[m
+[32m+[m[32m            Toast.LENGTH_SHORT[m
+[32m+[m[32m        ).show()[m
+[32m+[m
+[32m+[m[32m    }[m
+[32m+[m
+[32m+[m[32m    /** This function is kind of a bypass, since we can't just clear the list, and initiate it with 'mCurrencyList' because there will be no effect of it[m
+[32m+[m[32m    The list has some "deeper" reference. There will be two, separated list. One, for spinner, with "Currency" header inside, and second one without this header  */[m
+[32m+[m[32m    private fun deleteBaseFromTheList() {[m
+[32m+[m
+[32m+[m[32m        val listForSpinner: MutableList<String> = mutableListOf()[m
+[32m+[m[32m        val listForLV: MutableList<String> = mutableListOf()[m
+[32m+[m
+[32m+[m[32m        mCurrencyList.forEach {[m
+[32m+[m[32m            listForSpinner.add(it)[m
+[32m+[m[32m            listForLV.add(it)[m
+[32m+[m[32m        }[m
+[32m+[m
+[32m+[m[32m        if (listForSpinner.toString().contains(mBaseCurrency) && listForLV.contains(mBaseCurrency)[m
+[32m+[m[32m        ) {[m
+[32m+[m[32m            val spinnerIndex = listForSpinner.indices.find { listForSpinner[it] == mBaseCurrency }[m
+[32m+[m[32m            val listIndex = listForLV.indices.find { listForLV[it] == mBaseCurrency }[m
+[32m+[m[32m            spinnerIndex?.let { listForSpinner.removeAt(it) }[m
+[32m+[m[32m            listIndex?.let { listForLV.removeAt(it) }[m
+[32m+[m[32m        }[m
+[32m+[m[32m        //Remove "Currency" value from the list, that is intended for ListView[m
+[32m+[m[32m        listForLV.removeAt(0)[m
+[32m+[m
+[32m+[m[32m        setupSpinner(listForSpinner)[m
+[32m+[m[32m        setupListView(listForLV)[m
+[32m+[m[32m    }[m
+[32m+[m
+[32m+[m[32m    // Prepare spinner to display available currencies to change base currency, but only temporary. It will NOT affect the database.[m
+[32m+[m[32m    private fun setupSpinner(currencies: MutableList<String>) {[m
+[32m+[m[32m        var mIsTouched = false[m
+[32m+[m[32m        val adapter =[m
+[32m+[m[32m            ArrayAdapter(requireActivity(), android.R.layout.simple_spinner_item, currencies)[m
+[32m+[m[32m        mBinding.historicalChangeBase.adapter = adapter[m
+[32m+[m[32m        mBinding.historicalChangeBase.onItemSelectedListener =[m
+[32m+[m[32m            object : AdapterView.OnItemSelectedListener {[m
+[32m+[m[32m                override fun onItemSelected(p0: AdapterView<*>?, p1: View?, p2: Int, p3: Long) {[m
+[32m+[m
+[32m+[m[32m                    /** By using boolean variable: "mIsTouched" we can avoid self picking first value from the spinner   */[m
+[32m+[m[32m                    if (mIsTouched) {[m
+[32m+[m[32m                        mBaseCurrency = currencies[p2][m
+[32m+[m[32m                        mBinding.historicalBaseTv.text =[m
+[32m+[m[32m                            String.format([m
+[32m+[m[32m                                getString(R.string.formatted_base_currency),[m
+[32m+[m[32m                                mBaseCurrency[m
+[32m+[m[32m                            )[m
+[32m+[m[32m                        deleteBaseFromTheList()[m
+[32m+[m[32m                    } else {[m
+[32m+[m[32m                        mIsTouched = true[m
+[32m+[m[32m                    }[m
+[32m+[m[32m                }[m
+[32m+[m
+[32m+[m[32m                override fun onNothingSelected(p0: AdapterView<*>?) {[m
+[32m+[m[32m                    Log.i(TAG, "onNothingSelected in historical spinner ")[m
+[32m+[m[32m                }[m
+[32m+[m[32m            }[m
+[32m+[m[32m    }[m
+[32m+[m
+[32m+[m[32m    //Prepare ListView to display available currencies to pick up, as a reference to historical rates of selected base currency[m
+[32m+[m[32m    private fun setupListView(list: MutableList<String>) {[m
+[32m+[m[32m        val adapter =[m
+[32m+[m[32m            ArrayAdapter(requireActivity(), android.R.layout.simple_list_item_multiple_choice, list)[m
+[32m+[m
+[32m+[m
+[32m+[m[32m        mBinding.historicalSymbolsLv.adapter = adapter[m
+[32m+[m[32m        mBinding.historicalSymbolsLv.choiceMode = ListView.CHOICE_MODE_MULTIPLE[m
+[32m+[m[32m        mBinding.historicalSymbolsLv.onItemClickListener =[m
+[32m+[m[32m            object : AdapterView.OnItemClickListener {[m
+[32m+[m[32m                override fun onItemClick([m
+[32m+[m[32m                    parent: AdapterView<*>?,[m
+[32m+[m[32m                    view: View?,[m
+[32m+[m[32m                    position: Int,[m
+[32m+[m[32m                    id: Long[m
+[32m+[m[32m                ) {[m
+[32m+[m[32m                    /** After every click, check if total selected amount of symbols is <= 30.[m
+[32m+[m[32m                     * If user will try to select more than 30 symbols, inform him that he can't select more than 30[m
+[32m+[m[32m                     * The limitation is result from not getting data from the server. Probably because of the retrofit wait time limit[m
+[32m+[m[32m                     * **/[m
+[32m+[m
+[32m+[m[32m                    if (mBinding.historicalSymbolsLv.checkedItemCount > 30) {[m
+[32m+[m[32m                        Toast.makeText([m
+[32m+[m[32m                            requireContext(),[m
+[32m+[m[32m                            getString(R.string.cant_select_more_currencies),[m
+[32m+[m[32m                            Toast.LENGTH_SHORT[m
+[32m+[m[32m                        ).show()[m
+[32m+[m[32m                        mBinding.historicalSymbolsLv.setItemChecked(position, false)[m
+[32m+[m[32m                    }[m
+[32m+[m[32m                }[m
+[32m+[m[32m            }[m
+[32m+[m[32m        mBinding.historicalSaveSymbols.setOnClickListener {[m
+[32m+[m
+[32m+[m[32m            val selectedCurrencies: MutableList<String> = mutableListOf()[m
+[32m+[m
+[32m+[m[32m            // clear list after reset[m
+[32m+[m[32m            if (mIsRefreshed) {[m
+[32m+[m[32m                selectedCurrencies.clear()[m
+[32m+[m[32m            }[m
+[32m+[m
+[32m+[m[32m            /** Add to the created list all of the checked symbols. Next function will convert them into String */[m
+[32m+[m[32m            for (i in 0 until list.size) {[m
+[32m+[m[32m                if (mBinding.historicalSymbolsLv.isItemChecked(i)) {[m
+[32m+[m[32m                    selectedCurrencies.add(list[i])[m
+[32m+[m[32m                }[m
+[32m+[m[32m            }[m
+[32m+[m[32m            getCurrencies(selectedCurrencies)[m
+[32m+[m[32m        }[m
+[32m+[m[32m    }[m
+[32m+[m
+[32m+[m[32m    /*  Fetch data from the api, and observe it.[m
+[32m+[m[32m     After whole data is fetched, pass it into adapter which will display it in RecyclerView    */[m
+[32m+[m[32m    private fun getCurrencies(list: MutableList<String>) {[m
+[32m+[m[32m        if (mBaseCurrency != "default" && mDate != "default") {[m
+[32m+[m[32m            mViewModel.fetchHistoricalData([m
+[32m+[m[32m                baseCurrency = mBaseCurrency,[m
+[32m+[m[32m                selectedCurrencies = list.joinToString(separator = ", "), date = mDate[m
+[32m+[m[32m            )[m
+[32m+[m[32m            prepareViewsForRv()[m
+[32m+[m[32m        }[m
+[32m+[m[32m    }[m
+[32m+[m
+[32m+[m[32m    //  Prepare views to display RecyclerView. Delete unneeded views[m
+[32m+[m[32m    private fun prepareViewsForRv() {[m
+[32m+[m[32m        mBinding.historicalSelectInfo.visibility = View.INVISIBLE[m
+[32m+[m[32m        mBinding.historicalSymbolsLv.visibility = View.INVISIBLE[m
+[32m+[m[32m        mBinding.historicalSaveSymbols.visibility = View.INVISIBLE[m
+[32m+[m[32m        mBinding.historicalChangeInfo.visibility = View.INVISIBLE[m
+[32m+[m[32m        mBinding.historicalChangeBase.visibility = View.INVISIBLE[m
+[32m+[m
+[32m+[m[32m        mBinding.historicalDateTv.visibility = View.VISIBLE[m
+[32m+[m[32m        mBinding.historicalRv.visibility = View.VISIBLE[m
+[32m+[m[32m    }[m
+ }[m
+ [m
+[1mdiff --git a/app/src/main/java/com/example/currencyexchange/Fragments/Latest.kt b/app/src/main/java/com/example/currencyexchange/Fragments/Latest.kt[m
+[1mindex 77515ce..023ab0d 100644[m
+[1m--- a/app/src/main/java/com/example/currencyexchange/Fragments/Latest.kt[m
+[1m+++ b/app/src/main/java/com/example/currencyexchange/Fragments/Latest.kt[m
+[36m@@ -13,11 +13,9 @@[m [mimport com.example.currencyexchange.Adapters.LatestAdapter[m
+ import com.example.currencyexchange.R[m
+ import com.example.currencyexchange.ViewModels.*[m
+ import com.example.currencyexchange.databinding.FragmentLatestBinding[m
+[31m-import dagger.hilt.android.AndroidEntryPoint[m
+ import kotlinx.coroutines.CoroutineStart[m
+ import kotlinx.coroutines.launch[m
+ [m
+[31m-@AndroidEntryPoint[m
+ class Latest : Fragment() {[m
+ [m
+     private val TAG = "Latest"[m
+[36m@@ -54,9 +52,9 @@[m [mclass Latest : Fragment() {[m
+                             is DataWrapper.Success<*> -> {[m
+ [m
+                                 // Convert currencies from the database to the mutable map, and remove base currency with it's value, push modified data to the adapter[m
+[31m-                                val x = status.data?.latestRates!!.toMutableMap()[m
+[31m-                                x.remove(mBaseCurrency)[m
+[31m-                                mAdapter.setData(x)[m
+[32m+[m[32m                                val currenciesWithoutBase = status.data?.latestRates!!.toMutableMap()[m
+[32m+[m[32m                                currenciesWithoutBase.remove(mBaseCurrency)[m
+[32m+[m[32m                                mAdapter.setData(currenciesWithoutBase)[m
+                             }[m
+ [m
+                             is DataWrapper.Error -> {[m
+[1mdiff --git a/app/src/main/java/com/example/currencyexchange/Fragments/PagerBase.kt b/app/src/main/java/com/example/currencyexchange/Fragments/PagerBase.kt[m
+[1mindex 9478f67..aed35e8 100644[m
+[1m--- a/app/src/main/java/com/example/currencyexchange/Fragments/PagerBase.kt[m
+[1m+++ b/app/src/main/java/com/example/currencyexchange/Fragments/PagerBase.kt[m
+[36m@@ -13,8 +13,6 @@[m [mimport com.example.currencyexchange.Adapters.PagerAdapter[m
+ import com.example.currencyexchange.ViewModels.FragmentTagViewModel[m
+ import com.example.currencyexchange.databinding.FragmentPagerBaseBinding[m
+ import kotlinx.coroutines.launch[m
+[31m-// TODO - Latest G // Conversion G //[m
+[31m-// TODO - can't select first currency from spinner (AED)[m
+ [m
+ class PagerBase : Fragment() {[m
+     private var _binding: FragmentPagerBaseBinding? = null[m
+[1mdiff --git a/app/src/main/java/com/example/currencyexchange/Models/CurrenciesDatabaseModel.kt b/app/src/main/java/com/example/currencyexchange/Models/CurrenciesDatabaseModel.kt[m
+[1mindex edd6b80..63d2c74 100644[m
+[1m--- a/app/src/main/java/com/example/currencyexchange/Models/CurrenciesDatabaseModel.kt[m
+[1m+++ b/app/src/main/java/com/example/currencyexchange/Models/CurrenciesDatabaseModel.kt[m
+[36m@@ -10,12 +10,7 @@[m [mdata class CurrenciesDatabaseMain([m
+     @ColumnInfo("base_currency")[m
+     val baseCurrency: String,[m
+     @ColumnInfo("rates_date")[m
+[31m-    val ratesDate: String?){[m
+[31m-[m
+[31m-//    override fun toString(): String {[m
+[31m-//        return super.toString()[m
+[31m-//    }[m
+[31m-}[m
+[32m+[m[32m    val ratesDate: String?)[m
+ [m
+ @Entity(tableName = "currency_detailed")[m
+ data class CurrenciesDatabaseDetailed([m
+[1mdiff --git a/app/src/main/java/com/example/currencyexchange/ViewModels/ConversionViewModel.kt b/app/src/main/java/com/example/currencyexchange/ViewModels/ConversionViewModel.kt[m
+[1mindex bb87d8b..99861e8 100644[m
+[1m--- a/app/src/main/java/com/example/currencyexchange/ViewModels/ConversionViewModel.kt[m
+[1m+++ b/app/src/main/java/com/example/currencyexchange/ViewModels/ConversionViewModel.kt[m
+[36m@@ -31,7 +31,7 @@[m [mclass ConversionViewModel @Inject constructor([m
+         databaseRepository.baseCurrency[m
+             .map { DataWrapper.Success(it) }[m
+             .catch { DataWrapper.Error(it.message) }[m
+[31m-            .shareIn(viewModelScope, SharingStarted.WhileSubscribed())[m
+[32m+[m[32m            .shareIn(viewModelScope, SharingStarted.WhileSubscribed(), replay = 1)[m
+ [m
+     val allCurrencies: SharedFlow<DataWrapper<CurrenciesDatabaseDetailed>> =[m
+         databaseRepository.currencyData[m
+[1mdiff --git a/app/src/main/java/com/example/currencyexchange/ViewModels/HistoricalViewModel.kt b/app/src/main/java/com/example/currencyexchange/ViewModels/HistoricalViewModel.kt[m
+[1mindex 7b2240d..2f33212 100644[m
+[1m--- a/app/src/main/java/com/example/currencyexchange/ViewModels/HistoricalViewModel.kt[m
+[1m+++ b/app/src/main/java/com/example/currencyexchange/ViewModels/HistoricalViewModel.kt[m
+[36m@@ -1,49 +1,64 @@[m
+[31m-//package com.example.currencyexchange.ViewModels[m
+[31m-//[m
+[31m-//import android.content.ContentValues.TAG[m
+[31m-//import android.util.Log[m
+[31m-//import androidx.lifecycle.*[m
+[31m-//import com.example.currencyexchange.Models.HistoricalRatesModel[m
+[31m-//import com.example.currencyexchange.Repository.Implementation.CurrencyDatabaseRepository[m
+[31m-//import com.example.currencyexchange.Repository.CurrencyRetrofitRepository[m
+[31m-//import kotlinx.coroutines.launch[m
+[31m-//import retrofit2.Call[m
+[31m-//import retrofit2.Response[m
+[31m-//[m
+[31m-//class HistoricalViewModel constructor([m
+[31m-////    private val retrofitRepository: CurrencyRetrofitRepository,[m
+[31m-////    private val databaseRepository: CurrencyDatabaseRepository[m
+[31m-//) : ViewModel() {[m
+[31m-////    var date: String = "default"[m
+[31m-////    var historicalData  = MutableLiveData<HistoricalRatesModel?>()[m
+[31m-//[m
+[31m-////    val mBaseCurrency = databaseRepository.baseCurrency.asLiveData()[m
+[31m-////    val currencyList = databaseRepository.allCurrencies.asLiveData()[m
+[31m-//[m
+[31m-////    fun fetchHistoricalData(baseCurrency: String, selectedCurrencies: String) {[m
+[31m-////        viewModelScope.launch {[m
+[31m-////            val response =[m
+[31m-////                retrofitRepository.fetchHistoricalData(date, selectedCurrencies, baseCurrency)[m
+[31m-////            response.enqueue(object : retrofit2.Callback<HistoricalRatesModel> {[m
+[31m-////                override fun onResponse([m
+[31m-////                    call: Call<HistoricalRatesModel>,[m
+[31m-////                    response: Response<HistoricalRatesModel>[m
+[31m-////                ) {[m
+[31m-////                    if (response.isSuccessful) {[m
+[31m-////                        historicalData.value = response.body()[m
+[31m-////                    }[m
+[31m-////                }[m
+[31m-////                override fun onFailure(call: Call<HistoricalRatesModel>, t: Throwable) {[m
+[31m-////                    Log.i(TAG, "onFailure: FETCHING HISTORICAL DATA ERROR\n${t.message}")[m
+[31m-////                }[m
+[31m-////            })[m
+[31m-////        }[m
+[31m-//    }[m
+[31m-////    fun getBaseCurrency (): String{[m
+[31m-////        return mBaseCurrency.value.toString()[m
+[31m-////    }[m
+[31m-////    fun clearApiResponse(){[m
+[31m-////        historicalData.value = null[m
+[31m-////    }[m
+[31m-////}[m
+[31m-//[m
+[32m+[m[32mpackage com.example.currencyexchange.ViewModels[m
+[32m+[m
+[32m+[m[32mimport android.content.ContentValues.TAG[m
+[32m+[m[32mimport android.util.Log[m
+[32m+[m[32mimport androidx.lifecycle.*[m
+[32m+[m[32mimport com.example.currencyexchange.BuildConfig[m
+[32m+[m[32mimport com.example.currencyexchange.DataWrapper.DataWrapper[m
+[32m+[m[32mimport com.example.currencyexchange.Models.CurrenciesDatabaseDetailed[m
+[32m+[m[32mimport com.example.currencyexchange.Models.CurrenciesDatabaseMain[m
+[32m+[m[32mimport com.example.currencyexchange.Models.HistoricalRatesModel[m
+[32m+[m[32mimport com.example.currencyexchange.Repository.Implementation.DatabaseRepositoryImplementation[m
+[32m+[m[32mimport com.example.currencyexchange.Repository.Implementation.RetrofitRepositoryImplementation[m
+[32m+[m[32mimport dagger.hilt.android.lifecycle.HiltViewModel[m
+[32m+[m[32mimport kotlinx.coroutines.flow.SharedFlow[m
+[32m+[m[32mimport kotlinx.coroutines.flow.SharingStarted[m
+[32m+[m[32mimport kotlinx.coroutines.flow.catch[m
+[32m+[m[32mimport kotlinx.coroutines.flow.map[m
+[32m+[m[32mimport kotlinx.coroutines.flow.shareIn[m
+[32m+[m[32mimport kotlinx.coroutines.launch[m
+[32m+[m[32mimport java.lang.Exception[m
+[32m+[m[32mimport javax.inject.Inject[m
+[32m+[m
+[32m+[m[32m@HiltViewModel[m
+[32m+[m[32mclass HistoricalViewModel @Inject constructor([m
+[32m+[m[32m    private val retrofitRepository: RetrofitRepositoryImplementation,[m
+[32m+[m[32m    private val databaseRepository: DatabaseRepositoryImplementation[m
+[32m+[m[32m) : ViewModel() {[m
+[32m+[m
+[32m+[m[32m    private val _historical = MutableLiveData<DataWrapper<HistoricalRatesModel>>()[m
+[32m+[m[32m    val historicalData: LiveData<DataWrapper<HistoricalRatesModel>> get() = _historical[m
+[32m+[m
+[32m+[m[32m    val baseCurrency: SharedFlow<DataWrapper<CurrenciesDatabaseMain>> =[m
+[32m+[m[32m        databaseRepository.baseCurrency[m
+[32m+[m[32m            .map { DataWrapper.Success(it) }[m
+[32m+[m[32m            .catch { DataWrapper.Error(it.message) }[m
+[32m+[m[32m            .shareIn(viewModelScope, SharingStarted.WhileSubscribed())[m
+[32m+[m
+[32m+[m[32m    val allCurrencies: SharedFlow<DataWrapper<CurrenciesDatabaseDetailed>> =[m
+[32m+[m[32m        databaseRepository.currencyData[m
+[32m+[m[32m            .map { DataWrapper.Success(it) }[m
+[32m+[m[32m            .catch { DataWrapper.Error(it.message) }[m
+[32m+[m[32m            .shareIn(viewModelScope, SharingStarted.WhileSubscribed(), replay = 1)[m
+[32m+[m
+[32m+[m[32m    fun fetchHistoricalData(baseCurrency: String, selectedCurrencies: String, date: String) {[m
+[32m+[m[32m        viewModelScope.launch {[m
+[32m+[m[32m            try {[m
+[32m+[m[32m                val response = retrofitRepository.getHistorical([m
+[32m+[m[32m                    baseCurrency = baseCurrency,[m
+[32m+[m[32m                    currencies = selectedCurrencies,[m
+[32m+[m[32m                    date = date,[m
+[32m+[m[32m                    apiKey = BuildConfig.API_KEY[m
+[32m+[m[32m                )[m
+[32m+[m[32m                if (response.isSuccessful) {[m
+[32m+[m[32m                    _historical.postValue(DataWrapper.Success(response.body()!!))[m
+[32m+[m[32m                } else {[m
+[32m+[m[32m                    Log.e(TAG, "fetchHistoricalData: response error. ${response.code()}")[m
+[32m+[m[32m                }[m
+[32m+[m[32m            } catch (exception: Exception) {[m
+[32m+[m[32m                _historical.postValue(DataWrapper.Error(error = exception.message, data = null))[m
+[32m+[m[32m            }[m
+[32m+[m[32m        }[m
+[32m+[m[32m    }[m
+[32m+[m[32m}[m
+[41m+[m
+[1mdiff --git a/app/src/main/java/com/example/currencyexchange/ViewModels/LatestViewModel.kt b/app/src/main/java/com/example/currencyexchange/ViewModels/LatestViewModel.kt[m
+[1mindex ec3e768..e384943 100644[m
+[1m--- a/app/src/main/java/com/example/currencyexchange/ViewModels/LatestViewModel.kt[m
+[1m+++ b/app/src/main/java/com/example/currencyexchange/ViewModels/LatestViewModel.kt[m
+[36m@@ -77,6 +77,3 @@[m [mclass LatestViewModel @Inject constructor([m
+         }[m
+     }[m
+ }[m
+[31m-// TODO - check internet connection to perform appropriate operation[m
+[31m-//  if there is internet connection - insert present rates and date to the database[m
+[31m-//  if there's not internet connection, display recent inserted rates[m
+[1mdiff --git a/app/src/main/res/layout/fragment_conversion.xml b/app/src/main/res/layout/fragment_conversion.xml[m
+[1mindex f05e8eb..1547ea9 100644[m
+[1m--- a/app/src/main/res/layout/fragment_conversion.xml[m
+[1m+++ b/app/src/main/res/layout/fragment_conversion.xml[m
+[36m@@ -16,8 +16,7 @@[m
+         <com.google.android.material.appbar.MaterialToolbar[m
+             android:id="@+id/conversion_toolbar"[m
+             android:layout_width="match_parent"[m
+[31m-            android:layout_height="?attr/actionBarSize"[m
+[31m-            app:layout_scrollFlags="scroll|enterAlways">[m
+[32m+[m[32m            android:layout_height="?attr/actionBarSize">[m
+ [m
+             <TextView[m
+                 android:layout_width="wrap_content"[m
+[36m@@ -62,7 +61,8 @@[m
+                 android:layout_margin="20dp"[m
+                 android:textSize="25sp"[m
+                 app:layout_constraintStart_toStartOf="parent"[m
+[31m-                app:layout_constraintTop_toTopOf="parent" />[m
+[32m+[m[32m                app:layout_constraintTop_toTopOf="parent"[m
+[32m+[m[32m                android:text="@string/currency_name"/>[m
+ [m
+ [m
+             <Spinner[m
+[36m@@ -89,7 +89,7 @@[m
+                 android:id="@+id/conversion_to_spinner"[m
+                 android:layout_width="wrap_content"[m
+                 android:layout_height="wrap_content"[m
+[31m-                android:layout_marginTop="30dp"[m
+[32m+[m[32m                android:layout_marginTop="25dp"[m
+                 app:layout_constraintEnd_toEndOf="parent"[m
+                 app:layout_constraintHorizontal_bias="0.56"[m
+                 app:layout_constraintStart_toEndOf="@+id/conversion_to_tv"[m
+[36m@@ -131,7 +131,7 @@[m
+                 android:layout_width="match_parent"[m
+                 android:layout_height="wrap_content"[m
+                 android:textAlignment="center"[m
+[31m-                android:textSize="24sp"[m
+[32m+[m[32m                android:textSize="35sp"[m
+                 android:visibility="invisible"[m
+                 app:layout_constraintBottom_toBottomOf="parent"[m
+                 app:layout_constraintEnd_toEndOf="parent"[m

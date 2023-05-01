@@ -31,7 +31,7 @@ class ConversionViewModel @Inject constructor(
         databaseRepository.baseCurrency
             .map { DataWrapper.Success(it) }
             .catch { DataWrapper.Error(it.message) }
-            .shareIn(viewModelScope, SharingStarted.WhileSubscribed())
+            .shareIn(viewModelScope, SharingStarted.WhileSubscribed(), replay = 1)
 
     val allCurrencies: SharedFlow<DataWrapper<CurrenciesDatabaseDetailed>> =
         databaseRepository.currencyData

@@ -29,7 +29,6 @@ class ChangeBaseCurrency : Fragment() {
     private val mBinding get() = _binding!!
     private val mViewModel: ChangeBaseViewModel by activityViewModels()
 
-
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?

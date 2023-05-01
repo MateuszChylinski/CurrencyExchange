@@ -13,11 +13,9 @@ import com.example.currencyexchange.Adapters.LatestAdapter
 import com.example.currencyexchange.R
 import com.example.currencyexchange.ViewModels.*
 import com.example.currencyexchange.databinding.FragmentLatestBinding
-import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.launch
 
-@AndroidEntryPoint
 class Latest : Fragment() {
 
     private val TAG = "Latest"
@@ -54,9 +52,9 @@ class Latest : Fragment() {
                             is DataWrapper.Success<*> -> {
 
                                 // Convert currencies from the database to the mutable map, and remove base currency with it's value, push modified data to the adapter
-                                val x = status.data?.latestRates!!.toMutableMap()
-                                x.remove(mBaseCurrency)
-                                mAdapter.setData(x)
+                                val currenciesWithoutBase = status.data?.latestRates!!.toMutableMap()
+                                currenciesWithoutBase.remove(mBaseCurrency)
+                                mAdapter.setData(currenciesWithoutBase)
                             }
 
                             is DataWrapper.Error -> {

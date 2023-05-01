@@ -77,6 +77,3 @@ class LatestViewModel @Inject constructor(
         }
     }
 }
-// TODO - check internet connection to perform appropriate operation
-//  if there is internet connection - insert present rates and date to the database
-//  if there's not internet connection, display recent inserted rates

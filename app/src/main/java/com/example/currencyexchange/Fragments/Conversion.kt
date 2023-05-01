@@ -31,6 +31,9 @@ class Conversion : Fragment() {
     private val mBinding get() = mConversionBinding!!
     private val mViewModel: ConversionViewModel by activityViewModels()
 
+//TODO
+// Trace if there's internet connection.
+// Implement rates from db in latest/conversion if there's no internet
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -68,8 +71,11 @@ class Conversion : Fragment() {
                             currencies.data?.currencyData?.keys?.forEach {
                                 mCurrencyList.add(it)
                             }
-                            prepareFromSpinner(mCurrencyList)
-                            prepareToSpinner(mCurrencyList)
+                            if (!mCurrencyList.contains("Select currency")) {
+                                mCurrencyList.add(0, "Select currency")
+                            }
+                            deleteBaseCurrency()
+
                         }
 
                         is DataWrapper.Error -> {
@@ -82,6 +88,20 @@ class Conversion : Fragment() {
                 }
             }
         }
+
+        viewLifecycleOwner.lifecycleScope.launch {
+            mViewModel.exchangeState.observe(viewLifecycleOwner, Observer {
+                mBinding.conversionConvertedData.visibility = View.VISIBLE
+                mBinding.conversionConvertedData.text = String.format(
+                    getString(
+                        R.string.formatted_you_will_receive,
+                        it.data?.result,
+                        it?.data?.query?.to
+                    )
+                )
+            })
+        }
+
         return view
     }
 
@@ -105,19 +125,58 @@ class Conversion : Fragment() {
 
         /** Refresh layout UI*/
         mBinding.conversionRefreshContainer.setOnRefreshListener {
-            mDesiredCurrency = String()
 
-            //TODO check lifecycle state after refresh?
-//            mBaseCurrency = mViewModel.getBaseCurrency()
-            defaultViewsSetup(mCurrencyList)
+            viewLifecycleOwner.lifecycleScope.launch {
+                mViewModel.baseCurrency.collect { baseCurrency ->
+                    when (baseCurrency) {
+                        is DataWrapper.Success -> {
+                            mBaseCurrency = baseCurrency.data?.baseCurrency.toString()
+                            mBinding.conversionFromTv.text =
+                                String.format(getString(R.string.formatted_from), mBaseCurrency)
+                        }
+
+                        is DataWrapper.Error -> {
+                            Log.e(
+                                TAG,
+                                "onViewCreated: couldn't retrieve base currency from the database"
+                            )
+                        }
+                    }
+                }
+            }
+            defaultViewsSetup()
+            mDesiredCurrency = String()
             mBinding.conversionRefreshContainer.isRefreshing = false
         }
     }
 
+    /** Copy list of all currencies,
+     *  check if given list contains base currency, and desired currency (if user have already picked one).
+     *  If list contains these currencies, delete it, so user will not see them in spinner anymore.  */
+    private fun deleteBaseCurrency() {
+        val currencyList: MutableList<String> = mutableListOf()
+
+        mCurrencyList.forEach {
+            currencyList.add(it)
+        }
+
+        if (mDesiredCurrency != "default") {
+            val desiredIndex =
+                currencyList.indices.find { currencyList[it] == mDesiredCurrency }
+            desiredIndex?.let { currencyList.removeAt(it) }
+        }
+        val baseIndex =
+            currencyList.indices.find { currencyList[it] == mBaseCurrency }
+        baseIndex?.let { currencyList.removeAt(it) }
+
+        prepareFromSpinner(currencyList)
+        prepareToSpinner(currencyList)
+    }
+
+
     /** Prepare 'from' spinner. This spinner allow to pick new, temporary base currency  */
     private fun prepareFromSpinner(currencyList: MutableList<String>) {
         var isTouched = false
-
         val fromAdapter =
             ArrayAdapter(
                 requireActivity(),
@@ -141,7 +200,8 @@ class Conversion : Fragment() {
                                 getString(R.string.formatted_from),
                                 mBaseCurrency
                             )
-                        deleteBaseFromSpinner(currencyList)
+
+                        deleteBaseCurrency()
                     } else {
                         isTouched = true
                     }
@@ -152,6 +212,7 @@ class Conversion : Fragment() {
                 }
             }
     }
+
 
     /** Prepare 'to' spinner. Picked currency from this spinner, will be marked as desired currency in api call later on*/
     private fun prepareToSpinner(currencyList: MutableList<String>) {
@@ -180,7 +241,7 @@ class Conversion : Fragment() {
                                 mDesiredCurrency
                             )
 
-                        deleteBaseFromSpinner(currencyList)
+                        deleteBaseCurrency()
                     } else {
                         isTouched = true
                     }
@@ -192,22 +253,6 @@ class Conversion : Fragment() {
             }
     }
 
-    /** Copy list of all currencies,
-     *  check if given list contains base currency, and desired currency (if user have already picked one).
-     *  If list contains these currencies, delete it, so user will not see them in spinner anymore.  */
-    private fun deleteBaseFromSpinner(currencyList: MutableList<String>) {
-        if (mDesiredCurrency != "default") {
-            val desiredIndex =
-                currencyList.indices.find { currencyList[it] == mDesiredCurrency }
-            desiredIndex?.let { currencyList.removeAt(it) }
-        }
-        val baseIndex =
-            currencyList.indices.find { currencyList[it] == mBaseCurrency }
-        baseIndex?.let { currencyList.removeAt(it) }
-
-        prepareFromSpinner(currencyList)
-        prepareToSpinner(currencyList)
-    }
 
     /** get given value from EditText, and if it contains any value, perform an api call, and fetch the data.
      * if base/desired currency are empty, or the EditText does not contain any value, inform user to complete data*/
@@ -220,23 +265,6 @@ class Conversion : Fragment() {
                 selectedCurrency = mDesiredCurrency,
                 amount = mBinding.conversionEnterValue.text.toString()
             )
-            //TODO TEST
-            viewLifecycleOwner.lifecycleScope.launch {
-                mViewModel.exchangeState.observe(viewLifecycleOwner, Observer {
-                    mBinding.conversionConvertedData.visibility = View.VISIBLE
-                    mBinding.conversionConvertedData.text = String.format(
-                        getString(
-                            R.string.formatted_you_will_receive,
-                            it.data?.result,
-                            it?.data?.query?.to
-                        )
-                    )
-                    Log.i(
-                        TAG,
-                        "getValueFromEditText: FROM ${it.data?.query?.from} TO ${it.data?.query?.to} AMOUNT ${it.data?.query?.amount} RESULT = ${it.data?.result}"
-                    )
-                })
-            }
         } else {
             Toast.makeText(
                 requireActivity(),
@@ -248,9 +276,7 @@ class Conversion : Fragment() {
 
     /** After refreshing the layout, copy list of all currencies, delete base currency from the list,
      * clear TextView that display converted currency, make it invisible */
-    private fun defaultViewsSetup(currencyList: MutableList<String>) {
-        deleteBaseFromSpinner(currencyList)
-
+    private fun defaultViewsSetup() {
         mBinding.conversionEnterValue.text.clear()
         mBinding.conversionConvertedData.text = ""
         mBinding.conversionConvertedData.visibility = View.INVISIBLE

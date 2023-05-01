@@ -4,13 +4,11 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.example.currencyexchange.databinding.HistoricalItemsBinding
-import kotlin.collections.HashMap
 
 class HistoricalAdapter : RecyclerView.Adapter<HistoricalAdapter.ViewHolder>() {
-    private var mHashMap = HashMap<String, Double>()
-    private var mData = mHashMap
+    private var mData: Map<String, Double> = mapOf()
 
-    fun setData(data: HashMap<String, Double>) {
+    fun setData(data: Map<String, Double>) {
         this.mData = data
     }
 

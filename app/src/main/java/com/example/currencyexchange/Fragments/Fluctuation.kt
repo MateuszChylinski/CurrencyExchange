@@ -21,7 +21,6 @@ import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.currencyexchange.Adapters.FluctuationAdapter
 import com.example.currencyexchange.DataWrapper.DataWrapper
-import com.example.currencyexchange.Models.FluctuationRates
 import com.example.currencyexchange.R
 import com.example.currencyexchange.ViewModels.FluctuationViewModel
 import com.example.currencyexchange.ViewModels.FragmentTagViewModel
@@ -82,7 +81,6 @@ class Fluctuation : Fragment() {
                 }
             }
         }
-
         viewLifecycleOwner.lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 mViewModel.allCurrencies.collect { currencies ->
@@ -91,6 +89,10 @@ class Fluctuation : Fragment() {
                             currencies.data?.currencyData?.forEach {
                                 mCurrencies.add(it.key)
                             }
+                            if (!mCurrencies.contains("Select currency")) {
+                                mCurrencies.add(0, "Select currency")
+                            }
+                            deleteBaseCurrencyFromList()
                         }
 
                         is DataWrapper.Error -> {
@@ -114,13 +116,10 @@ class Fluctuation : Fragment() {
             }
         }
 
-        //    TODO finish refreshing layout
         /** Reload UI to 'default' state (as it was while entering the layout for the first time) */
-        mBinding.fluctuationRefreshContainer.setOnRefreshListener{
+        mBinding.fluctuationRefreshContainer.setOnRefreshListener {
             mIsChanged = true
-//            mBaseCurrency = mViewModel.getBaseCurrency()
-//            defaultViewsSetup()
-//
+            defaultViewsSetup()
             mBinding.fluctuationRefreshContainer.isRefreshing = false
         }
         return view
@@ -141,7 +140,7 @@ class Fluctuation : Fragment() {
         }
         mBinding.fluctuationSetToOk.setOnClickListener {
             getDateFromUser(2)
-            prepareViewsForListView(mCurrencies)
+            prepareViewsForListView()
         }
         /** Prepare a flag, which can trigger the Navigation Components in the PagerBase fragment (which is ViewHolder host)
          * to move user to the ChangeBaseCurrency fragment, where user can set new base currency (permanently, in database) */
@@ -192,7 +191,7 @@ class Fluctuation : Fragment() {
         mBinding.fluctuationSetToOk.visibility = View.VISIBLE
     }
 
-    private fun prepareViewsForListView(currencies: MutableList<String>) {
+    private fun prepareViewsForListView() {
         mBinding.fluctuationToCenterTv.visibility = View.INVISIBLE
         mBinding.fluctuationToDt.visibility = View.INVISIBLE
         mBinding.fluctuationSetToOk.visibility = View.INVISIBLE
@@ -211,24 +210,43 @@ class Fluctuation : Fragment() {
         mBinding.fluctuationToDate.text =
             String.format(getString(R.string.formatted_to), endDate)
 
+        Toast.makeText(
+            activity,
+            getString(R.string.select_up_to_30_currencies),
+            Toast.LENGTH_SHORT
+        ).show()
+
         // Make sure that the base currency has some value, before deleting it from the list.
         if (mBaseCurrency != "default") {
-            deleteBaseCurrencyFromList(currencies)
+            deleteBaseCurrencyFromList()
         }
     }
 
-    /** This function will delete base currency from the list, that will be forwarded as an input later on  */
-    private fun deleteBaseCurrencyFromList(list: MutableList<String>) {
-        val currencyList = list.toMutableList()
+    /** This function is kind of a bypass, since we can't just clear the list, and initiate it with 'mCurrencyList' because there will be no effect of it
+    The list has some "deeper" reference. There will be two, separated list. One, for spinner, with "Currency" header inside, and second one without this header  */
+    private fun deleteBaseCurrencyFromList() {
+        val spinnerList: MutableList<String> = mutableListOf()
+        val lvList: MutableList<String> = mutableListOf()
 
-        if (currencyList.toString().contains(mBaseCurrency)) {
-            val index = currencyList.indices.find {
-                currencyList[it] == mBaseCurrency
-            }
-            currencyList.removeAt(index!!)
+        mCurrencies.forEach {
+            spinnerList.add(it)
+            lvList.add(it)
         }
-        setupBaseCurrencySpinner(currencyList)
-        setupListView(currencyList)
+
+        if (spinnerList.toString().contains(mBaseCurrency) && lvList.toString()
+                .contains(mBaseCurrency)
+        ) {
+            val spinnerIndex = spinnerList.indices.find { spinnerList[it] == mBaseCurrency }
+            val listIndex = lvList.indices.find { lvList[it] == mBaseCurrency }
+            spinnerIndex?.let { spinnerList.removeAt(it) }
+            listIndex?.let { lvList.removeAt(it) }
+        }
+
+        //Delete "Select currency" value from the list intended for ListView.
+        lvList.removeAt(0)
+
+        setupBaseCurrencySpinner(spinnerList)
+        setupListView(lvList)
     }
 
     /** Setup spinner that allow user to change the base currency. It will NOT affect the database, it will be a temporary change. */
@@ -247,7 +265,7 @@ class Fluctuation : Fragment() {
                                 getString(R.string.formatted_base_currency),
                                 mBaseCurrency
                             )
-                        deleteBaseCurrencyFromList(currencyNames)
+                        deleteBaseCurrencyFromList()
                     } else {
                         mIsTouched = true
                     }
@@ -264,11 +282,6 @@ class Fluctuation : Fragment() {
         val adapter =
             ArrayAdapter(requireActivity(), android.R.layout.simple_list_item_multiple_choice, list)
 
-        Toast.makeText(
-            activity,
-            getString(R.string.select_up_to_30_currencies),
-            Toast.LENGTH_SHORT
-        ).show()
 
         mBinding.fluctuationSelectSymbolsLv.choiceMode = ListView.CHOICE_MODE_MULTIPLE
         mBinding.fluctuationSelectSymbolsLv.adapter = adapter
@@ -294,10 +307,7 @@ class Fluctuation : Fragment() {
             }
 
         mBinding.fluctuationSaveSymbols.setOnClickListener {
-            // Whenever layout will be refreshed, clear the symbols list, so it will not contain previously picked currencies.
-            if (mIsChanged) {
-                list.clear()
-            }
+
             //Add to the created list all of the checked symbols. Next function will convert them into String
             val selectedCurrencies: MutableList<String> = mutableListOf()
 
@@ -312,10 +322,7 @@ class Fluctuation : Fragment() {
 
     private fun getCurrencies(list: MutableList<String>) {
 //        Perform an api call by given base currency, and checked currencies from the ListView, and change views visibility, to display RecyclerView.
-        Log.i(
-            TAG,
-            "getCurrencies: BASE $mBaseCurrency START DATE $startDate END DATE $endDate SELECTED CURRENCIES $list"
-        )
+
         mViewModel.fetchFluctuation(
             baseCurrency = mBaseCurrency,
             selectedCurrencies = list.joinToString(separator = ","),
@@ -326,7 +333,8 @@ class Fluctuation : Fragment() {
     }
 
     private fun prepareRecyclerView() {
-        mBinding.fluctuationBaseCurrencyTv.text = mBaseCurrency
+        mBinding.fluctuationBaseCurrencyTv.text =
+            String.format(getString(R.string.formatted_base_currency), mBaseCurrency)
         mBinding.fluctuationBaseInRv.text =
             String.format(getString(R.string.formatted_base_currency), mBaseCurrency)
         mBinding.fluctuationRv.layoutManager = LinearLayoutManager(this.requireContext())

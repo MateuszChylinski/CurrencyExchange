@@ -13,8 +13,6 @@ import com.example.currencyexchange.Adapters.PagerAdapter
 import com.example.currencyexchange.ViewModels.FragmentTagViewModel
 import com.example.currencyexchange.databinding.FragmentPagerBaseBinding
 import kotlinx.coroutines.launch
-// TODO - Latest G // Conversion G //
-// TODO - can't select first currency from spinner (AED)
 
 class PagerBase : Fragment() {
     private var _binding: FragmentPagerBaseBinding? = null
