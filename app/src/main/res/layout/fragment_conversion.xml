@@ -16,8 +16,7 @@
         <com.google.android.material.appbar.MaterialToolbar
             android:id="@+id/conversion_toolbar"
             android:layout_width="match_parent"
-            android:layout_height="?attr/actionBarSize"
-            app:layout_scrollFlags="scroll|enterAlways">
+            android:layout_height="?attr/actionBarSize">
 
             <TextView
                 android:layout_width="wrap_content"
@@ -62,7 +61,8 @@
                 android:layout_margin="20dp"
                 android:textSize="25sp"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
+                app:layout_constraintTop_toTopOf="parent"
+                android:text="@string/currency_name"/>
 
 
             <Spinner
@@ -89,7 +89,7 @@
                 android:id="@+id/conversion_to_spinner"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="30dp"
+                android:layout_marginTop="25dp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintHorizontal_bias="0.56"
                 app:layout_constraintStart_toEndOf="@+id/conversion_to_tv"
@@ -131,7 +131,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:textAlignment="center"
-                android:textSize="24sp"
+                android:textSize="35sp"
                 android:visibility="invisible"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"

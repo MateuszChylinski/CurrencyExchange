@@ -1,49 +1,64 @@
-//package com.example.currencyexchange.ViewModels
-//
-//import android.content.ContentValues.TAG
-//import android.util.Log
-//import androidx.lifecycle.*
-//import com.example.currencyexchange.Models.HistoricalRatesModel
-//import com.example.currencyexchange.Repository.Implementation.CurrencyDatabaseRepository
-//import com.example.currencyexchange.Repository.CurrencyRetrofitRepository
-//import kotlinx.coroutines.launch
-//import retrofit2.Call
-//import retrofit2.Response
-//
-//class HistoricalViewModel constructor(
-////    private val retrofitRepository: CurrencyRetrofitRepository,
-////    private val databaseRepository: CurrencyDatabaseRepository
-//) : ViewModel() {
-////    var date: String = "default"
-////    var historicalData  = MutableLiveData<HistoricalRatesModel?>()
-//
-////    val mBaseCurrency = databaseRepository.baseCurrency.asLiveData()
-////    val currencyList = databaseRepository.allCurrencies.asLiveData()
-//
-////    fun fetchHistoricalData(baseCurrency: String, selectedCurrencies: String) {
-////        viewModelScope.launch {
-////            val response =
-////                retrofitRepository.fetchHistoricalData(date, selectedCurrencies, baseCurrency)
-////            response.enqueue(object : retrofit2.Callback<HistoricalRatesModel> {
-////                override fun onResponse(
-////                    call: Call<HistoricalRatesModel>,
-////                    response: Response<HistoricalRatesModel>
-////                ) {
-////                    if (response.isSuccessful) {
-////                        historicalData.value = response.body()
-////                    }
-////                }
-////                override fun onFailure(call: Call<HistoricalRatesModel>, t: Throwable) {
-////                    Log.i(TAG, "onFailure: FETCHING HISTORICAL DATA ERROR\n${t.message}")
-////                }
-////            })
-////        }
-//    }
-////    fun getBaseCurrency (): String{
-////        return mBaseCurrency.value.toString()
-////    }
-////    fun clearApiResponse(){
-////        historicalData.value = null
-////    }
-////}
-//
+package com.example.currencyexchange.ViewModels
+
+import android.content.ContentValues.TAG
+import android.util.Log
+import androidx.lifecycle.*
+import com.example.currencyexchange.BuildConfig
+import com.example.currencyexchange.DataWrapper.DataWrapper
+import com.example.currencyexchange.Models.CurrenciesDatabaseDetailed
+import com.example.currencyexchange.Models.CurrenciesDatabaseMain
+import com.example.currencyexchange.Models.HistoricalRatesModel
+import com.example.currencyexchange.Repository.Implementation.DatabaseRepositoryImplementation
+import com.example.currencyexchange.Repository.Implementation.RetrofitRepositoryImplementation
+import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.shareIn
+import kotlinx.coroutines.launch
+import java.lang.Exception
+import javax.inject.Inject
+
+@HiltViewModel
+class HistoricalViewModel @Inject constructor(
+    private val retrofitRepository: RetrofitRepositoryImplementation,
+    private val databaseRepository: DatabaseRepositoryImplementation
+) : ViewModel() {
+
+    private val _historical = MutableLiveData<DataWrapper<HistoricalRatesModel>>()
+    val historicalData: LiveData<DataWrapper<HistoricalRatesModel>> get() = _historical
+
+    val baseCurrency: SharedFlow<DataWrapper<CurrenciesDatabaseMain>> =
+        databaseRepository.baseCurrency
+            .map { DataWrapper.Success(it) }
+            .catch { DataWrapper.Error(it.message) }
+            .shareIn(viewModelScope, SharingStarted.WhileSubscribed())
+
+    val allCurrencies: SharedFlow<DataWrapper<CurrenciesDatabaseDetailed>> =
+        databaseRepository.currencyData
+            .map { DataWrapper.Success(it) }
+            .catch { DataWrapper.Error(it.message) }
+            .shareIn(viewModelScope, SharingStarted.WhileSubscribed(), replay = 1)
+
+    fun fetchHistoricalData(baseCurrency: String, selectedCurrencies: String, date: String) {
+        viewModelScope.launch {
+            try {
+                val response = retrofitRepository.getHistorical(
+                    baseCurrency = baseCurrency,
+                    currencies = selectedCurrencies,
+                    date = date,
+                    apiKey = BuildConfig.API_KEY
+                )
+                if (response.isSuccessful) {
+                    _historical.postValue(DataWrapper.Success(response.body()!!))
+                } else {
+                    Log.e(TAG, "fetchHistoricalData: response error. ${response.code()}")
+                }
+            } catch (exception: Exception) {
+                _historical.postValue(DataWrapper.Error(error = exception.message, data = null))
+            }
+        }
+    }
+}
+
