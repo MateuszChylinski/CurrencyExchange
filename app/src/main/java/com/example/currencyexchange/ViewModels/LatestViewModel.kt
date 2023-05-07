@@ -20,7 +20,7 @@ import javax.inject.Inject
 @HiltViewModel
 class LatestViewModel @Inject constructor(
     private val databaseRepository: DatabaseRepositoryImplementation,
-    private val retrofitRepository: RetrofitRepositoryImplementation
+    private val retrofitRepository: RetrofitRepositoryImplementation,
 ) : ViewModel() {
 
     private var doesContainData = false
@@ -40,6 +40,12 @@ class LatestViewModel @Inject constructor(
             .map { DataWrapper.Success(it) }
             .shareIn(viewModelScope, SharingStarted.WhileSubscribed(), replay = 1)
 
+    val isDbInit: SharedFlow<DataWrapper<Boolean>> =
+        databaseRepository.isInit
+            .map { DataWrapper.Success(it) }
+            .catch { DataWrapper.Error(it) }
+            .shareIn(viewModelScope, SharingStarted.WhileSubscribed(), replay = 1)
+
 
     /** Launch coroutines and perform an api call
      * In case the call will be successfully, assign the response data to LiveData
@@ -53,11 +59,13 @@ class LatestViewModel @Inject constructor(
         try {
             if (response?.isSuccessful == true) {
                 _latestRatesCall.postValue(DataWrapper.Success(response.body()!!))
+            }else{
+                Log.i(TAG, "fetchData: couldn't fetch data in ViewModel. ${response?.code()}")
             }
         } catch (exception: Exception) {
             _latestRatesCall.postValue(DataWrapper.Error(error = exception.message, data = null))
         } finally {
-            insertCurrencies(CurrenciesDatabaseDetailed(currencyData = response?.body()?.latestRates!!))
+            insertCurrencies(CurrenciesDatabaseDetailed(ratesDate = response?.body()?.date, currencyData = response?.body()?.latestRates!!))
         }
     }
 

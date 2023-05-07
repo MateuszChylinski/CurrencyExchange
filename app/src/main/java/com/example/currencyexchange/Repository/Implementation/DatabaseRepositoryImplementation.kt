@@ -16,6 +16,8 @@ class DatabaseRepositoryImplementation @Inject constructor(
     override val currencyData: Flow<CurrenciesDatabaseDetailed>
         get() = currencyDAO.getCurrencyData()
 
+
+
     override suspend fun insertCurrencies(currency: CurrenciesDatabaseDetailed) {
         currencyDAO.insertCurrencyData(currency)
     }
@@ -31,4 +33,7 @@ class DatabaseRepositoryImplementation @Inject constructor(
     override suspend fun updateRatesDate(date: String?) {
         currencyDAO.updateRatesDate(date)
     }
+
+    override val isInit: Flow<Boolean>
+        get() = currencyDAO.checkIfInit()
 }

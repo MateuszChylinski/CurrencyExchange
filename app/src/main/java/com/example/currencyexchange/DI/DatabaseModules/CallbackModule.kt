@@ -25,7 +25,7 @@ class CallbackModule @Inject constructor(
     }
     @SuppressLint("SimpleDateFormat")
     private suspend fun insertDefaultCurrency(){
-        val defaultCurrency = CurrenciesDatabaseMain(0, "EUR", SimpleDateFormat("yyy-MM-dd").format(Calendar.getInstance().time))
+        val defaultCurrency = CurrenciesDatabaseMain(0, "EUR")
         provider.get().insertDefaultCurrency(defaultCurrency)
     }
 }

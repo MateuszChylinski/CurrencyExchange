@@ -17,8 +17,9 @@ interface CurrencyDAO {
     suspend fun insertCurrencyData(detailed: CurrenciesDatabaseDetailed)
 
     /** Update currency rates, to let user know, from when they are */
-    @Query("UPDATE currency_main SET rates_date = :date WHERE id = 1")
+    @Query("UPDATE currency_detailed SET rates_date = :date WHERE id = 1")
     suspend fun updateRatesDate(date: String?)
+
     @Query("UPDATE currency_detailed SET currency_data =:data WHERE id = 1")
     suspend fun updatesCurrencyData(data: Map<String, Double>)
 
@@ -33,4 +34,8 @@ interface CurrencyDAO {
     /** Update base currency */
     @Query("UPDATE currency_main SET base_currency = :currency WHERE id = 1")
     suspend fun updateBaseCurrency(currency: String?)
+
+    //TODO TEST
+    @Query("SELECT (SELECT COUNT(*) FROM currency_detailed) == 0")
+    fun checkIfInit(): Flow<Boolean>
 }

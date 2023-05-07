@@ -12,4 +12,7 @@ interface DatabaseRepository {
     suspend fun updateBaseCurrency(baseCurrency: CurrenciesDatabaseMain)
     suspend fun updateRates(currency: CurrenciesDatabaseDetailed)
     suspend fun updateRatesDate(date: String?)
+
+    //TODO TEST
+    val isInit: Flow<Boolean>
 }
