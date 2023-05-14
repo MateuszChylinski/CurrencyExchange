@@ -20,8 +20,8 @@ interface CurrencyDAO {
     @Query("UPDATE currency_detailed SET rates_date = :date WHERE id = 1")
     suspend fun updateRatesDate(date: String?)
 
-    @Query("UPDATE currency_detailed SET currency_data =:data WHERE id = 1")
-    suspend fun updatesCurrencyData(data: Map<String, Double>)
+    @Query("UPDATE currency_detailed SET for_base = :baseW, rates_date = :dateW, currency_data =:data WHERE id = :id")
+    suspend fun updatesCurrencyData(id: Int, baseW: String, dateW: String, data: Map<String, Double>)
 
     /** Get id, base currency, and date of rates from database  */
     @Query("SELECT * FROM currency_main")
@@ -31,11 +31,15 @@ interface CurrencyDAO {
     @Query("SELECT * FROM currency_detailed")
     fun getCurrencyData(): Flow<CurrenciesDatabaseDetailed>
 
+    /** Get list of 'CurrenciesDatabaseDetailed' objects. It'll be used in offline 'mode' */
+    @Query("SELECT * FROM currency_detailed")
+    fun getCurrencyListData(): Flow<List<CurrenciesDatabaseDetailed>>
+
     /** Update base currency */
     @Query("UPDATE currency_main SET base_currency = :currency WHERE id = 1")
     suspend fun updateBaseCurrency(currency: String?)
 
-    //TODO TEST
+    /** Check if database contains any data, and return Boolean */
     @Query("SELECT (SELECT COUNT(*) FROM currency_detailed) == 0")
     fun checkIfInit(): Flow<Boolean>
 }

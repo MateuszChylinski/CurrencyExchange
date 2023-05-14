@@ -49,7 +49,7 @@ class ChangeBaseCurrency : Fragment() {
                             )
                         }
                         is DataWrapper.Error<*> -> {
-                            Log.w(
+                            Log.e(
                                 TAG,
                                 "ChangeBaseCurrency: failed to retrieve base currency from the database: ${currency.message}"
                             )
@@ -110,8 +110,7 @@ class ChangeBaseCurrency : Fragment() {
                 mViewModel.updateBaseCurrency(
                     CurrenciesDatabaseMain(
                         0,
-                        mBaseCurrency,
-                        Calendar.getInstance().time.toString()
+                        mBaseCurrency
                     )
                 )
                 moveToPreviousFragment()

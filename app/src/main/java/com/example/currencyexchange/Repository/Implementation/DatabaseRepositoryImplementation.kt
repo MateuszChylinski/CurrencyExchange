@@ -16,6 +16,9 @@ class DatabaseRepositoryImplementation @Inject constructor(
     override val currencyData: Flow<CurrenciesDatabaseDetailed>
         get() = currencyDAO.getCurrencyData()
 
+    override val currencyListData: Flow<List<CurrenciesDatabaseDetailed>>
+        get() = currencyDAO.getCurrencyListData()
+
 
 
     override suspend fun insertCurrencies(currency: CurrenciesDatabaseDetailed) {
@@ -27,7 +30,7 @@ class DatabaseRepositoryImplementation @Inject constructor(
     }
 
     override suspend fun updateRates(currency: CurrenciesDatabaseDetailed) {
-        currencyDAO.updatesCurrencyData(currency.currencyData)
+        currencyDAO.updatesCurrencyData(currency.id, currency.baseCurrency, currency.ratesDate, currency.currencyData)
     }
 
     override suspend fun updateRatesDate(date: String?) {
