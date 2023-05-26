@@ -16,6 +16,7 @@ import com.example.currencyexchange.ViewModels.*
 import com.example.currencyexchange.databinding.FragmentLatestBinding
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.launch
+import kotlin.math.log
 
 class Latest : Fragment() {
     private val TAG = "Latest"
@@ -38,14 +39,14 @@ class Latest : Fragment() {
         mBinding.latestRv.layoutManager = LinearLayoutManager(this.context)
         mBinding.latestRv.adapter = mAdapter
 
+
         /** Create lazy coroutine, which will be triggered whenever mobile device will have network connection. Perform an api call, and observe values that came from the call. */
         val apiCallCoroutine =
             viewLifecycleOwner.lifecycleScope.launch(start = CoroutineStart.LAZY) {
-                mViewModel.fetchData(mBaseCurrency)
+//                mViewModel.fetchData(mBaseCurrency)
                 mViewModel.latestRates.observe(viewLifecycleOwner, Observer { status ->
                     when (status) {
                         is DataWrapper.Success<*> -> {
-
                             // Add response to variable as mutable map, and find k/v for given base currency, remove it, and display.
                             val currencies = status.data?.latestRates?.toMutableMap()
                             currencies?.remove(mBaseCurrency)
@@ -98,7 +99,7 @@ class Latest : Fragment() {
          * Program will find, and display proper object from this list.
          * In case when user will change base currency, while connection services are OFF, and the new base currency will not be in the list,
          * program will inform user that the database at current state doesn't contain data about specific base currency, so it'll be necessary to have internet connection */
-        
+
         val currencyDataCoroutine =
             viewLifecycleOwner.lifecycleScope.launch(start = CoroutineStart.LAZY) {
                 mViewModel.currencyDataList.collect { currency ->
@@ -154,7 +155,6 @@ class Latest : Fragment() {
          * where database contains data about currency rates, and mobile device does not have network connection */
         val oldRates =
             viewLifecycleOwner.lifecycleScope.launch(start = CoroutineStart.LAZY) {
-                Log.i(TAG, "onCreateView: OLD RATES")
                 mViewModel.currencyDataList.collect { offlineCurrencies ->
                     when (offlineCurrencies) {
                         is DataWrapper.Success -> {
@@ -182,7 +182,7 @@ class Latest : Fragment() {
                                 mBinding.appBarLayout.visibility = View.INVISIBLE
 
                                 mBinding.latestNoInternetExplanation.text =
-                                    getString(R.string.latest_no_network_after_changing_base)
+                                    getString(R.string.no_network_after_changing_base)
 
 
                             }
@@ -198,14 +198,13 @@ class Latest : Fragment() {
                 }
             }
 
-
         /** Create lazy coroutine that will collect flow with status of ConnectivityManager.
          *  This function is responsible for manipulating specific coroutines according to status of the internet connection
          *  Since ConnectivityManager is responsible for providing status of the connection services,
          *  it will not produce any state whenever user will start the app with connection services off.
-         *  It will only produce any state after user will enable some connection services, like wifi. 
+         *  It will only produce any state after user will enable some connection services, like wifi.
          *  Before that, it is important to start appropriate coroutine, before the app will obtain any status from flow */
-        
+
         val networkCoroutine =
             viewLifecycleOwner.lifecycleScope.launch(start = CoroutineStart.LAZY) {
 

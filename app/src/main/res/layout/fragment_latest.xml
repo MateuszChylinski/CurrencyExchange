@@ -94,7 +94,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="15dp"
-            android:text="@string/latest_no_network_explanation"
+            android:text="@string/no_network_explanation"
             android:textAlignment="center"
             android:textSize="25sp"
             android:visibility="invisible"

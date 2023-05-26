@@ -64,6 +64,7 @@ class LatestViewModel @Inject constructor(
         )
         try {
             if (response?.isSuccessful == true) {
+
                 _latestRatesCall.postValue(DataWrapper.Success(response.body()!!))
             } else {
                 Log.w(TAG, "fetchData: couldn't fetch data in ViewModel. ${response?.code()}")
