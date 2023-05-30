@@ -50,10 +50,23 @@
         android:layout_height="match_parent"
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
+
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/historical_no_network"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textSize="30sp"
+                android:textAlignment="center"
+                android:text="@string/no_network_explanation_historical_fluctuation"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                android:visibility="invisible" />
 
             <!--    First layout pick date-->
             <TextView

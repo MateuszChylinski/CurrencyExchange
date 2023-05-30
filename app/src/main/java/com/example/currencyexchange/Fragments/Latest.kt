@@ -16,7 +16,6 @@ import com.example.currencyexchange.ViewModels.*
 import com.example.currencyexchange.databinding.FragmentLatestBinding
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.launch
-import kotlin.math.log
 
 class Latest : Fragment() {
     private val TAG = "Latest"
@@ -43,7 +42,7 @@ class Latest : Fragment() {
         /** Create lazy coroutine, which will be triggered whenever mobile device will have network connection. Perform an api call, and observe values that came from the call. */
         val apiCallCoroutine =
             viewLifecycleOwner.lifecycleScope.launch(start = CoroutineStart.LAZY) {
-//                mViewModel.fetchData(mBaseCurrency)
+                mViewModel.fetchData(mBaseCurrency)
                 mViewModel.latestRates.observe(viewLifecycleOwner, Observer { status ->
                     when (status) {
                         is DataWrapper.Success<*> -> {
@@ -62,7 +61,7 @@ class Latest : Fragment() {
                              *  'mCurrencyData' is a list, that contains objects of 'CurrenciesDatabaseDetailed'.
                              *  It'll be used to maintain proper data about currencies, and display them in case where user will not have stable internet connection */
                             val indexToUpdate =
-                                mCurrencyData.find { curr -> curr.baseCurrency == status.data.baseCurrency && curr.ratesDate == status.data.date }?.id
+                                mCurrencyData.find { curr -> curr.baseCurrency == status.data.baseCurrency }?.id
                             if (indexToUpdate != null) {
                                 mViewModel.updateCurrencies(
                                     CurrenciesDatabaseDetailed(

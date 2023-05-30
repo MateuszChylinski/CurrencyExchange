@@ -9,7 +9,8 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-class NetworkObserverImplementation @Inject constructor(private val connectivityManager: ConnectivityManager): NetworkObserver{
+class NetworkObserverImplementation @Inject constructor(private val connectivityManager: ConnectivityManager) :
+    NetworkObserver {
 
     override fun observeStatus(): Flow<NetworkObserver.NetworkStatus> {
         return callbackFlow {
@@ -18,7 +19,8 @@ class NetworkObserverImplementation @Inject constructor(private val connectivity
                 override fun onAvailable(network: Network) {
                     super.onAvailable(network)
                     launch {
-                        send(NetworkObserver.NetworkStatus.Available) }
+                        send(NetworkObserver.NetworkStatus.Available)
+                    }
                 }
 
                 override fun onLosing(network: Network, maxMsToLive: Int) {

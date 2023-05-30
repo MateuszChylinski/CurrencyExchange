@@ -24,7 +24,6 @@ class PagerBase : Fragment() {
     private val mViewModel: FragmentTagViewModel by viewModels()
 
 
-
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,

@@ -117,6 +117,8 @@ class Conversion : Fragment() {
                 mViewModel.allCurrencies.collect { currencies ->
                     when (currencies) {
                         is DataWrapper.Success -> {
+                            Log.i(TAG, "onViewCreated online ${currencies.data}: ")
+
                             currencies.data?.currencyData?.keys?.forEach {
                                 mCurrencyList.add(it)
                             }
@@ -137,7 +139,7 @@ class Conversion : Fragment() {
             }
         }
 
-    /*if the device will not have internet connection,
+    /* if the device will not have internet connection,
     load list of currencies that are being stored in database,
     so user could make an conversion, but with old rates */
     private val mOfflineListOfCurrencies: Job
@@ -178,6 +180,7 @@ class Conversion : Fragment() {
                     when (state) {
                         is DataWrapper.Success -> {
                             mNetworkState = state.data?.name.toString()
+                            Log.i(TAG, "onViewCreated $mNetworkState: ")
 
                             if (mNetworkState != "Available" && mIsDbInit) {
                                 mBinding.conversionError.visibility = View.VISIBLE
@@ -291,30 +294,11 @@ class Conversion : Fragment() {
                 ownerProducer = { requireParentFragment() })
             mFragmentVM.setMoveFlag(true)
         }
-
+//TODO make an code review in fragments. Seems like spinners are not reacting as they should after changing base currency
 
         // Refresh layout UI
         mBinding.conversionRefreshContainer.setOnRefreshListener {
-            viewLifecycleOwner.lifecycleScope.launch {
-                mViewModel.baseCurrency.collect { baseCurrency ->
-                    when (baseCurrency) {
-                        is DataWrapper.Success -> {
-                            mBaseCurrency = baseCurrency.data?.baseCurrency.toString()
-                            mBinding.conversionFromTv.text =
-                                String.format(getString(R.string.formatted_from), mBaseCurrency)
-                        }
-
-                        is DataWrapper.Error -> {
-                            Log.e(
-                                TAG,
-                                "onViewCreated: couldn't retrieve base currency from the database"
-                            )
-                        }
-                    }
-                }
-            }
             defaultViewsSetup()
-            mDesiredCurrency = String()
             mBinding.conversionRefreshContainer.isRefreshing = false
         }
     }
@@ -441,5 +425,6 @@ class Conversion : Fragment() {
 
         mNetworkStateCoroutine.start()
         mOfflineListOfCurrencies.start()
+
     }
 }

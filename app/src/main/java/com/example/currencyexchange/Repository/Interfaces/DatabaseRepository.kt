@@ -13,5 +13,4 @@ interface DatabaseRepository {
     suspend fun insertCurrencies(currency: CurrenciesDatabaseDetailed)
     suspend fun updateBaseCurrency(baseCurrency: CurrenciesDatabaseMain)
     suspend fun updateRates(currency: CurrenciesDatabaseDetailed)
-    suspend fun updateRatesDate(date: String?)
 }

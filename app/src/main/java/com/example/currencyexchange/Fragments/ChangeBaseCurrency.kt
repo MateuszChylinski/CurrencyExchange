@@ -19,7 +19,6 @@ import com.example.currencyexchange.R
 import com.example.currencyexchange.ViewModels.ChangeBaseViewModel
 import com.example.currencyexchange.databinding.FragmentChangeBaseCurrencyBinding
 import kotlinx.coroutines.launch
-import java.util.Calendar
 
 class ChangeBaseCurrency : Fragment() {
     private var TAG = "ChangeBaseCurrency"

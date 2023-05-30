@@ -15,7 +15,7 @@ class RetrofitRepositoryImplementation @Inject constructor(private val services:
     override suspend fun getLatestRates(
         apiKey: String,
         baseCurrency: String
-    ): Response<LatestRates>? =
+    ): Response<LatestRates> =
         services.getLatestRates(apikey = apiKey, base = baseCurrency)
 
     override suspend fun convertCurrency(

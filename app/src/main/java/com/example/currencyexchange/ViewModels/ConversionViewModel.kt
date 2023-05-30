@@ -36,25 +36,25 @@ class ConversionViewModel @Inject constructor(
         databaseRepository.baseCurrency
             .map { DataWrapper.Success(it) }
             .catch { DataWrapper.Error(it.message) }
-            .shareIn(viewModelScope, SharingStarted.WhileSubscribed())
+            .shareIn(viewModelScope, SharingStarted.WhileSubscribed(), replay = 1)
 
     val allCurrencies: SharedFlow<DataWrapper<CurrenciesDatabaseDetailed>> =
         databaseRepository.currencyData
             .map { DataWrapper.Success(it) }
             .catch { DataWrapper.Error(it.message) }
-            .shareIn(viewModelScope, SharingStarted.WhileSubscribed())
+            .shareIn(viewModelScope, SharingStarted.WhileSubscribed(), replay = 1)
 
     val networkState: SharedFlow<DataWrapper<NetworkObserver.NetworkStatus>> =
         networkObserver.observeStatus()
             .map { DataWrapper.Success(it) }
             .catch { DataWrapper.Error(it) }
-            .shareIn(viewModelScope, SharingStarted.WhileSubscribed())
+            .shareIn(viewModelScope, SharingStarted.WhileSubscribed(), replay = 1)
 
     val databaseState: SharedFlow<DataWrapper<Boolean>> =
         databaseRepository.isInit
             .map { DataWrapper.Success(it) }
             .catch { DataWrapper.Error(it) }
-            .shareIn(viewModelScope, SharingStarted.WhileSubscribed())
+            .shareIn(viewModelScope, SharingStarted.WhileSubscribed(), replay = 1)
 
     val currencyData: SharedFlow<DataWrapper<List<CurrenciesDatabaseDetailed>>> =
         databaseRepository.currencyListData
@@ -71,12 +71,15 @@ class ConversionViewModel @Inject constructor(
                 apiKey = BuildConfig.API_KEY
             )
             try {
-                if (response.isSuccessful){
+                if (response.isSuccessful) {
                     _exchangeState.postValue(DataWrapper.Success(response.body()!!))
-                }else{
-                    Log.e(TAG, "exchangeCurrency ViewModel: Response is NOT successful. Code: ${response.code()}")
+                } else {
+                    Log.e(
+                        TAG,
+                        "exchangeCurrency ViewModel: Response is NOT successful. Code: ${response.code()}"
+                    )
                 }
-            }catch (exception: Exception){
+            } catch (exception: Exception) {
                 _exchangeState.postValue(DataWrapper.Error(data = null, error = exception.message))
             }
         }

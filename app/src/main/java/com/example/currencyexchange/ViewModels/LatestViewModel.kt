@@ -57,35 +57,35 @@ class LatestViewModel @Inject constructor(
      * In case the call will be successfully, assign the response data to LiveData
      * In case the call will fail, display exception
      * Finally, insert/update map with currencies, and their rates in database, and update date, to let user know, from when the rates are  */
-    fun fetchData(baseCurrency: String) = viewModelScope.launch {
+    fun fetchData(baseCurrency: String) =
+        viewModelScope.launch {
         val response = retrofitRepository.getLatestRates(
             baseCurrency = baseCurrency,
             apiKey = BuildConfig.API_KEY
         )
         try {
-            if (response?.isSuccessful == true) {
-
+            if (response.isSuccessful) {
                 _latestRatesCall.postValue(DataWrapper.Success(response.body()!!))
             } else {
-                Log.w(TAG, "fetchData: couldn't fetch data in ViewModel. ${response?.code()}")
+                Log.w(TAG, "fetchData: couldn't fetch data in ViewModel. ${response.code()}")
             }
         } catch (exception: Exception) {
             _latestRatesCall.postValue(DataWrapper.Error(error = exception.message, data = null))
         }
     }
 
-     fun insertCurrencies(currencyData: CurrenciesDatabaseDetailed) = viewModelScope.launch {
+    fun insertCurrencies(currencyData: CurrenciesDatabaseDetailed) = viewModelScope.launch {
         try {
             databaseRepository.insertCurrencies(currencyData)
         } catch (exception: IOException) {
-            Log.i(TAG, "insertCurrencies: couldn't insert currencies in view model. $exception")
+            Log.e(TAG, "insertCurrencies: couldn't insert currencies in view model. $exception")
         }
     }
 
-     fun updateCurrencies(currencyData: CurrenciesDatabaseDetailed) = viewModelScope.launch {
+    fun updateCurrencies(currencyData: CurrenciesDatabaseDetailed) = viewModelScope.launch {
         try {
             databaseRepository.updateRates(currencyData)
-        }catch (exception: Exception){
+        } catch (exception: Exception) {
             Log.e(TAG, "updateCurrencies: couldn't update rates in view model. $exception")
         }
     }

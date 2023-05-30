@@ -25,6 +25,8 @@ import com.example.currencyexchange.R
 import com.example.currencyexchange.ViewModels.FluctuationViewModel
 import com.example.currencyexchange.ViewModels.FragmentTagViewModel
 import com.example.currencyexchange.databinding.FragmentFluctuationBinding
+import kotlinx.coroutines.CoroutineStart
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Calendar
@@ -48,18 +50,42 @@ class Fluctuation : Fragment() {
     private var endDate: String = "default"
 
     private var mBaseCurrency: String = "default"
-    private var mIsChanged: Boolean = false
     private val mCurrencies: MutableList<String> = mutableListOf()
 
 
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View {
-        _binding = FragmentFluctuationBinding.inflate(inflater, container, false)
-        val view = mBinding.root
+    private val networkStateTracker: Job
+        get() = viewLifecycleOwner.lifecycleScope.launch {
+            setupViewNoInternet()
+            mViewModel.networkState.collect { status ->
+                when (status) {
+                    is DataWrapper.Success -> {
+                        if (status.data.toString() == "Available") {
+                            mBinding.fluctuationNoInternet.visibility = View.INVISIBLE
 
-        viewLifecycleOwner.lifecycleScope.launch {
+                            mBinding.fluctuationFromDt.visibility = View.VISIBLE
+                            mBinding.fluctuationFromCenterTv.visibility = View.VISIBLE
+                            mBinding.fluctuationSetFromOk.visibility = View.VISIBLE
+
+                            baseCurr.start()
+                            currencies.start()
+                            fluctuationData.start()
+                        } else {
+                            setupViewNoInternet()
+                        }
+                    }
+
+                    is DataWrapper.Error -> {
+                        Log.e(
+                            TAG,
+                            "onCreateView: couldn't retrieve network services status. Exception: ${status.message}"
+                        )
+                    }
+                }
+            }
+        }
+
+    private val baseCurr: Job
+        get() = viewLifecycleOwner.lifecycleScope.launch(start = CoroutineStart.LAZY) {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 mViewModel.baseCurrency.collect { currency ->
                     when (currency) {
@@ -81,7 +107,8 @@ class Fluctuation : Fragment() {
                 }
             }
         }
-        viewLifecycleOwner.lifecycleScope.launch {
+    private val currencies: Job
+        get() = viewLifecycleOwner.lifecycleScope.launch(start = CoroutineStart.LAZY) {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 mViewModel.allCurrencies.collect { currencies ->
                     when (currencies) {
@@ -106,19 +133,31 @@ class Fluctuation : Fragment() {
             }
         }
 
-        viewLifecycleOwner.lifecycleScope.launch {
-            repeatOnLifecycle(Lifecycle.State.STARTED) {
-                mViewModel.fluctuation.observe(viewLifecycleOwner, Observer {
-                    mFluctuationAdapter = FluctuationAdapter()
-                    mFluctuationAdapter?.setData(it.data?.rates!!)
-                    mBinding.fluctuationRv.adapter = mFluctuationAdapter
-                })
+    private val fluctuationData: Job
+        get() =
+            viewLifecycleOwner.lifecycleScope.launch(start = CoroutineStart.LAZY) {
+                repeatOnLifecycle(Lifecycle.State.STARTED) {
+                    mViewModel.fluctuation.observe(viewLifecycleOwner, Observer {
+                        mFluctuationAdapter = FluctuationAdapter()
+                        mFluctuationAdapter?.setData(it.data?.rates!!)
+                        mBinding.fluctuationRv.adapter = mFluctuationAdapter
+                    })
+                }
             }
-        }
+
+
+    override fun onCreateView(
+        inflater: LayoutInflater, container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View {
+        _binding = FragmentFluctuationBinding.inflate(inflater, container, false)
+        val view = mBinding.root
+
+        networkStateTracker.start()
+
 
         /** Reload UI to 'default' state (as it was while entering the layout for the first time) */
         mBinding.fluctuationRefreshContainer.setOnRefreshListener {
-            mIsChanged = true
             defaultViewsSetup()
             mBinding.fluctuationRefreshContainer.isRefreshing = false
         }
@@ -181,6 +220,26 @@ class Fluctuation : Fragment() {
         }
     }
 
+    private fun setupViewNoInternet() {
+        mBinding.fluctuationNoInternet.visibility = View.VISIBLE
+
+        mBinding.fluctuationFromCenterTv.visibility = View.INVISIBLE
+        mBinding.fluctuationFromDt.visibility = View.INVISIBLE
+        mBinding.fluctuationSetFromOk.visibility = View.INVISIBLE
+        mBinding.fluctuationBaseCurrencyTv.visibility = View.INVISIBLE
+        mBinding.fluctuationRv.visibility = View.INVISIBLE
+        mBinding.fluctuationBaseInRv.visibility = View.INVISIBLE
+        mBinding.fluctuationSelectBaseCurrency.visibility = View.INVISIBLE
+        mBinding.fluctuationToDt.visibility = View.INVISIBLE
+        mBinding.fluctuationFromDate.visibility = View.INVISIBLE
+        mBinding.fluctuationToDate.visibility = View.INVISIBLE
+        mBinding.fluctuationSelectSymbolsLv.visibility = View.INVISIBLE
+        mBinding.fluctuationSelectSymbolsTv.visibility = View.INVISIBLE
+        mBinding.fluctuationSaveSymbols.visibility = View.INVISIBLE
+        mBinding.fluctuationToCenterTv.visibility = View.INVISIBLE
+        mBinding.fluctuationSetToOk.visibility = View.INVISIBLE
+    }
+
     private fun setupViewsToGetDate() {
         mBinding.fluctuationFromCenterTv.visibility = View.INVISIBLE
         mBinding.fluctuationFromDt.visibility = View.INVISIBLE
@@ -215,11 +274,6 @@ class Fluctuation : Fragment() {
             getString(R.string.select_up_to_30_currencies),
             Toast.LENGTH_SHORT
         ).show()
-
-        // Make sure that the base currency has some value, before deleting it from the list.
-        if (mBaseCurrency != "default") {
-            deleteBaseCurrencyFromList()
-        }
     }
 
     /** This function is kind of a bypass, since we can't just clear the list, and initiate it with 'mCurrencyList' because there will be no effect of it
@@ -233,14 +287,8 @@ class Fluctuation : Fragment() {
             lvList.add(it)
         }
 
-        if (spinnerList.toString().contains(mBaseCurrency) && lvList.toString()
-                .contains(mBaseCurrency)
-        ) {
-            val spinnerIndex = spinnerList.indices.find { spinnerList[it] == mBaseCurrency }
-            val listIndex = lvList.indices.find { lvList[it] == mBaseCurrency }
-            spinnerIndex?.let { spinnerList.removeAt(it) }
-            listIndex?.let { lvList.removeAt(it) }
-        }
+        spinnerList.removeIf { it == mBaseCurrency }
+        lvList.removeIf { it == mBaseCurrency }
 
         //Delete "Select currency" value from the list intended for ListView.
         lvList.removeAt(0)
@@ -259,6 +307,7 @@ class Fluctuation : Fragment() {
             object : AdapterView.OnItemSelectedListener {
                 override fun onItemSelected(p0: AdapterView<*>?, p1: View?, p2: Int, p3: Long) {
                     if (mIsTouched) {
+                        mIsTouched = false
                         mBaseCurrency = currencyNames[p2]
                         mBinding.fluctuationBaseCurrencyTv.text =
                             String.format(
@@ -272,7 +321,7 @@ class Fluctuation : Fragment() {
                 }
 
                 override fun onNothingSelected(p0: AdapterView<*>?) {
-                    Log.i(TAG, "onNothingSelected: IN FLUCTUATION SPINNER")
+                    Log.e(TAG, "onNothingSelected: IN FLUCTUATION SPINNER")
                 }
             }
     }
@@ -375,12 +424,12 @@ class Fluctuation : Fragment() {
             }
         }
 
-        mBinding.fluctuationFromCenterTv.visibility = View.VISIBLE
-        mBinding.fluctuationFromDt.visibility = View.VISIBLE
-        mBinding.fluctuationSetFromOk.visibility = View.VISIBLE
-
         /** Clear from/to date after reset  */
+        mBaseCurrency = String()
         startDate = String()
         endDate = String()
+        mCurrencies.clear()
+
+        networkStateTracker.start()
     }
 }

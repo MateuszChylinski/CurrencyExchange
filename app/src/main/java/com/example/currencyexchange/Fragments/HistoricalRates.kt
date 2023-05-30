@@ -24,53 +24,80 @@ import com.example.currencyexchange.R
 import com.example.currencyexchange.ViewModels.FragmentTagViewModel
 import com.example.currencyexchange.ViewModels.HistoricalViewModel
 import com.example.currencyexchange.databinding.FragmentHistoricalRatesBinding
+import kotlinx.coroutines.CoroutineStart
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Calendar
 
 class HistoricalRates : Fragment() {
 
+    private val mViewModel: HistoricalViewModel by activityViewModels()
+    private var _binding: FragmentHistoricalRatesBinding? = null
+    private val mBinding get() = _binding!!
+
     private val TAG = "HistoricalRates"
     private var mDate: String = "default"
     private var mBaseCurrency = "default"
     private var mIsRefreshed: Boolean = false
 
-    private var _binding: FragmentHistoricalRatesBinding? = null
-    private val mBinding get() = _binding!!
-    private val mViewModel: HistoricalViewModel by activityViewModels()
+
     private val mCalendar = Calendar.getInstance()
 
     private var mHistoricalAdapter: HistoricalAdapter? = null
     private var mCurrencyList: MutableList<String> = mutableListOf()
 
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View {
-        _binding = FragmentHistoricalRatesBinding.inflate(inflater, container, false)
-        mBinding.historicalRv.layoutManager = LinearLayoutManager(this.context)
-        val view = mBinding.root
+    private val networkStateTracker: Job
+        get() = viewLifecycleOwner.lifecycleScope.launch {
+            noInternetViews()
+            mViewModel.networkState.collect { state ->
+                when (state) {
+                    is DataWrapper.Success -> {
+                        if (state.data.toString() == "Available") {
+                            mBinding.historicalNoNetwork.visibility = View.INVISIBLE
 
-        viewLifecycleOwner.lifecycleScope.launch {
-            repeatOnLifecycle(Lifecycle.State.STARTED) {
-                mViewModel.baseCurrency.collect { currency ->
-                    when (currency) {
-                        is DataWrapper.Success -> {
-                            mBaseCurrency = currency.data?.baseCurrency.toString()
-                        }
+                            mBinding.historicalInfo.visibility = View.VISIBLE
+                            mBinding.historicalDt.visibility = View.VISIBLE
+                            mBinding.historicalSaveDate.visibility = View.VISIBLE
 
-                        is DataWrapper.Error -> {
-                            Log.e(
-                                TAG,
-                                "onCreateView: couldn't retrieve base currency from the ViewModel. ${currency.message}",
-                            )
+                            baseCurr.start()
+                            allCurrencies.start()
+                            historicalData.start()
+                        } else {
+                            noInternetViews()
                         }
+                    }
+
+                    is DataWrapper.Error -> {
+                        Log.e(
+                            TAG,
+                            "couldn't retrieve network state. Exception: ${state.message}"
+                        )
                     }
                 }
             }
         }
 
-        viewLifecycleOwner.lifecycleScope.launch {
+    private val baseCurr: Job
+        get() = viewLifecycleOwner.lifecycleScope.launch(start = CoroutineStart.LAZY) {
+            mViewModel.baseCurrency.collect { currency ->
+                when (currency) {
+                    is DataWrapper.Success -> {
+                        mBaseCurrency = currency.data?.baseCurrency.toString()
+                    }
+
+                    is DataWrapper.Error -> {
+                        Log.e(
+                            TAG,
+                            "onCreateView: couldn't retrieve base currency from the ViewModel. ${currency.message}",
+                        )
+                    }
+                }
+            }
+        }
+
+    private val allCurrencies: Job
+        get() = viewLifecycleOwner.lifecycleScope.launch(start = CoroutineStart.LAZY) {
             mViewModel.allCurrencies.collect { currencies ->
                 when (currencies) {
                     is DataWrapper.Success -> {
@@ -97,7 +124,9 @@ class HistoricalRates : Fragment() {
             }
         }
 
-        viewLifecycleOwner.lifecycleScope.launch {
+
+    private val historicalData: Job
+        get() = viewLifecycleOwner.lifecycleScope.launch(start = CoroutineStart.LAZY) {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 mViewModel.historicalData.observe(viewLifecycleOwner, Observer {
                     mHistoricalAdapter = HistoricalAdapter()
@@ -106,29 +135,28 @@ class HistoricalRates : Fragment() {
                 })
             }
         }
+
+
+    override fun onCreateView(
+        inflater: LayoutInflater, container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View {
+        _binding = FragmentHistoricalRatesBinding.inflate(inflater, container, false)
+        mBinding.historicalRv.layoutManager = LinearLayoutManager(this.context)
+        val view = mBinding.root
+
+        networkStateTracker.start()
+
         // After refreshing layout, reset UI to the default state, and observe the base currency once again, so user will see "default" base currency
         mBinding.historicalRefreshContainer.setOnRefreshListener {
             mBinding.historicalRefreshContainer.isRefreshing = false
 
-            lifecycleScope.launch {
-                mViewModel.baseCurrency.collect { currency ->
-                    when (currency) {
-                        is DataWrapper.Success -> {
-                            mBaseCurrency = currency.data?.baseCurrency.toString()
-                            mBinding.historicalBaseTv.text = mBaseCurrency
-                        }
-
-                        is DataWrapper.Error -> {
-                            Log.e(
-                                TAG,
-                                "onCreateView: couldn't retrieve base currency from the viewmodel after refreshing the layout.\n${currency.message}",
-                            )
-                        }
-                    }
-                }
-            }
-            mIsRefreshed = true
             setDefaultVisibility()
+
+            mIsRefreshed = true
+        }
+        mBinding.historicalSaveDate.setOnClickListener {
+            getDate()
         }
         return view
     }
@@ -145,7 +173,7 @@ class HistoricalRates : Fragment() {
                 ownerProducer = { requireParentFragment() })
             mFragmentTagViewModel.setMoveFlag(true)
         }
-        setDefaultVisibility()
+//        setDefaultVisibility()
     }
 
     // Prepare default visibility - it is mainly needed after user will refresh the layout
@@ -171,9 +199,8 @@ class HistoricalRates : Fragment() {
         mBinding.historicalDateTv.visibility = View.INVISIBLE
         mBinding.historicalRv.visibility = View.INVISIBLE
 
-        mBinding.historicalSaveDate.setOnClickListener {
-            getDate()
-        }
+        networkStateTracker.cancel()
+        networkStateTracker.start()
     }
 
     //  Get picked date, and store it in mDate variable in format of 'yyyy-mm-dd'
@@ -225,14 +252,8 @@ class HistoricalRates : Fragment() {
             listForSpinner.add(it)
             listForLV.add(it)
         }
-
-        if (listForSpinner.toString().contains(mBaseCurrency) && listForLV.contains(mBaseCurrency)
-        ) {
-            val spinnerIndex = listForSpinner.indices.find { listForSpinner[it] == mBaseCurrency }
-            val listIndex = listForLV.indices.find { listForLV[it] == mBaseCurrency }
-            spinnerIndex?.let { listForSpinner.removeAt(it) }
-            listIndex?.let { listForLV.removeAt(it) }
-        }
+        listForSpinner.removeIf { it == mBaseCurrency }
+        listForLV.removeIf { it == mBaseCurrency }
         //Remove "Currency" value from the list, that is intended for ListView
         listForLV.removeAt(0)
 
@@ -265,7 +286,7 @@ class HistoricalRates : Fragment() {
                 }
 
                 override fun onNothingSelected(p0: AdapterView<*>?) {
-                    Log.i(TAG, "onNothingSelected in historical spinner ")
+                    Log.e(TAG, "onNothingSelected in historical spinner ")
                 }
             }
     }
@@ -342,6 +363,23 @@ class HistoricalRates : Fragment() {
 
         mBinding.historicalDateTv.visibility = View.VISIBLE
         mBinding.historicalRv.visibility = View.VISIBLE
+    }
+
+    // display in case there is no internet connection, or as a default (when there's no data about network services)
+    private fun noInternetViews() {
+        mBinding.historicalNoNetwork.visibility = View.VISIBLE
+
+        mBinding.historicalInfo.visibility = View.INVISIBLE
+        mBinding.historicalDt.visibility = View.INVISIBLE
+        mBinding.historicalSaveDate.visibility = View.INVISIBLE
+        mBinding.historicalRv.visibility = View.INVISIBLE
+        mBinding.historicalSelectInfo.visibility = View.INVISIBLE
+        mBinding.historicalSymbolsLv.visibility = View.INVISIBLE
+        mBinding.historicalSaveSymbols.visibility = View.INVISIBLE
+        mBinding.historicalChangeInfo.visibility = View.INVISIBLE
+        mBinding.historicalChangeBase.visibility = View.INVISIBLE
+        mBinding.historicalBaseTv.visibility = View.INVISIBLE
+        mBinding.historicalDateTv.visibility = View.INVISIBLE
     }
 }
 
