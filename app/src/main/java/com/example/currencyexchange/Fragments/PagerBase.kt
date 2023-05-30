@@ -12,6 +12,7 @@ import androidx.navigation.fragment.findNavController
 import com.example.currencyexchange.Adapters.PagerAdapter
 import com.example.currencyexchange.ViewModels.FragmentTagViewModel
 import com.example.currencyexchange.databinding.FragmentPagerBaseBinding
+
 import kotlinx.coroutines.launch
 
 class PagerBase : Fragment() {
@@ -20,7 +21,8 @@ class PagerBase : Fragment() {
     private lateinit var pagerAdapter: PagerAdapter
     private val mFragmentsList =
         arrayListOf(Latest(), Conversion(), Fluctuation(), HistoricalRates())
-    val mViewModel: FragmentTagViewModel by viewModels()
+    private val mViewModel: FragmentTagViewModel by viewModels()
+
 
     override fun onCreateView(
         inflater: LayoutInflater,

@@ -10,7 +10,7 @@ interface ApiServices {
     suspend fun getLatestRates(
         @Query("base") base: String,
         @Query("apikey") apikey: String
-    ): Response<LatestRates>?
+    ): Response<LatestRates>
 
     @GET("/fixer/convert")
     suspend fun convertCurrency(

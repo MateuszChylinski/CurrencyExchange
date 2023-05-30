@@ -19,7 +19,6 @@ import com.example.currencyexchange.R
 import com.example.currencyexchange.ViewModels.ChangeBaseViewModel
 import com.example.currencyexchange.databinding.FragmentChangeBaseCurrencyBinding
 import kotlinx.coroutines.launch
-import java.util.Calendar
 
 class ChangeBaseCurrency : Fragment() {
     private var TAG = "ChangeBaseCurrency"
@@ -49,7 +48,7 @@ class ChangeBaseCurrency : Fragment() {
                             )
                         }
                         is DataWrapper.Error<*> -> {
-                            Log.w(
+                            Log.e(
                                 TAG,
                                 "ChangeBaseCurrency: failed to retrieve base currency from the database: ${currency.message}"
                             )
@@ -110,8 +109,7 @@ class ChangeBaseCurrency : Fragment() {
                 mViewModel.updateBaseCurrency(
                     CurrenciesDatabaseMain(
                         0,
-                        mBaseCurrency,
-                        Calendar.getInstance().time.toString()
+                        mBaseCurrency
                     )
                 )
                 moveToPreviousFragment()

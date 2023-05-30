@@ -8,6 +8,8 @@ import com.example.currencyexchange.DataWrapper.DataWrapper
 import com.example.currencyexchange.Models.CurrenciesDatabaseDetailed
 import com.example.currencyexchange.Models.CurrenciesDatabaseMain
 import com.example.currencyexchange.Models.FluctuationModel
+import com.example.currencyexchange.NetworkDetection.NetworkObserver
+import com.example.currencyexchange.NetworkDetection.NetworkObserverImplementation
 import com.example.currencyexchange.Repository.Implementation.DatabaseRepositoryImplementation
 import com.example.currencyexchange.Repository.Implementation.RetrofitRepositoryImplementation
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -23,7 +25,8 @@ import javax.inject.Inject
 @HiltViewModel
 class FluctuationViewModel @Inject constructor(
     private val apiRepository: RetrofitRepositoryImplementation,
-    private val databaseRepository: DatabaseRepositoryImplementation
+    private val databaseRepository: DatabaseRepositoryImplementation,
+    private val networkStatus: NetworkObserverImplementation
 ) : ViewModel() {
 
     private val _fluctuation = MutableLiveData<DataWrapper<FluctuationModel>>()
@@ -33,10 +36,16 @@ class FluctuationViewModel @Inject constructor(
         databaseRepository.baseCurrency
             .map { DataWrapper.Success(it) }
             .catch { DataWrapper.Error(it.message) }
-            .shareIn(viewModelScope, SharingStarted.WhileSubscribed())
+            .shareIn(viewModelScope, SharingStarted.WhileSubscribed(), replay = 1)
 
     val allCurrencies: SharedFlow<DataWrapper<CurrenciesDatabaseDetailed>> =
         databaseRepository.currencyData
+            .map { DataWrapper.Success(it) }
+            .catch { DataWrapper.Error(it.message) }
+            .shareIn(viewModelScope, SharingStarted.WhileSubscribed(), replay = 1)
+
+    val networkState: SharedFlow<DataWrapper<NetworkObserver.NetworkStatus>> =
+        networkStatus.observeStatus()
             .map { DataWrapper.Success(it) }
             .catch { DataWrapper.Error(it.message) }
             .shareIn(viewModelScope, SharingStarted.WhileSubscribed(), replay = 1)

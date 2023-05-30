@@ -8,8 +8,6 @@ import com.example.currencyexchange.Models.CurrenciesDatabaseMain
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
-import java.text.SimpleDateFormat
-import java.util.Calendar
 import javax.inject.Inject
 import javax.inject.Provider
 
@@ -25,7 +23,7 @@ class CallbackModule @Inject constructor(
     }
     @SuppressLint("SimpleDateFormat")
     private suspend fun insertDefaultCurrency(){
-        val defaultCurrency = CurrenciesDatabaseMain(0, "EUR", SimpleDateFormat("yyy-MM-dd").format(Calendar.getInstance().time))
+        val defaultCurrency = CurrenciesDatabaseMain(0, "EUR")
         provider.get().insertDefaultCurrency(defaultCurrency)
     }
 }
