@@ -48,6 +48,6 @@
     <string name="formatted_current_base">Current base currency: %1$s</string>
     <string name="no_network_sign">:(</string>
     <string name="no_network_explanation">When application is just installed, it requires internet connection to fill database with data about specific currency. Please, provide internet connection.</string>
-    <string name="no_network_after_changing_base">Database does not contain any data about this specific currency. Please provide internet connection to update data</string>
+    <string name="no_network_after_changing_base">Database does not contain any data about this specific currency. Please provide internet connection to update data, or alternatively, consider changing base currency.</string>
     <string name="no_network_explanation_historical_fluctuation">This mode can\'t be used without internet connection.</string>
 </resources>
