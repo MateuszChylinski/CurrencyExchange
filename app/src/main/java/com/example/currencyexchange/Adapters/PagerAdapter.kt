@@ -15,6 +15,7 @@ class PagerAdapter(fragment: Fragment, fragmentList: List<Fragment>) :
             1 -> NUM_PAGES[1]
             2 -> NUM_PAGES[2]
             3 -> NUM_PAGES[3]
+            4 -> NUM_PAGES[4]
             else -> throw IllegalArgumentException("Error in FragmentStateAdapter")
         }
     }
