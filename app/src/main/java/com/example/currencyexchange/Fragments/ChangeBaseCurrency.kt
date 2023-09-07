@@ -61,6 +61,7 @@ class ChangeBaseCurrency : Fragment() {
         /** Retrieve list of all available currencies from the database */
         viewLifecycleOwner.lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
+
                 mViewModel.currencyNames.collect { currency ->
                     when (currency) {
                         is DataWrapper.Success -> {

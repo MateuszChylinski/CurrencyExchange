@@ -38,7 +38,6 @@ class Latest : Fragment() {
         mBinding.latestRv.layoutManager = LinearLayoutManager(this.context)
         mBinding.latestRv.adapter = mAdapter
 
-
         /** Create lazy coroutine, which will be triggered whenever mobile device will have network connection. Perform an api call, and observe values that came from the call. */
         val apiCallCoroutine =
             viewLifecycleOwner.lifecycleScope.launch(start = CoroutineStart.LAZY) {
@@ -46,6 +45,7 @@ class Latest : Fragment() {
                 mViewModel.latestRates.observe(viewLifecycleOwner, Observer { status ->
                     when (status) {
                         is DataWrapper.Success<*> -> {
+                            mBinding.latestProgressBar.visibility = View.INVISIBLE
                             // Add response to variable as mutable map, and find k/v for given base currency, remove it, and display.
                             val currencies = status.data?.latestRates?.toMutableMap()
                             currencies?.remove(mBaseCurrency)
@@ -56,6 +56,8 @@ class Latest : Fragment() {
                                     status.data.date
                                 )
 
+                            mBinding.latestBase.visibility = View.VISIBLE
+                            mBinding.latestDate.visibility = View.VISIBLE
 
                             /** Find index of specific object in list. If it is present, then update is, if not, insert it into database
                              *  'mCurrencyData' is a list, that contains objects of 'CurrenciesDatabaseDetailed'.
@@ -164,13 +166,20 @@ class Latest : Fragment() {
                                     offlineCurrencies.data[index!! - 1].currencyData.toMutableMap()
                                 currencyData.remove(mBaseCurrency)
                                 mAdapter.setData(currencyData)
+
                                 mBinding.latestDate.text =
                                     String.format(
                                         getString(R.string.rates_from_date),
                                         offlineCurrencies.data[index - 1].ratesDate
                                     )
 
+                                mBinding.latestBase.visibility = View.VISIBLE
+                                mBinding.latestDate.visibility = View.VISIBLE
+                                mBinding.latestRv.visibility = View.VISIBLE
+                                mBinding.latestProgressBar.visibility = View.INVISIBLE
+
                             } else {
+                                mBinding.latestProgressBar.visibility = View.INVISIBLE
                                 mBinding.latestNoInternetSign.visibility = View.VISIBLE
                                 mBinding.latestNoInternetExplanation.visibility =
                                     View.VISIBLE
@@ -178,8 +187,6 @@ class Latest : Fragment() {
                                 mBinding.latestRv.visibility = View.INVISIBLE
                                 mBinding.latestBase.visibility = View.INVISIBLE
                                 mBinding.latestDate.visibility = View.INVISIBLE
-                                mBinding.appBarLayout.visibility = View.INVISIBLE
-
                                 mBinding.latestNoInternetExplanation.text =
                                     getString(R.string.no_network_after_changing_base)
 
@@ -207,30 +214,26 @@ class Latest : Fragment() {
         val networkCoroutine =
             viewLifecycleOwner.lifecycleScope.launch(start = CoroutineStart.LAZY) {
 
-                //Since the flow will be emitted whenever user will turn on any of the connection services,
-                //firstly, behave like there is no internet connection. If the internet connection will be available, then perform an api call.
+                /*Since the flow will be emitted whenever user will turn on any of the connection services,
+                firstly, behave like there is no internet connection. If the internet connection will be available, then perform an api call.
+                if database is already populated with some data about currency rates start the 'oldRates' coroutine. */
 
-                //if database is already populated with some data about currency rates start the 'oldRates' coroutine.
                 if (!mIsDatabaseEmpty) {
                     oldRates.start()
                     mBinding.latestNoInternetSign.visibility = View.INVISIBLE
                     mBinding.latestNoInternetExplanation.visibility = View.INVISIBLE
-                    mBinding.appBarLayout.visibility = View.VISIBLE
-                    mBinding.latestBase.visibility = View.VISIBLE
-                    mBinding.latestDate.visibility = View.VISIBLE
 
                     // if database is not populated, and mobile device does not have connection to the network, display explanation why user should enable network connection
                 } else {
                     mBinding.latestNoInternetSign.visibility = View.VISIBLE
                     mBinding.latestNoInternetExplanation.visibility = View.VISIBLE
-                    mBinding.appBarLayout.visibility = View.INVISIBLE
                     mBinding.latestBase.visibility = View.INVISIBLE
                     mBinding.latestDate.visibility = View.INVISIBLE
                 }
 
                 mViewModel.internetConnection.collect { status ->
-                    //if mobile device has network connection, cancel the 'oldRates' coroutine,
-                    // and start 'apiCallCoroutine', 'currencyDataCoroutine' coroutines. Manipulate visibility of the views.
+                    /*if mobile device has network connection, cancel the 'oldRates' coroutine,
+                     and start 'apiCallCoroutine', 'currencyDataCoroutine' coroutines. Manipulate visibility of the views. */
                     if (status.data?.name == "Available") {
                         oldRates.cancel()
                         apiCallCoroutine.start()
@@ -238,10 +241,6 @@ class Latest : Fragment() {
 
                         mBinding.latestNoInternetSign.visibility = View.INVISIBLE
                         mBinding.latestNoInternetExplanation.visibility = View.INVISIBLE
-
-                        mBinding.appBarLayout.visibility = View.VISIBLE
-                        mBinding.latestBase.visibility = View.VISIBLE
-                        mBinding.latestDate.visibility = View.VISIBLE
                         mBinding.latestRv.visibility = View.VISIBLE
                     }
                 }
@@ -271,6 +270,11 @@ class Latest : Fragment() {
         /** By clicking on a icon, inside of the toolbar, set a move flag to the 'ChangeBaseCurrency' fragment
          *  where user can select new base currency which will be saved in database */
         mBinding.latestChangeBase.setOnClickListener {
+            mBinding.latestBase.visibility = View.INVISIBLE
+            mBinding.latestDate.visibility = View.INVISIBLE
+            mBinding.latestRv.visibility = View.INVISIBLE
+            mBinding.latestProgressBar.visibility = View.VISIBLE
+
             val testVM: FragmentTagViewModel by viewModels(
                 ownerProducer = { requireParentFragment() })
             testVM.setMoveFlag(true)
