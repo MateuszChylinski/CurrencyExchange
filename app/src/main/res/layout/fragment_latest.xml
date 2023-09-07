@@ -50,6 +50,16 @@
         android:orientation="vertical"
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
+        <com.google.android.material.progressindicator.CircularProgressIndicator
+            android:id="@+id/latest_progress_bar"
+            android:indeterminate="true"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:indicatorSize="50dp"
+            app:indicatorColor="@color/design_default_color_primary"
+            app:trackColor="#f2f2"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"/>
 
         <TextView
             android:id="@+id/latest_base"
@@ -118,13 +128,6 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/latest_base" />
 
-        <ProgressBar
-            android:id="@+id/latest_progress_bar"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:visibility="visible"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="@+id/latest_rv"
-            tools:ignore="NotSibling" />
+
     </androidx.constraintlayout.widget.ConstraintLayout>
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

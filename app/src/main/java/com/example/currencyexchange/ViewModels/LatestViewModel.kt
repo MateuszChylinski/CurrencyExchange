@@ -66,10 +66,8 @@ class LatestViewModel @Inject constructor(
         try {
             if (response.isSuccessful) {
                 _latestRatesCall.postValue(DataWrapper.Success(response.body()!!))
-            } else {
-                Log.w(TAG, "fetchData: couldn't fetch data in ViewModel. ${response.code()}")
             }
-        } catch (exception: Exception) {
+        } catch (exception: java.net.SocketTimeoutException) {
             _latestRatesCall.postValue(DataWrapper.Error(error = exception.message, data = null))
         }
     }

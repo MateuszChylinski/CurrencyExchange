@@ -38,6 +38,7 @@ class Latest : Fragment() {
         mBinding.latestRv.layoutManager = LinearLayoutManager(this.context)
         mBinding.latestRv.adapter = mAdapter
 
+
         /** Create lazy coroutine, which will be triggered whenever mobile device will have network connection. Perform an api call, and observe values that came from the call. */
         val apiCallCoroutine =
             viewLifecycleOwner.lifecycleScope.launch(start = CoroutineStart.LAZY) {
@@ -45,7 +46,6 @@ class Latest : Fragment() {
                 mViewModel.latestRates.observe(viewLifecycleOwner, Observer { status ->
                     when (status) {
                         is DataWrapper.Success<*> -> {
-                            mBinding.latestProgressBar.visibility = View.INVISIBLE
                             // Add response to variable as mutable map, and find k/v for given base currency, remove it, and display.
                             val currencies = status.data?.latestRates?.toMutableMap()
                             currencies?.remove(mBaseCurrency)
@@ -56,8 +56,7 @@ class Latest : Fragment() {
                                     status.data.date
                                 )
 
-                            mBinding.latestBase.visibility = View.VISIBLE
-                            mBinding.latestDate.visibility = View.VISIBLE
+
 
                             /** Find index of specific object in list. If it is present, then update is, if not, insert it into database
                              *  'mCurrencyData' is a list, that contains objects of 'CurrenciesDatabaseDetailed'.
@@ -83,6 +82,10 @@ class Latest : Fragment() {
                                     )
                                 )
                             }
+
+                            mBinding.latestBase.visibility = View.VISIBLE
+                            mBinding.latestDate.visibility = View.VISIBLE
+                            mBinding.latestProgressBar.visibility = View.INVISIBLE
                         }
 
                         is DataWrapper.Error -> {
@@ -273,7 +276,6 @@ class Latest : Fragment() {
             mBinding.latestBase.visibility = View.INVISIBLE
             mBinding.latestDate.visibility = View.INVISIBLE
             mBinding.latestRv.visibility = View.INVISIBLE
-            mBinding.latestProgressBar.visibility = View.VISIBLE
 
             val testVM: FragmentTagViewModel by viewModels(
                 ownerProducer = { requireParentFragment() })
