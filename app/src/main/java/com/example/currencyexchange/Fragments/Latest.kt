@@ -56,8 +56,11 @@ class Latest : Fragment() {
                                     status.data.date
                                 )
 
+<<<<<<< Updated upstream
 
 
+=======
+>>>>>>> Stashed changes
                             /** Find index of specific object in list. If it is present, then update is, if not, insert it into database
                              *  'mCurrencyData' is a list, that contains objects of 'CurrenciesDatabaseDetailed'.
                              *  It'll be used to maintain proper data about currencies, and display them in case where user will not have stable internet connection */
@@ -82,7 +85,10 @@ class Latest : Fragment() {
                                     )
                                 )
                             }
+<<<<<<< Updated upstream
 
+=======
+>>>>>>> Stashed changes
                             mBinding.latestBase.visibility = View.VISIBLE
                             mBinding.latestDate.visibility = View.VISIBLE
                             mBinding.latestProgressBar.visibility = View.INVISIBLE
@@ -103,7 +109,6 @@ class Latest : Fragment() {
          * Program will find, and display proper object from this list.
          * In case when user will change base currency, while connection services are OFF, and the new base currency will not be in the list,
          * program will inform user that the database at current state doesn't contain data about specific base currency, so it'll be necessary to have internet connection */
-
         val currencyDataCoroutine =
             viewLifecycleOwner.lifecycleScope.launch(start = CoroutineStart.LAZY) {
                 mViewModel.currencyDataList.collect { currency ->
