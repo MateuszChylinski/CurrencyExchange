@@ -31,9 +31,18 @@ interface ApiServices {
 
     @GET("/fixer/{date}")
     suspend fun getHistoricalData(
-        @Path("date")date: String,
+        @Path("date") date: String,
         @Query("symbols") symbols: String,
         @Query("base") baseCurrency: String,
         @Query("apikey") apiKey: String
     ): Response<HistoricalRatesModel>
+
+    @GET("/fixer/timeseries")
+    suspend fun getTimeSeries(
+        @Query("start_date") startDate: String,
+        @Query("end_date") endDate: String,
+        @Query("base") base: String,
+        @Query("symbols") symbols: String,
+        @Query("apikey") apikey: String
+    ): Response<TimeSeriesModel>
 }

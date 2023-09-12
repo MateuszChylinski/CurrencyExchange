@@ -5,6 +5,7 @@ import com.example.currencyexchange.Models.ConversionModel
 import com.example.currencyexchange.Models.FluctuationModel
 import com.example.currencyexchange.Models.HistoricalRatesModel
 import com.example.currencyexchange.Models.LatestRates
+import com.example.currencyexchange.Models.TimeSeriesModel
 import com.example.currencyexchange.Repository.Interfaces.RetrofitRepository
 import retrofit2.Response
 import javax.inject.Inject
@@ -57,5 +58,20 @@ class RetrofitRepositoryImplementation @Inject constructor(private val services:
             baseCurrency = baseCurrency,
             symbols = currencies,
             date = date
+        )
+
+    override suspend fun getTimeSeriesData(
+        apiKey: String,
+        baseCurrency: String,
+        currencies: String,
+        startDate: String,
+        endDate: String
+    ): Response<TimeSeriesModel> =
+        services.getTimeSeries(
+            apikey = apiKey,
+            base = baseCurrency,
+            symbols = currencies,
+            startDate = startDate,
+            endDate = endDate
         )
 }

@@ -4,6 +4,7 @@ import com.example.currencyexchange.Models.ConversionModel
 import com.example.currencyexchange.Models.FluctuationModel
 import com.example.currencyexchange.Models.HistoricalRatesModel
 import com.example.currencyexchange.Models.LatestRates
+import com.example.currencyexchange.Models.TimeSeriesModel
 import retrofit2.Response
 
 interface RetrofitRepository {
@@ -11,4 +12,5 @@ interface RetrofitRepository {
     suspend fun convertCurrency(apiKey: String, baseCurrency: String, wantedCurrency: String, amount: String): Response<ConversionModel>
     suspend fun getFluctuation(apiKey: String, startDate: String, endDate: String, baseCurrency: String, currencies: String): Response<FluctuationModel>
     suspend fun getHistorical(apiKey: String, baseCurrency: String, currencies: String, date: String): Response<HistoricalRatesModel>
+    suspend fun getTimeSeriesData(apiKey: String, baseCurrency: String, currencies: String, startDate: String, endDate: String): Response<TimeSeriesModel>
 }
