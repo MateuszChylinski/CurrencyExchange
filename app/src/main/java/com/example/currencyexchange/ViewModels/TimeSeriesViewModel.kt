@@ -30,7 +30,6 @@ class TimeSeriesViewModel @Inject constructor(
     private val databaseRepository: DatabaseRepositoryImplementation,
     private val retrofitRepository: RetrofitRepositoryImplementation,
     private val networkObserver: NetworkObserverImplementation,
-    private val dataModifier: DataModifier
 ) : ViewModel() {
 
     private val _TimeSeriesData = MutableLiveData<DataWrapper<TimeSeriesModel>>()
@@ -53,11 +52,6 @@ class TimeSeriesViewModel @Inject constructor(
             .map { DataWrapper.Success(it) }
             .catch { DataWrapper.Error(it.message) }
             .shareIn(viewModelScope, SharingStarted.WhileSubscribed(), replay = 1)
-
-    fun deleteBaseTest(currencies: MutableList<String>, baseCurrency: String, isForSpinner: Boolean){
-        dataModifier.deleteBaseCurrency(currencies, baseCurrency, isForSpinner)
-    }
-
 
     fun fetchTimeSeriesData(
         basCurrency: String,
