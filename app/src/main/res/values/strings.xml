@@ -32,6 +32,7 @@
     <string name="fluctuation_fragment_name">Fluctuation\nrates</string>
     <string name="change_base_content_description">By clicking on the currency icon, you can change your base currency</string>
     <string name="select_desired_currency">You have to select desired currency, and enter amount of currency that you want to exchange in order to make a conversion</string>
+    <string name="select_at_least_one_currency">In order to display chart, you have to select at least one currency</string>
     <string name="base_currency_unk">Base currency UNK</string>
     <string name="rates_from_date">Rates from\n %1$s</string>
     <string name="pick_7_currencies">Pick up to 7 currencies, and click on the save button to display data</string>
