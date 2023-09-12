@@ -28,6 +28,3 @@ object DataModifier {
         return mutableListOf()
     }
 }
-
-//TODO prepare from/to spinners
-//TODO get date from user
