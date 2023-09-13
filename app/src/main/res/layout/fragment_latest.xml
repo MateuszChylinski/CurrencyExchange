@@ -59,13 +59,7 @@
             app:indicatorColor="@color/design_default_color_primary"
             app:trackColor="#f2f2"
             app:layout_constraintStart_toStartOf="parent"
-<<<<<<< Updated upstream
             app:layout_constraintTop_toTopOf="parent"/>
-=======
-            app:layout_constraintTop_toTopOf="parent"
-            />
->>>>>>> Stashed changes
-
         <TextView
             android:id="@+id/latest_base"
             android:layout_width="0dp"
@@ -131,10 +125,5 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/latest_base" />
-<<<<<<< Updated upstream
-
-
-=======
->>>>>>> Stashed changes
     </androidx.constraintlayout.widget.ConstraintLayout>
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
