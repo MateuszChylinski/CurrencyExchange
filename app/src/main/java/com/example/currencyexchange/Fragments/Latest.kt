@@ -55,12 +55,6 @@ class Latest : Fragment() {
                                     getString(R.string.rates_from_date),
                                     status.data.date
                                 )
-
-<<<<<<< Updated upstream
-
-
-=======
->>>>>>> Stashed changes
                             /** Find index of specific object in list. If it is present, then update is, if not, insert it into database
                              *  'mCurrencyData' is a list, that contains objects of 'CurrenciesDatabaseDetailed'.
                              *  It'll be used to maintain proper data about currencies, and display them in case where user will not have stable internet connection */
@@ -85,10 +79,6 @@ class Latest : Fragment() {
                                     )
                                 )
                             }
-<<<<<<< Updated upstream
-
-=======
->>>>>>> Stashed changes
                             mBinding.latestBase.visibility = View.VISIBLE
                             mBinding.latestDate.visibility = View.VISIBLE
                             mBinding.latestProgressBar.visibility = View.INVISIBLE
