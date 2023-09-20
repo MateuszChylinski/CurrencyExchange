@@ -80,6 +80,7 @@ class TimeSeriesViewModel @Inject constructor(
                 _TimeSeriesData.postValue(DataWrapper.Error(null, exception.message))
             }
         }
-
     }
 }
+
+

@@ -53,4 +53,5 @@
     <string name="no_network_after_changing_base">Database does not contain any data about this specific currency. Please provide internet connection to update data, or alternatively, consider changing base currency.</string>
     <string name="no_network_explanation_historical_fluctuation">This mode can\'t be used without internet connection.</string>
     <string name="time_series">Time\nSeries</string>
+    <string name="timeout_explanation">App couldn\'t connect with the server this time. Please, restart the app</string>
 </resources>
