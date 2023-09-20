@@ -14,13 +14,14 @@ import com.example.currencyexchange.ViewModels.FragmentTagViewModel
 import com.example.currencyexchange.databinding.FragmentPagerBaseBinding
 
 import kotlinx.coroutines.launch
+import java.sql.Time
 
 class PagerBase : Fragment() {
     private var _binding: FragmentPagerBaseBinding? = null
     private val mBinding get() = _binding!!
     private lateinit var pagerAdapter: PagerAdapter
     private val mFragmentsList =
-        arrayListOf(Latest(), Conversion(), Fluctuation(), HistoricalRates())
+        arrayListOf(Latest(), Conversion(), Fluctuation(), HistoricalRates(), TimeSeries())
     private val mViewModel: FragmentTagViewModel by viewModels()
 
 

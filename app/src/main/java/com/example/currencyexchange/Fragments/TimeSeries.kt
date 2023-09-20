@@ -5,7 +5,6 @@ import android.content.ContentValues.TAG
 import android.graphics.Color
 import android.os.Bundle
 import android.util.Log
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -14,6 +13,7 @@ import android.widget.AdapterView.OnItemSelectedListener
 import android.widget.ArrayAdapter
 import android.widget.ListView
 import android.widget.Toast
+import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
@@ -50,21 +50,30 @@ class TimeSeries : Fragment(), OnChartValueSelectedListener {
     private val mSdf = SimpleDateFormat("yyyy-MM-dd")
     private val mCalendar = Calendar.getInstance()
 
+    private lateinit var barData: BarData
+    private lateinit var set: BarDataSet
+    private lateinit var legend: Legend
+
     private var mTimeSeriesBinding: FragmentTimeSeriesBinding? = null
     private val mBinding get() = mTimeSeriesBinding!!
     private val mViewModel: TimeSeriesViewModel by activityViewModels()
-    private var set: BarDataSet? = null
 
     private var mBaseCurrency: String = "default"
     private var mStartDate: String = "default"
     private var mEndDate: String = "default"
-    private var isClicked: Boolean = true
-    private var internetStatus = false
+    private var currencyChain = ""
+
     private val mStartingDateInMs = 946684800000
     private val mDayInMs = 86400000
-    private var mSelectedCurrencies: MutableList<String> = mutableListOf()
-    private var mCurrenciesList: MutableList<String> = mutableListOf()
 
+    private var isClicked: Boolean = true
+    private var internetStatus = false
+
+    private val legendEntries = mutableListOf<LegendEntry>()
+    private val mChartData: MutableList<BarEntry> = mutableListOf()
+    private val mSelectedCurrencies: MutableList<String> = mutableListOf()
+    private val mCurrenciesList: MutableList<String> = mutableListOf()
+    private val colorsList = mutableListOf<Int>()
 
     /** Collect base currency from the database **/
     private val baseCurrencyJob: Job
@@ -78,7 +87,7 @@ class TimeSeries : Fragment(), OnChartValueSelectedListener {
                     }
 
                     is DataWrapper.Error -> {
-                        Log.i(
+                        Log.e(
                             TAG,
                             "Couldn't retrieve base currency from the database. ${currency.message}: "
                         )
@@ -92,6 +101,7 @@ class TimeSeries : Fragment(), OnChartValueSelectedListener {
         get() =
             viewLifecycleOwner.lifecycleScope.launch(start = CoroutineStart.LAZY) {
                 mViewModel.allCurrencies.collect { currencies ->
+
                     when (currencies) {
                         is DataWrapper.Success -> {
                             currencies.data?.currencyData?.forEach {
@@ -116,7 +126,6 @@ class TimeSeries : Fragment(), OnChartValueSelectedListener {
 
 
     /** Observe network state, in order to display for user warning, that he need to provide internet connection, or if the mobile device is already connected, let the user use this fragment. **/
-
     private val networkObserver: Job
         get() =
             viewLifecycleOwner.lifecycleScope.launch {
@@ -128,10 +137,10 @@ class TimeSeries : Fragment(), OnChartValueSelectedListener {
                                 if (networkStatus.data.toString() == "Available") {
                                     internetStatus = true
                                 } else {
+                                    // If there's no internet connection reset picked date
                                     internetStatus = false
-                                    mStartDate = ""
-                                    mEndDate = ""
-//                                    allCurrenciesJob.cancel()
+                                    mStartDate = "default"
+                                    mEndDate = "default"
                                 }
                                 setViewsToGetStartDate(internetStatus)
                             }
@@ -146,51 +155,6 @@ class TimeSeries : Fragment(), OnChartValueSelectedListener {
                     }
                 }
             }
-
-    /** Change picked currencies into string chain, make an api call with provided data, and observe the result **/
-    private val apiCall: Job
-        get() =
-            viewLifecycleOwner.lifecycleScope.launch(start = CoroutineStart.LAZY) {
-                var currencyChain = ""
-                for (i in 0 until mSelectedCurrencies.size) {
-                    currencyChain += "${mSelectedCurrencies[i]}, "
-                }
-
-                mViewModel.fetchTimeSeriesData(
-                    mBaseCurrency,
-                    currencyChain,
-                    mStartDate,
-                    mEndDate
-                )
-                mViewModel.timeSeriesData.observe(viewLifecycleOwner, Observer { status ->
-                    when (status) {
-                        is DataWrapper.Success -> {
-                            val testApiData: MutableList<BarEntry> = ArrayList()
-                            formatDate(status.data?.timeSeriesRates?.keys?.toList()!!)
-                            status.data.timeSeriesRates.entries.forEachIndexed { index, entry ->
-                                testApiData.add(
-                                    BarEntry(
-                                        index.toFloat(),
-                                        entry.value.values.map { it.toFloat() }.toFloatArray()
-                                    )
-                                )
-
-                                deleteBaseCurrencyFromList()
-                            }
-                            prepareChart(
-                                testApiData,
-                                formatDate(status.data.timeSeriesRates.keys.toList()),
-                                mSelectedCurrencies
-                            )
-                        }
-
-                        is DataWrapper.Error -> {
-                            Log.i(TAG, "onCreateView: TEST API CALL FAILED ${status.message}")
-                        }
-                    }
-                })
-            }
-
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -234,29 +198,6 @@ class TimeSeries : Fragment(), OnChartValueSelectedListener {
         }
     }
 
-    /** After triggering the SwipeRefreshLayout, manipulate views, to the state when user enter the fragment for the first time **/
-    private fun defaultViews() {
-        mBinding.timeSeriesEndDp.visibility = View.INVISIBLE
-        mBinding.timeSeriesEndBtn.visibility = View.INVISIBLE
-        mBinding.timeSeriesEndDate.visibility = View.INVISIBLE
-        mBinding.timeSeriesBaseCurrencyTv.visibility = View.INVISIBLE
-        mBinding.timeSeriesSelectBaseCurrency.visibility = View.INVISIBLE
-        mBinding.timeSeriesStartDate.visibility = View.INVISIBLE
-        mBinding.timeSeriesSelectSymbolsTv.visibility = View.INVISIBLE
-        mBinding.timeSeriesSelectSymbolsLv.visibility = View.INVISIBLE
-        mBinding.timeSeriesSaveSymbols.visibility = View.INVISIBLE
-        mBinding.timeSeriesChart.visibility = View.INVISIBLE
-
-        mBinding.timeSeriesInfo.visibility = View.VISIBLE
-        mBinding.timeSeriesStartDp.visibility = View.VISIBLE
-        mBinding.timeSeriesStartBtn.visibility = View.VISIBLE
-
-        mSelectedCurrencies.clear()
-        mBinding.timeSeriesChart.invalidate()
-        mBinding.timeSeriesChart.refreshDrawableState()
-    }
-
-
     /** Get from/to date from user **/
     private fun getDateFromUser(selection: Int) {
         when (selection) {
@@ -285,7 +226,7 @@ class TimeSeries : Fragment(), OnChartValueSelectedListener {
         }
     }
 
-    /** Depending on the current network state (is it provided, or not) let the user work with this fragment (if there is internet provided) or display notification, that he need to provide internet to work with this fragment **/
+    /** Depending on the current network state (it is provided, or not) let the user work with this fragment, or display notification about internet need in order to let user work with this fragment **/
     private fun setViewsToGetStartDate(status: Boolean) {
         if (status) {
             mBinding.timeSeriesNoInternet.visibility = View.INVISIBLE
@@ -334,14 +275,13 @@ class TimeSeries : Fragment(), OnChartValueSelectedListener {
 
     /** Setup views to display chart with data, that came from api call. **/
     private fun setViewsToDisplayChart() {
+        mBinding.timeSeriesProgressBar.visibility = View.VISIBLE
         mBinding.timeSeriesSelectSymbolsLv.visibility = View.INVISIBLE
         mBinding.timeSeriesSaveSymbols.visibility = View.INVISIBLE
         mBinding.timeSeriesBaseCurrencyTv.visibility = View.INVISIBLE
-        mBinding.timeSeriesSelectBaseCurrency.visibility = View.VISIBLE
         mBinding.timeSeriesStartDate.visibility = View.INVISIBLE
         mBinding.timeSeriesEndDate.visibility = View.INVISIBLE
         mBinding.timeSeriesSelectBaseCurrency.visibility = View.INVISIBLE
-
     }
 
     /** Provide two lists. One for spinner, second ListView. The difference is in spinner list, where at first index, there will be record 'Select currency'.
@@ -416,16 +356,18 @@ class TimeSeries : Fragment(), OnChartValueSelectedListener {
                 }
             }
 
+        // After clicking on save button, which is below of ListView, save every picked currency by user.
         mBinding.timeSeriesSaveSymbols.setOnClickListener {
             for (i in 0 until currencyList.size) {
-                if (mBinding.timeSeriesSelectSymbolsLv.isItemChecked(i)) {
-                    mSelectedCurrencies.add(currencyList[i])
-                }
+                if (mBinding.timeSeriesSelectSymbolsLv.isItemChecked(i)) mSelectedCurrencies.add(
+                    currencyList[i]
+                )
             }
 
-            if (mSelectedCurrencies.size > 0) {
+            // Check if user has picked any currency. If not, remind him that he need to pick at least one.
+            if (mSelectedCurrencies.isNotEmpty()) {
                 mBinding.timeSeriesProgressBar.visibility = View.VISIBLE
-                apiCall.start()
+                makeApiCall()
                 setViewsToDisplayChart()
             } else {
                 Toast.makeText(
@@ -450,15 +392,102 @@ class TimeSeries : Fragment(), OnChartValueSelectedListener {
         return toReturn
     }
 
+    /** After triggering the SwipeRefreshLayout, manipulate views, to the state when user enter the fragment for the first time **/
+    private fun defaultViews() {
+
+        //Check if specific item in ListView was checked, and uncheck it.
+        for (i in 0 until mCurrenciesList.size) {
+            if (mBinding.timeSeriesSelectSymbolsLv.isItemChecked(i)) mBinding.timeSeriesSelectSymbolsLv.setItemChecked(
+                i,
+                false
+            )
+        }
+
+        mBinding.timeSeriesEndDp.visibility = View.INVISIBLE
+        mBinding.timeSeriesEndBtn.visibility = View.INVISIBLE
+        mBinding.timeSeriesEndDate.visibility = View.INVISIBLE
+        mBinding.timeSeriesBaseCurrencyTv.visibility = View.INVISIBLE
+        mBinding.timeSeriesSelectBaseCurrency.visibility = View.INVISIBLE
+        mBinding.timeSeriesStartDate.visibility = View.INVISIBLE
+        mBinding.timeSeriesSelectSymbolsTv.visibility = View.INVISIBLE
+        mBinding.timeSeriesSelectSymbolsLv.visibility = View.INVISIBLE
+        mBinding.timeSeriesSaveSymbols.visibility = View.INVISIBLE
+        mBinding.timeSeriesChart.visibility = View.INVISIBLE
+
+        mBinding.timeSeriesInfo.visibility = View.VISIBLE
+        mBinding.timeSeriesStartDp.visibility = View.VISIBLE
+        mBinding.timeSeriesStartBtn.visibility = View.VISIBLE
+
+        //Clear everything with correlation with chart
+        mSelectedCurrencies.clear()
+        mChartData.clear()
+        colorsList.clear()
+
+        barData.clearValues()
+        set.clear()
+        legend.resetCustom()
+
+        legendEntries.clear()
+        currencyChain = String()
+    }
+
+    /** Change picked currencies into string chain, make an api call with provided data, and observe the result **/
+    private fun makeApiCall() {
+
+        // "Break" list, and concatenate every currency symbol from it, and provide it as selected currencies api call parameter
+        for (i in 0 until mSelectedCurrencies.size) {
+            currencyChain += "${mSelectedCurrencies[i]}, "
+        }
+
+        // Trigger an api call
+        mViewModel.fetchTimeSeriesData(
+            mBaseCurrency,
+            currencyChain,
+            mStartDate,
+            mEndDate
+        )
+
+        //Observe wrapped api response.
+        mViewModel.timeSeriesData.observe(viewLifecycleOwner, Observer { status ->
+            when (status) {
+                is DataWrapper.Success -> {
+                    mChartData.clear()
+                    status.data?.timeSeriesRates?.entries?.forEachIndexed { index, entry ->
+                        mChartData.add(
+                            BarEntry(
+                                index.toFloat(),
+                                entry.value.values.map { it.toFloat() }.toFloatArray()
+                            )
+                        )
+                        deleteBaseCurrencyFromList()
+                    }
+                    prepareChart(
+                        mChartData,
+                        formatDate(status.data?.timeSeriesRates?.keys!!.toList()),
+                        mSelectedCurrencies
+                    )
+                }
+
+                is DataWrapper.Error -> {
+                    Log.e(TAG, "onCreateView: TEST API CALL FAILED ${status.message}")
+                    Toast.makeText(
+                        requireContext(),
+                        getString(R.string.timeout_explanation),
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+            }
+        })
+    }
+
     //TODO - adjust colors after changing UI. These colors are temporary.
     /** Prepare bar chart to display data from api call. **/
     private fun prepareChart(
         entries: MutableList<BarEntry>,
         xAxisValues: ArrayList<String>,
-        selectedCurrencies: List<String>
+        selectedCurrencies: MutableList<String>
     ) {
-        val legendEntries = arrayListOf<LegendEntry>()
-        val colorsList = mutableListOf<Int>()
+        //TEMPORARY SOLUTION - pick random colors, and in case where colorsList does not contain that color, just add it there.
         for (i in selectedCurrencies.indices) {
             val color =
                 Color.argb(
@@ -472,13 +501,14 @@ class TimeSeries : Fragment(), OnChartValueSelectedListener {
             }
         }
         set = BarDataSet(entries, "x")
-        set?.colors = colorsList
-        set?.highLightAlpha = 0
+        set.colors = colorsList
+        set.highLightAlpha = 0
 
-        val data = BarData(set)
-        mBinding.timeSeriesChart.data = data
+        //Prepare BarData. Display vertical bars, which contain data about picked currencies, for specific day, that will be displayed below each bar
+        barData = BarData(set)
+        mBinding.timeSeriesChart.data = barData
         mBinding.timeSeriesChart.description?.isEnabled = false
-        mBinding.timeSeriesChart.setVisibleXRangeMaximum(6f)
+        mBinding.timeSeriesChart.setVisibleXRangeMaximum(6f) //Determine max visible bars range
         mBinding.timeSeriesChart.barData?.setValueTextSize(12f)
         mBinding.timeSeriesChart.xAxis?.position = XAxis.XAxisPosition.BOTTOM
         mBinding.timeSeriesChart.setExtraOffsets(0f, 0f, 0f, 15f)
@@ -494,13 +524,14 @@ class TimeSeries : Fragment(), OnChartValueSelectedListener {
         mBinding.timeSeriesChart.axisLeft.isEnabled = false
         mBinding.timeSeriesChart.axisRight.isEnabled = false
 
-        //legend
-        val legend = mBinding.timeSeriesChart.legend
-        legend?.verticalAlignment = Legend.LegendVerticalAlignment.BOTTOM
-        legend?.horizontalAlignment = Legend.LegendHorizontalAlignment.LEFT
-        legend?.orientation = Legend.LegendOrientation.HORIZONTAL
-        legend?.setDrawInside(false)
+        //legend (display currency symbols and their corresponding colors in squares at the bottom left corner of the fragment.
+        legend = mBinding.timeSeriesChart.legend
+        legend.verticalAlignment = Legend.LegendVerticalAlignment.BOTTOM
+        legend.horizontalAlignment = Legend.LegendHorizontalAlignment.LEFT
+        legend.orientation = Legend.LegendOrientation.HORIZONTAL
+        legend.setDrawInside(false)
 
+        if (legendEntries.size > 0) legendEntries.clear()
         for (i in selectedCurrencies.indices) {
             legendEntries.add(
                 LegendEntry(
@@ -513,17 +544,20 @@ class TimeSeries : Fragment(), OnChartValueSelectedListener {
                 )
             )
         }
+        legend.setCustom(legendEntries)
 
-        legend?.setCustom(legendEntries)
-        set?.valueFormatter = object : ValueFormatter() {
+        set.valueFormatter = object : ValueFormatter() {
             override fun getFormattedValue(value: Float): String {
                 return String.format("%2.02f", value)
             }
         }
-        mBinding.timeSeriesChart.setOnChartValueSelectedListener(this)
-
         mBinding.timeSeriesChart.invalidate()
         mBinding.timeSeriesChart.refreshDrawableState()
+
+        mBinding.timeSeriesChart.setOnChartValueSelectedListener(this)
+        mBinding.timeSeriesChart.notifyDataSetChanged()
+
+        setViewsToDisplayChart()
         mBinding.timeSeriesChart.visibility = View.VISIBLE
         mBinding.timeSeriesProgressBar.visibility = View.INVISIBLE
     }
@@ -531,12 +565,12 @@ class TimeSeries : Fragment(), OnChartValueSelectedListener {
     /** Let user show, and hide rates of specific currencies **/
     override fun onValueSelected(e: Entry?, h: Highlight?) {
         isClicked = !isClicked
-        set!!.setDrawValues(isClicked)
+        set.setDrawValues(isClicked)
     }
 
     /** Let user show, and hide rates of specific currencies **/
     override fun onNothingSelected() {
         isClicked = !isClicked
-        set!!.setDrawValues(isClicked)
+        set.setDrawValues(isClicked)
     }
 }
