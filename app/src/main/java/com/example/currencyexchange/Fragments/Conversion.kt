@@ -25,6 +25,13 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 
 class Conversion : Fragment() {
+    private var mConversionBinding: FragmentConversionBinding? = null
+    private val mBinding get() = mConversionBinding!!
+    private val mViewModel: ConversionViewModel by activityViewModels()
+
+    private var mCurrencyList: MutableList<String> = mutableListOf()
+    private var mOfflineCurrencyList: MutableList<String> = mutableListOf()
+
     private val TAG = "Conversion"
     private var mBaseCurrency: String = "default"
     private var mDesiredCurrency: String = "default"
@@ -32,17 +39,9 @@ class Conversion : Fragment() {
     private var mAmountToConversion = ""
     private var mIsDbInit = false
 
-    private var mCurrencyList: MutableList<String> = mutableListOf()
-    private var mOfflineCurrencyList: MutableList<String> = mutableListOf()
-
-    private var mConversionBinding: FragmentConversionBinding? = null
-    private val mBinding get() = mConversionBinding!!
-    private val mViewModel: ConversionViewModel by activityViewModels()
-
     /** Prepare various of global coroutines.
      * The reason behind this, is because it can be used more than once,
      * which will be helpful with dealing with online/offline 'state' of the app.*/
-
 
     // make an api call, and display data that came out as an response
     private val mOnlineConversion: Job
@@ -56,6 +55,7 @@ class Conversion : Fragment() {
                 when (conversion) {
                     is DataWrapper.Success -> {
                         mBinding.conversionConvertedData.visibility = View.VISIBLE
+                        mBinding.conversionProgressBar.visibility = View.INVISIBLE
                         mBinding.conversionConvertedData.text = String.format(
                             getString(R.string.formatted_you_will_receive),
                             conversion.data?.result,
@@ -64,6 +64,7 @@ class Conversion : Fragment() {
                     }
 
                     is DataWrapper.Error -> {
+                        Toast.makeText(requireContext(), getString(R.string.timeout_explanation), Toast.LENGTH_LONG).show()
                         Log.e(
                             TAG,
                             "onCreateView: couldn't perform an api call to converse currencies. Exception: ${conversion.message}"
@@ -81,22 +82,32 @@ class Conversion : Fragment() {
                 when (currency) {
                     is DataWrapper.Success -> {
                         try {
+
+                            // try to find data about given base currency
                             val index =
                                 currency.data?.find { obj -> obj.baseCurrency == mBaseCurrency }?.id
-                            val result =
-                                currency.data?.get(index!! - 1)?.currencyData?.get(
+
+                            // if database contain data about given currency make an conversion. If not, display warning.
+                            if (index != null) {
+                                val result =
+                                    currency.data[index - 1].currencyData[mDesiredCurrency]
+                                mBinding.conversionProgressBar.visibility = View.INVISIBLE
+                                mBinding.conversionConvertedData.visibility = View.VISIBLE
+                                mBinding.conversionConvertedData.text = String.format(
+                                    getString(R.string.formatted_you_will_receive),
+                                    result!! * mAmountToConversion.toInt(),
                                     mDesiredCurrency
                                 )
-
-                            mBinding.conversionConvertedData.visibility = View.VISIBLE
-                            mBinding.conversionConvertedData.text = String.format(
-                                getString(R.string.formatted_you_will_receive),
-                                result!! * mAmountToConversion.toInt(),
-                                mDesiredCurrency
-                            )
+                            } else {
+                                Toast.makeText(
+                                    requireContext(),
+                                    getString(R.string.no_network_after_changing_base),
+                                    Toast.LENGTH_LONG
+                                ).show()
+                            }
 
                         } catch (exception: NullPointerException) {
-                            Log.e(TAG, "onCreateView: ERROR $exception")
+                            Log.e(TAG, "onCreateView: mOfflineConversion error: $exception")
                         }
                     }
 
@@ -117,8 +128,6 @@ class Conversion : Fragment() {
                 mViewModel.allCurrencies.collect { currencies ->
                     when (currencies) {
                         is DataWrapper.Success -> {
-                            Log.i(TAG, "onViewCreated online ${currencies.data}: ")
-
                             currencies.data?.currencyData?.keys?.forEach {
                                 mCurrencyList.add(it)
                             }
@@ -148,8 +157,10 @@ class Conversion : Fragment() {
                 mViewModel.currencyData.collect { currency ->
                     when (currency) {
                         is DataWrapper.Success -> {
-                            currency.data?.forEach { curr ->
-                                mOfflineCurrencyList.add(curr.baseCurrency)
+                            currency.data?.forEach { currenciesDatabaseDetailed ->
+                                if (!mOfflineCurrencyList.contains(currenciesDatabaseDetailed.baseCurrency)) {
+                                    mOfflineCurrencyList.add(currenciesDatabaseDetailed.baseCurrency)
+                                }
                             }
 
                             if (!mOfflineCurrencyList.contains("Select currency")) {
@@ -173,6 +184,7 @@ class Conversion : Fragment() {
         and there's no internet connection, display TextView with explanation
         if program will detect that internet connection is present, then stop offline currencies coroutine
         and start online coroutine to display every currency that is present in the api. */
+
     private val mNetworkStateCoroutine: Job
         get() = viewLifecycleOwner.lifecycleScope.launch(start = CoroutineStart.LAZY) {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
@@ -180,15 +192,12 @@ class Conversion : Fragment() {
                     when (state) {
                         is DataWrapper.Success -> {
                             mNetworkState = state.data?.name.toString()
-                            Log.i(TAG, "onViewCreated $mNetworkState: ")
 
-                            if (mNetworkState != "Available" && mIsDbInit) {
-                                mBinding.conversionError.visibility = View.VISIBLE
-                            }
-
-                            if (mNetworkState == "Available") {
+                            if (mNetworkState == "Available" || !mIsDbInit) {
                                 mOfflineListOfCurrencies.cancel()
                                 mOnlineListOfCurrencies.start()
+                            } else {
+                                mBinding.conversionError.visibility = View.VISIBLE
                             }
                         }
 
@@ -203,9 +212,14 @@ class Conversion : Fragment() {
             }
         }
 
-    // retrieve base currency from the database.
-    private val baseCurrency: Job
-        get() = viewLifecycleOwner.lifecycleScope.launch {
+    override fun onCreateView(
+        inflater: LayoutInflater, container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View {
+        mConversionBinding = FragmentConversionBinding.inflate(layoutInflater)
+        val view = mBinding.root
+
+        viewLifecycleOwner.lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 mViewModel.baseCurrency.collect { currency ->
                     when (currency) {
@@ -226,14 +240,6 @@ class Conversion : Fragment() {
             }
         }
 
-
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View {
-        mConversionBinding = FragmentConversionBinding.inflate(layoutInflater)
-        val view = mBinding.root
-
         // track database state (is it empty, or not). Start appropriate coroutines
         viewLifecycleOwner.lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
@@ -241,7 +247,25 @@ class Conversion : Fragment() {
                     when (state) {
                         is DataWrapper.Success -> {
                             mIsDbInit = state.data!!
-                            baseCurrency.start()
+                            if (mIsDbInit) {
+                                mBinding.conversionError.visibility = View.VISIBLE
+                                mBinding.conversionFromTv.visibility = View.INVISIBLE
+                                mBinding.conversionFromSpinner.visibility = View.INVISIBLE
+                                mBinding.conversionToTv.visibility = View.INVISIBLE
+                                mBinding.conversionToSpinner.visibility = View.INVISIBLE
+                                mBinding.conversionEnterValueTv.visibility = View.INVISIBLE
+                                mBinding.conversionEnterValue.visibility = View.INVISIBLE
+                                mBinding.conversionConverseBtn.visibility = View.INVISIBLE
+                            } else {
+                                mBinding.conversionError.visibility = View.INVISIBLE
+                                mBinding.conversionFromTv.visibility = View.VISIBLE
+                                mBinding.conversionFromSpinner.visibility = View.VISIBLE
+                                mBinding.conversionToTv.visibility = View.VISIBLE
+                                mBinding.conversionToSpinner.visibility = View.VISIBLE
+                                mBinding.conversionEnterValueTv.visibility = View.VISIBLE
+                                mBinding.conversionEnterValue.visibility = View.VISIBLE
+                                mBinding.conversionConverseBtn.visibility = View.VISIBLE
+                            }
                             mNetworkStateCoroutine.start()
                             mOfflineListOfCurrencies.start()
                         }
@@ -260,6 +284,8 @@ class Conversion : Fragment() {
         /* Retrieve provided amount in EditText, and make an api call, based on:
            base currency, desired currency, and amount */
         mBinding.conversionConverseBtn.setOnClickListener {
+
+            // If any of the currencies (from/to) are set to 'default', or given input from amount EditText view is lower than 1, then display Toast, which will inform user about providing proper data in order to make a conversion
             val defaultCurrencies = mBaseCurrency == "default" || mDesiredCurrency == "default"
             val isConversionEmpty = mBinding.conversionEnterValue.text.toString().isEmpty()
 
@@ -272,6 +298,7 @@ class Conversion : Fragment() {
                     Toast.LENGTH_LONG
                 ).show()
             } else {
+                mBinding.conversionProgressBar.visibility = View.VISIBLE
                 mAmountToConversion = mBinding.conversionEnterValue.text.toString()
 
                 if (mNetworkState == "Available") {
@@ -284,6 +311,7 @@ class Conversion : Fragment() {
         return view
     }
 
+    //TODO TIMEOUT CAUSE CRASH
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
@@ -294,18 +322,38 @@ class Conversion : Fragment() {
                 ownerProducer = { requireParentFragment() })
             mFragmentVM.setMoveFlag(true)
         }
-//TODO make an code review in fragments. Seems like spinners are not reacting as they should after changing base currency
 
-        // Refresh layout UI
+
+        /* Prepare layout to state as it was when user first entered it. Clear currency lists,
+           and start one more time appropriate coroutines */
         mBinding.conversionRefreshContainer.setOnRefreshListener {
-            defaultViewsSetup()
+            mBinding.conversionEnterValue.text.clear()
+            mBinding.conversionConvertedData.text = ""
+            mBinding.conversionConvertedData.visibility = View.INVISIBLE
+            mBinding.conversionError.visibility = View.INVISIBLE
+            mBinding.conversionProgressBar.visibility = View.INVISIBLE
+
+            mBinding.conversionToTv.text = getString(R.string.currency_name)
+            mBinding.conversionFromTv.text =
+                String.format(getString(R.string.formatted_from), mBaseCurrency)
+
+            mOfflineCurrencyList.clear()
+            mCurrencyList.clear()
+
+            mDesiredCurrency = "default"
+            mAmountToConversion = ""
+
+            mNetworkStateCoroutine.start()
+            mOfflineListOfCurrencies.start()
             mBinding.conversionRefreshContainer.isRefreshing = false
         }
     }
 
+
     /* Copy list of all currencies,
        check if given list contains base currency, and desired currency (if user have already picked one).
        If list contains these currencies, delete it, so user will not see them in spinner anymore. */
+
     private fun deleteBaseCurrency() {
         val copiedList: MutableList<String> = mutableListOf()
         copiedList.clear()
@@ -346,6 +394,7 @@ class Conversion : Fragment() {
                     position: Int,
                     id: Long
                 ) {
+                    if (currencyList[position] == "Select currency") isTouched = false
                     if (isTouched) {
                         isTouched = false
                         mBaseCurrency = currencyList[position]
@@ -385,6 +434,7 @@ class Conversion : Fragment() {
                     position: Int,
                     id: Long
                 ) {
+                    if (currencyList[position] == "Select currency") isTouched = false
                     if (isTouched) {
                         isTouched = false
                         mDesiredCurrency = currencyList[position]
@@ -403,28 +453,5 @@ class Conversion : Fragment() {
                     Log.e(TAG, "onNothingSelected: NOTHING SELECTED!")
                 }
             }
-    }
-
-    /* Prepare layout to state as it was when user first entered it. Clear currency lists,
-       and start one more time appropriate coroutines */
-    private fun defaultViewsSetup() {
-        mBinding.conversionEnterValue.text.clear()
-        mBinding.conversionConvertedData.text = ""
-        mBinding.conversionConvertedData.visibility = View.INVISIBLE
-        mBinding.conversionError.visibility = View.INVISIBLE
-
-        mBinding.conversionToTv.text = getString(R.string.currency_name)
-        mBinding.conversionFromTv.text =
-            String.format(getString(R.string.formatted_from), mBaseCurrency)
-
-        mOfflineCurrencyList.clear()
-        mCurrencyList.clear()
-
-        mDesiredCurrency = "default"
-        mAmountToConversion = ""
-
-        mNetworkStateCoroutine.start()
-        mOfflineListOfCurrencies.start()
-
     }
 }
