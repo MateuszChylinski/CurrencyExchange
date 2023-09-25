@@ -64,13 +64,14 @@ class ConversionViewModel @Inject constructor(
 
     fun exchangeCurrency(baseCurrency: String, selectedCurrency: String, amount: String) {
         viewModelScope.launch {
-            val response = apiRepository.convertCurrency(
-                baseCurrency = baseCurrency,
-                wantedCurrency = selectedCurrency,
-                amount = amount,
-                apiKey = BuildConfig.API_KEY
-            )
             try {
+                val response = apiRepository.convertCurrency(
+                    baseCurrency = baseCurrency,
+                    wantedCurrency = selectedCurrency,
+                    amount = amount,
+                    apiKey = BuildConfig.API_KEY
+                )
+
                 if (response.isSuccessful) {
                     _exchangeState.postValue(DataWrapper.Success(response.body()!!))
                 } else {
@@ -79,7 +80,7 @@ class ConversionViewModel @Inject constructor(
                         "exchangeCurrency ViewModel: Response is NOT successful. Code: ${response.code()}"
                     )
                 }
-            } catch (exception: Exception) {
+            } catch (exception: java.net.SocketTimeoutException) {
                 _exchangeState.postValue(DataWrapper.Error(data = null, error = exception.message))
             }
         }
