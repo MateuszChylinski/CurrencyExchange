@@ -212,7 +212,7 @@ class Latest : Fragment() {
         val networkCoroutine =
             viewLifecycleOwner.lifecycleScope.launch(start = CoroutineStart.LAZY) {
 
-                /*Since the flow will be emitted whenever user will turn on any of the connection services,
+                /* Since the flow will be emitted whenever user will turn on any of the connection services,
                 firstly, behave like there is no internet connection. If the internet connection will be available, then perform an api call.
                 if database is already populated with some data about currency rates start the 'oldRates' coroutine. */
 

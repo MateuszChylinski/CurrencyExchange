@@ -59,18 +59,24 @@ class LatestViewModel @Inject constructor(
      * Finally, insert/update map with currencies, and their rates in database, and update date, to let user know, from when the rates are  */
     fun fetchData(baseCurrency: String) =
         viewModelScope.launch {
-        val response = retrofitRepository.getLatestRates(
-            baseCurrency = baseCurrency,
-            apiKey = BuildConfig.API_KEY
-        )
-        try {
-            if (response.isSuccessful) {
-                _latestRatesCall.postValue(DataWrapper.Success(response.body()!!))
+            try {
+
+                val response = retrofitRepository.getLatestRates(
+                    baseCurrency = baseCurrency,
+                    apiKey = BuildConfig.API_KEY
+                )
+                if (response.isSuccessful) {
+                    _latestRatesCall.postValue(DataWrapper.Success(response.body()!!))
+                }
+            } catch (exception: java.net.SocketTimeoutException) {
+                _latestRatesCall.postValue(
+                    DataWrapper.Error(
+                        error = exception.message,
+                        data = null
+                    )
+                )
             }
-        } catch (exception: java.net.SocketTimeoutException) {
-            _latestRatesCall.postValue(DataWrapper.Error(error = exception.message, data = null))
         }
-    }
 
     fun insertCurrencies(currencyData: CurrenciesDatabaseDetailed) = viewModelScope.launch {
         try {
