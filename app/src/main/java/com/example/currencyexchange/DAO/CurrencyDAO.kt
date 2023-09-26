@@ -33,7 +33,7 @@ interface CurrencyDAO {
 
     /** Update base currency */
     @Query("UPDATE currency_main SET base_currency = :currency WHERE id = 1")
-    suspend fun updateBaseCurrency(currency: String?)
+    suspend fun updateBaseCurrency(currency: String)
 
     /** Check if database contains any data, and return Boolean */
     @Query("SELECT (SELECT COUNT(*) FROM currency_detailed) == 0")

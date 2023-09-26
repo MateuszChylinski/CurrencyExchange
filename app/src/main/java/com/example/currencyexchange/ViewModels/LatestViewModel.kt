@@ -26,10 +26,10 @@ class LatestViewModel @Inject constructor(
     private val networkObserver: NetworkObserverImplementation
 ) : ViewModel() {
 
-    private val _latestRatesCall = MutableLiveData<DataWrapper<LatestRates>>()
-    val latestRates: LiveData<DataWrapper<LatestRates>> get() = _latestRatesCall
+    private val _latestRatesCall = MutableLiveData<DataWrapper<LatestRates?>>()
+    val latestRates: LiveData<DataWrapper<LatestRates?>> get() = _latestRatesCall
 
-    val baseCurrency: SharedFlow<DataWrapper<CurrenciesDatabaseMain>>? =
+    val baseCurrency: SharedFlow<DataWrapper<CurrenciesDatabaseMain>> =
         databaseRepository.baseCurrency
             .map { DataWrapper.Success(it) }
             .catch { DataWrapper.Error(it.message) }
@@ -64,8 +64,8 @@ class LatestViewModel @Inject constructor(
                     baseCurrency = baseCurrency,
                     apiKey = BuildConfig.API_KEY
                 )
-                if (response.isSuccessful) {
-                    _latestRatesCall.postValue(DataWrapper.Success(response.body()!!))
+                response.let {
+                    if (it.isSuccessful) _latestRatesCall.postValue(DataWrapper.Success(it.body()))
                 }
             } catch (exception: java.net.SocketTimeoutException) {
                 _latestRatesCall.postValue(

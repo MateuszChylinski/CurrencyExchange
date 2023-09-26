@@ -141,7 +141,7 @@ class Latest : Fragment() {
         /** Retrieve base currency from the database */
         viewLifecycleOwner.lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
-                mViewModel.baseCurrency?.collect { currency ->
+                mViewModel.baseCurrency.collect { currency ->
                     when (currency) {
                         is DataWrapper.Success -> {
                             mBaseCurrency = currency.data?.baseCurrency.toString()
