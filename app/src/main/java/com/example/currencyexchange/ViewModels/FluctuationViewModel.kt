@@ -19,7 +19,6 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.launch
-import java.lang.Exception
 import javax.inject.Inject
 
 @HiltViewModel
@@ -30,7 +29,7 @@ class FluctuationViewModel @Inject constructor(
 ) : ViewModel() {
 
     private val _fluctuation = MutableLiveData<DataWrapper<FluctuationModel>>()
-    val fluctuation: LiveData<DataWrapper<FluctuationModel>> get() = _fluctuation
+    val fluctuationResponse: LiveData<DataWrapper<FluctuationModel>> get() = _fluctuation
 
     val baseCurrency: SharedFlow<DataWrapper<CurrenciesDatabaseMain>> =
         databaseRepository.baseCurrency
@@ -66,15 +65,16 @@ class FluctuationViewModel @Inject constructor(
                     apiKey = BuildConfig.API_KEY
                 )
                 if (response.isSuccessful) {
-                    _fluctuation.postValue(DataWrapper.Success(response.body()!!))
+                    response.body()?.let { _fluctuation.postValue(DataWrapper.Success(it)) }
+
                 } else {
                     Log.e(
                         TAG,
                         "fetchFluctuation: response from the server was not successful. Response code: ${response.code()}"
                     )
                 }
-            } catch (exception: Exception) {
-                Log.e(TAG, "fetchFluctuation: Couldn't perform an api call. $exception")
+            } catch (exception: java.net.SocketTimeoutException) {
+                _fluctuation.postValue(DataWrapper.Error(data = null, error = exception.message))
             }
         }
     }
