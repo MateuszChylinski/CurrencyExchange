@@ -19,21 +19,23 @@ class DatabaseRepositoryImplementation @Inject constructor(
     override val currencyListData: Flow<List<CurrenciesDatabaseDetailed>>
         get() = currencyDAO.getCurrencyListData()
 
-    override suspend fun insertCurrencies(currency: CurrenciesDatabaseDetailed) {
-        currencyDAO.insertCurrencyData(currency)
+    override suspend fun insertCurrencies(currency: CurrenciesDatabaseDetailed?) {
+        currency?.let { currencyDAO.insertCurrencyData(it) }
     }
 
-    override suspend fun updateBaseCurrency(baseCurrency: CurrenciesDatabaseMain) {
-        currencyDAO.updateBaseCurrency(baseCurrency.baseCurrency)
+    override suspend fun updateBaseCurrency(baseCurrency: CurrenciesDatabaseMain?) {
+        currencyDAO.updateBaseCurrency(baseCurrency?.baseCurrency)
     }
 
-    override suspend fun updateRates(currency: CurrenciesDatabaseDetailed) {
-        currencyDAO.updatesCurrencyData(
-            currency.id,
-            currency.baseCurrency,
-            currency.ratesDate,
-            currency.currencyData
-        )
+    override suspend fun updateRates(currency: CurrenciesDatabaseDetailed?) {
+        currency?.let {
+            currencyDAO.updatesCurrencyData(
+                currency.id,
+                currency.baseCurrency,
+                currency.ratesDate,
+                currency.currencyData
+            )
+        }
     }
 
     override val isInit: Flow<Boolean>

@@ -3,6 +3,7 @@ package com.example.currencyexchange.Fragments
 import android.os.Bundle
 import android.util.Log
 import android.view.*
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
@@ -49,35 +50,41 @@ class Latest : Fragment() {
                             // Add response to variable as mutable map, and find k/v for given base currency, remove it, and display.
                             val currencies = status.data?.latestRates?.toMutableMap()
                             currencies?.remove(mBaseCurrency)
-                            mAdapter.setData(currencies!!)
+                            currencies?.let { mAdapter.setData(it) }
                             mBinding.latestDate.text =
                                 String.format(
                                     getString(R.string.rates_from_date),
-                                    status.data.date
+                                    status.data?.date
                                 )
                             /** Find index of specific object in list. If it is present, then update is, if not, insert it into database
                              *  'mCurrencyData' is a list, that contains objects of 'CurrenciesDatabaseDetailed'.
                              *  It'll be used to maintain proper data about currencies, and display them in case where user will not have stable internet connection */
                             val indexToUpdate =
-                                mCurrencyData.find { curr -> curr.baseCurrency == status.data.baseCurrency }?.id
+                                mCurrencyData.find { curr -> curr.baseCurrency == status.data?.baseCurrency }?.id
                             if (indexToUpdate != null) {
-                                mViewModel.updateCurrencies(
-                                    CurrenciesDatabaseDetailed(
-                                        id = indexToUpdate,
-                                        baseCurrency = status.data.baseCurrency,
-                                        ratesDate = status.data.date,
-                                        currencyData = status.data.latestRates
+
+                                status.data?.let {
+                                    mViewModel.updateCurrencies(
+                                        CurrenciesDatabaseDetailed(
+                                            id = indexToUpdate,
+                                            baseCurrency = it.baseCurrency,
+                                            ratesDate = it.date,
+                                            currencyData = it.latestRates
+                                        )
                                     )
-                                )
+                                }
                             } else {
-                                mViewModel.insertCurrencies(
-                                    CurrenciesDatabaseDetailed(
-                                        id = 0,
-                                        baseCurrency = status.data.baseCurrency,
-                                        ratesDate = status.data.date,
-                                        currencyData = status.data.latestRates
+
+                                status.data?.let {
+                                    mViewModel.insertCurrencies(
+                                        CurrenciesDatabaseDetailed(
+                                            id = 0,
+                                            baseCurrency = it.baseCurrency,
+                                            ratesDate = it.date,
+                                            currencyData = it.latestRates
+                                        )
                                     )
-                                )
+                                }
                             }
                             mBinding.latestBase.visibility = View.VISIBLE
                             mBinding.latestDate.visibility = View.VISIBLE
@@ -85,6 +92,11 @@ class Latest : Fragment() {
                         }
 
                         is DataWrapper.Error -> {
+                            Toast.makeText(
+                                requireContext(),
+                                getString(R.string.timeout_explanation),
+                                Toast.LENGTH_LONG
+                            ).show()
                             Log.e(
                                 TAG,
                                 "onCreateView: Failed to get latest rates:\n${status.message}"
@@ -129,7 +141,7 @@ class Latest : Fragment() {
         /** Retrieve base currency from the database */
         viewLifecycleOwner.lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
-                mViewModel.baseCurrency.collect { currency ->
+                mViewModel.baseCurrency?.collect { currency ->
                     when (currency) {
                         is DataWrapper.Success -> {
                             mBaseCurrency = currency.data?.baseCurrency.toString()
