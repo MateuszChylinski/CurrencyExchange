@@ -6,7 +6,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.currencyexchange.databinding.LatestRowBinding
 
 class LatestAdapter : RecyclerView.Adapter<LatestAdapter.ViewHolder>() {
-    private var ratesData = mapOf<String, Double>()
+    private var ratesData: Map<String, Double>? = mapOf()
 
     fun setData(data: Map<String, Double>) {
         this.ratesData = data
@@ -20,14 +20,15 @@ class LatestAdapter : RecyclerView.Adapter<LatestAdapter.ViewHolder>() {
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         with(holder) {
-            binding.latestCurrencyOrigin.text = ratesData.keys.toTypedArray()[position]
+            binding.latestCurrencyOrigin.text = ratesData?.keys?.toTypedArray()?.get(position) ?: "Null"
+
             binding.latestCurrencyValue.text =
-                String.format("%.2f", ratesData.values.toTypedArray()[position])
+                String.format("%.2f", ratesData?.values?.toTypedArray()?.get(position) ?: "Null")
         }
     }
 
     override fun getItemCount(): Int {
-        return ratesData.size
+        return ratesData?.size ?: 0
     }
 
     inner class ViewHolder(val binding: LatestRowBinding) :

@@ -29,7 +29,7 @@ class LatestViewModel @Inject constructor(
     private val _latestRatesCall = MutableLiveData<DataWrapper<LatestRates>>()
     val latestRates: LiveData<DataWrapper<LatestRates>> get() = _latestRatesCall
 
-    val baseCurrency: SharedFlow<DataWrapper<CurrenciesDatabaseMain>> =
+    val baseCurrency: SharedFlow<DataWrapper<CurrenciesDatabaseMain>>? =
         databaseRepository.baseCurrency
             .map { DataWrapper.Success(it) }
             .catch { DataWrapper.Error(it.message) }
@@ -60,7 +60,6 @@ class LatestViewModel @Inject constructor(
     fun fetchData(baseCurrency: String) =
         viewModelScope.launch {
             try {
-
                 val response = retrofitRepository.getLatestRates(
                     baseCurrency = baseCurrency,
                     apiKey = BuildConfig.API_KEY
