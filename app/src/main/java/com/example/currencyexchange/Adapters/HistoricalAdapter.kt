@@ -10,6 +10,7 @@ class HistoricalAdapter : RecyclerView.Adapter<HistoricalAdapter.ViewHolder>() {
 
     fun setData(data: Map<String, Double>) {
         this.mData = data
+        notifyDataSetChanged()
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {

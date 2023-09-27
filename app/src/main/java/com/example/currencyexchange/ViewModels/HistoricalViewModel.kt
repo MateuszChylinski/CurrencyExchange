@@ -29,14 +29,14 @@ class HistoricalViewModel @Inject constructor(
     private val networkStatus: NetworkObserverImplementation
 ) : ViewModel() {
 
-    private val _historical = MutableLiveData<DataWrapper<HistoricalRatesModel>>()
-    val historicalData: LiveData<DataWrapper<HistoricalRatesModel>> get() = _historical
+    private val _historical = MutableLiveData<DataWrapper<HistoricalRatesModel?>>()
+    val historicalData: LiveData<DataWrapper<HistoricalRatesModel?>> get() = _historical
 
     val baseCurrency: SharedFlow<DataWrapper<CurrenciesDatabaseMain>> =
         databaseRepository.baseCurrency
             .map { DataWrapper.Success(it) }
             .catch { DataWrapper.Error(it.message) }
-            .shareIn(viewModelScope, SharingStarted.WhileSubscribed())
+            .shareIn(viewModelScope, SharingStarted.WhileSubscribed(), replay = 1)
 
     val allCurrencies: SharedFlow<DataWrapper<CurrenciesDatabaseDetailed>> =
         databaseRepository.currencyData
@@ -59,10 +59,16 @@ class HistoricalViewModel @Inject constructor(
                     date = date,
                     apiKey = BuildConfig.API_KEY
                 )
-                if (response.isSuccessful) {
-                    _historical.postValue(DataWrapper.Success(response.body()!!))
-                } else {
-                    Log.e(TAG, "fetchHistoricalData: response error. ${response.code()}")
+                // to avoid forcing the response with '!!', use 'let' instead
+                response.let {
+                    if (it.isSuccessful) {
+                        _historical.postValue(DataWrapper.Success(it.body()))
+                    } else {
+                        Log.e(
+                            TAG,
+                            "ViewModel: Response is NOT successful. Code: ${response.code()}"
+                        )
+                    }
                 }
             } catch (exception: Exception) {
                 _historical.postValue(DataWrapper.Error(error = exception.message, data = null))
