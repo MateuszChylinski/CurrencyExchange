@@ -311,7 +311,6 @@ class Conversion : Fragment() {
         return view
     }
 
-    //TODO TIMEOUT CAUSE CRASH
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
