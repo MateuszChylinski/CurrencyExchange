@@ -171,6 +171,11 @@ class TimeSeries : Fragment(), OnChartValueSelectedListener {
         return view
     }
 
+    override fun onStop() {
+        super.onStop()
+        defaultViews()
+    }
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         mBinding.timeSeriesStartDp.minDate = mStartingDateInMs
         mBinding.timeSeriesStartDp.maxDate = mCalendar.timeInMillis.minus(mDayInMs)

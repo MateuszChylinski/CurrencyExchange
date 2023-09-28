@@ -124,7 +124,6 @@ class Conversion : Fragment() {
     // if device will have internet connection, load every currency that is available in the api
     private val mOnlineListOfCurrencies: Job
         get() = viewLifecycleOwner.lifecycleScope.launch(start = CoroutineStart.LAZY) {
-            repeatOnLifecycle(Lifecycle.State.STARTED) {
                 mViewModel.allCurrencies.collect { currencies ->
                     when (currencies) {
                         is DataWrapper.Success -> {
@@ -144,7 +143,6 @@ class Conversion : Fragment() {
                             )
                         }
                     }
-                }
             }
         }
 
@@ -153,7 +151,6 @@ class Conversion : Fragment() {
     so user could make an conversion, but with old rates */
     private val mOfflineListOfCurrencies: Job
         get() = viewLifecycleOwner.lifecycleScope.launch(start = CoroutineStart.LAZY) {
-            repeatOnLifecycle(Lifecycle.State.STARTED) {
                 mViewModel.currencyData.collect { currency ->
                     when (currency) {
                         is DataWrapper.Success -> {
@@ -177,7 +174,6 @@ class Conversion : Fragment() {
                         }
                     }
                 }
-            }
         }
 
     /* track network state. If the database doesn't contain any currency data,
@@ -187,7 +183,6 @@ class Conversion : Fragment() {
 
     private val mNetworkStateCoroutine: Job
         get() = viewLifecycleOwner.lifecycleScope.launch(start = CoroutineStart.LAZY) {
-            repeatOnLifecycle(Lifecycle.State.STARTED) {
                 mViewModel.networkState.collect { state ->
                     when (state) {
                         is DataWrapper.Success -> {
@@ -207,7 +202,6 @@ class Conversion : Fragment() {
                                 "onCreateView: couldn't retrieve state of the network services. Exception: ${state.message}",
                             )
                         }
-                    }
                 }
             }
         }

@@ -55,7 +55,7 @@ class Fluctuation : Fragment() {
 
     /** Track network state. Perform certain actions when available. Otherwise, display monit that'll inform user about necessity of providing internet connection in order to user this fragment */
     private val networkStateTracker: Job
-        get() = viewLifecycleOwner.lifecycleScope.launch {
+        get() = viewLifecycleOwner.lifecycleScope.launch(start = CoroutineStart.LAZY) {
             setupViewNoInternet()
             mViewModel.networkState.collect { status ->
                 when (status) {

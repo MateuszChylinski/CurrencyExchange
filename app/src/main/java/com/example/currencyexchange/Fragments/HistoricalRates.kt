@@ -15,8 +15,10 @@ import androidx.core.view.size
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.Observer
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.currencyexchange.Adapters.HistoricalAdapter
 import com.example.currencyexchange.DataWrapper.DataWrapper
@@ -135,27 +137,29 @@ class HistoricalRates : Fragment() {
         get() =
             viewLifecycleOwner.lifecycleScope.launch {
                 mViewModel.networkState.collect { state ->
-                    when (state) {
-                        is DataWrapper.Success -> {
-                            if (state.data.toString() == "Available") {
-                                mIsInternetProvided = true
-                                mBinding.historicalNoNetwork.visibility = View.INVISIBLE
-                                mBinding.historicalInfo.visibility = View.VISIBLE
-                                mBinding.historicalDt.visibility = View.VISIBLE
-                                mBinding.historicalSaveDate.visibility = View.VISIBLE
+                    repeatOnLifecycle(Lifecycle.State.STARTED) {
+                        when (state) {
+                            is DataWrapper.Success -> {
+                                if (state.data.toString() == "Available") {
+                                    mIsInternetProvided = true
+                                    mBinding.historicalNoNetwork.visibility = View.INVISIBLE
+                                    mBinding.historicalInfo.visibility = View.VISIBLE
+                                    mBinding.historicalDt.visibility = View.VISIBLE
+                                    mBinding.historicalSaveDate.visibility = View.VISIBLE
 
-                                baseCurr.start()
-                            } else {
-                                mIsInternetProvided = false
-                                noInternetViews()
+                                    baseCurr.start()
+                                } else {
+                                    mIsInternetProvided = false
+                                    noInternetViews()
+                                }
                             }
-                        }
 
-                        is DataWrapper.Error -> {
-                            Log.e(
-                                TAG,
-                                "couldn't retrieve network state. Exception: ${state.message}"
-                            )
+                            is DataWrapper.Error -> {
+                                Log.e(
+                                    TAG,
+                                    "couldn't retrieve network state. Exception: ${state.message}"
+                                )
+                            }
                         }
                     }
                 }
@@ -173,8 +177,6 @@ class HistoricalRates : Fragment() {
         mCalendar.set(1999, 2, 1)
         mBinding.historicalDt.minDate = mCalendar.timeInMillis
         mBinding.historicalDt.maxDate = Calendar.getInstance().timeInMillis
-
-        internetState.start()
 
         // After refreshing layout, reset UI to the default state, and observe the base currency once again, so user will see "default" base currency
         mBinding.historicalRefreshContainer.setOnRefreshListener {
@@ -205,6 +207,7 @@ class HistoricalRates : Fragment() {
         / the coroutine responsible for tracking the state of internet connection won't be triggered.
         / Display views like there's no internet connectivity, after user will turn on internet, it'll be changed immediately */
         noInternetViews()
+        internetState.start()
 
         mBinding.historicalChangeBaseIcon.setOnClickListener {
             //In case where user will navigate back from the change base currency fragment, clear the picked currencies list.
@@ -325,6 +328,7 @@ class HistoricalRates : Fragment() {
             }
             prepareViewsForRv()
             historicalData.start()
+            Log.i(TAG, "setupListView: ${mBinding.historicalRefreshContainer.isEnabled}")
         }
     }
 
@@ -344,6 +348,7 @@ class HistoricalRates : Fragment() {
 
         mBinding.historicalProgressBar.visibility = View.VISIBLE
         mBinding.historicalRv.visibility = View.VISIBLE
+        mBinding.historicalRefreshContainer.isEnabled = true
     }
     //  Prepare views to display ListView. Make unneeded views invisible
     private fun setVisibilityToLv() {
