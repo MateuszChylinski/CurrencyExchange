@@ -237,8 +237,10 @@ class Latest : Fragment() {
                 } else {
                     mBinding.latestNoInternetSign.visibility = View.VISIBLE
                     mBinding.latestNoInternetExplanation.visibility = View.VISIBLE
+                    mBinding.latestProgressBar.visibility = View.INVISIBLE
                     mBinding.latestBase.visibility = View.INVISIBLE
                     mBinding.latestDate.visibility = View.INVISIBLE
+                    mBinding.appBarLayout.visibility = View.INVISIBLE
                 }
 
                 mViewModel.internetConnection.collect { status ->
@@ -252,6 +254,7 @@ class Latest : Fragment() {
                         mBinding.latestNoInternetSign.visibility = View.INVISIBLE
                         mBinding.latestNoInternetExplanation.visibility = View.INVISIBLE
                         mBinding.latestRv.visibility = View.VISIBLE
+                        mBinding.appBarLayout.visibility = View.VISIBLE
                     }
                 }
             }
@@ -280,9 +283,6 @@ class Latest : Fragment() {
         /** By clicking on a icon, inside of the toolbar, set a move flag to the 'ChangeBaseCurrency' fragment
          *  where user can select new base currency which will be saved in database */
         mBinding.latestChangeBase.setOnClickListener {
-            mBinding.latestBase.visibility = View.INVISIBLE
-            mBinding.latestDate.visibility = View.INVISIBLE
-            mBinding.latestRv.visibility = View.INVISIBLE
 
             val testVM: FragmentTagViewModel by viewModels(
                 ownerProducer = { requireParentFragment() })
