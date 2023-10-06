@@ -31,7 +31,7 @@
     <string name="conversion_fragment_name">Conversion</string>
     <string name="fluctuation_fragment_name">Fluctuation\nrates</string>
     <string name="change_base_content_description">By clicking on the currency icon, you can change your base currency</string>
-    <string name="select_desired_currency">You have to select desired currency, and enter amount of currency that you want to exchange in order to make a conversion</string>
+    <string name="select_desired_currency">You have to select desired currency, and enter amount to exchange</string>
     <string name="select_at_least_one_currency">In order to display chart, you have to select at least one currency</string>
     <string name="base_currency_unk">Base currency UNK</string>
     <string name="rates_from_date">Rates from\n %1$s</string>
@@ -50,7 +50,7 @@
     <string name="formatted_current_base">Current base currency: %1$s</string>
     <string name="no_network_sign">:(</string>
     <string name="no_network_explanation">When application is just installed, it requires internet connection to fill database with data about specific currency. Please, provide internet connection.</string>
-    <string name="no_network_after_changing_base">Database does not contain any data about this specific currency. Please provide internet connection to update data, or alternatively, consider changing base currency.</string>
+    <string name="no_network_after_changing_base">Provide internet connection in order to use this currency.</string>
     <string name="no_network_explanation_historical_fluctuation">This mode can\'t be used without internet connection.</string>
     <string name="time_series">Time\nSeries</string>
     <string name="timeout_explanation">App couldn\'t connect with the server this time. Please, restart the app</string>
