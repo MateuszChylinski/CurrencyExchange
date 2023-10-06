@@ -54,9 +54,6 @@ class ConversionViewModel @Inject constructor(
     fun clearDesiredAndAmount() {
         _convertedAmount.value = null
         _convertTo.value = null
-
-        println(_convertedAmount.value)
-        println(_convertTo.value)
     }
 
     val baseCurrency: SharedFlow<DataWrapper<CurrenciesDatabaseMain>> =
