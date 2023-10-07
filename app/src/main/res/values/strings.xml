@@ -36,6 +36,8 @@
     <string name="base_currency_unk">Base currency UNK</string>
     <string name="rates_from_date">Rates from\n %1$s</string>
     <string name="pick_7_currencies">Pick up to 7 currencies, and click on the save button to display data</string>
+    <string name="proceed">Proceed</string>
+    <string name="timeseries_info">Select start, and end date of desired time series, to display data.</string>
 
     <!--  String resources with specific format  -->
     <string name="formatted_base_currency">Base currency: %1$s</string>

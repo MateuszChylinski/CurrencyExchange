@@ -3,7 +3,6 @@ package com.example.currencyexchange.DataWrapper
 import androidx.room.TypeConverter
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
-import java.util.Date
 
 class CustomTypeConverters {
     @TypeConverter
@@ -15,13 +14,5 @@ class CustomTypeConverters {
     fun fromMap(map: Map<String, Double>?): String {
         val gson = Gson()
         return gson.toJson(map)
-    }
-    @TypeConverter
-    fun fromTimestamp(date: Long?): Date? {
-        return date?.let { Date(date) }
-    }
-    @TypeConverter
-    fun dateToTimestamp(date: Date?): Long?{
-        return date?.time
     }
 }
