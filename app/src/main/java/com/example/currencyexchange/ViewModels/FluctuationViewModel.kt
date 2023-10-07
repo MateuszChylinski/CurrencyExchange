@@ -27,9 +27,12 @@ class FluctuationViewModel @Inject constructor(
     private val databaseRepository: DatabaseRepositoryImplementation,
     private val networkStatus: NetworkObserverImplementation
 ) : ViewModel() {
+    private val _fluctuation = MutableLiveData<DataWrapper<FluctuationModel>?>()
+    val fluctuationResponse: LiveData<DataWrapper<FluctuationModel>?> get() = _fluctuation
 
-    private val _fluctuation = MutableLiveData<DataWrapper<FluctuationModel>>()
-    val fluctuationResponse: LiveData<DataWrapper<FluctuationModel>> get() = _fluctuation
+    fun clearApiResponse(){
+        _fluctuation.value = null
+    }
 
     val baseCurrency: SharedFlow<DataWrapper<CurrenciesDatabaseMain>> =
         databaseRepository.baseCurrency
