@@ -34,19 +34,18 @@ import java.util.Calendar
 
 class HistoricalRates : Fragment() {
     private val TAG = "HistoricalRates"
-
-    private val mCalendar = Calendar.getInstance()
-    private val mViewModel: HistoricalViewModel by activityViewModels()
     private var _binding: FragmentHistoricalRatesBinding? = null
     private val mBinding get() = _binding!!
+    private val mViewModel: HistoricalViewModel by activityViewModels()
+    private val mCalendar = Calendar.getInstance()
     private var mHistoricalAdapter: HistoricalAdapter = HistoricalAdapter()
+
+    private val mCurrencyList: MutableList<String> = mutableListOf()
+    private val mPickedCurrencies: MutableList<String> = mutableListOf()
 
     private var mDate: String = "default"
     private var mBaseCurrency = "default"
     private var mIsInternetProvided = false
-
-    private val mCurrencyList: MutableList<String> = mutableListOf()
-    private val mPickedCurrencies: MutableList<String> = mutableListOf()
 
     /** Retrieve base currency from the database */
     private val baseCurr: Job
@@ -97,7 +96,7 @@ class HistoricalRates : Fragment() {
         }
 
     /** Make an api call, and observe LiveData from ViewModel */
-    private val historicalData: Job
+    private val mApiCall: Job
         get() = viewLifecycleOwner.lifecycleScope.launch(start = CoroutineStart.LAZY) {
 
             mViewModel.fetchHistoricalData(
@@ -105,7 +104,11 @@ class HistoricalRates : Fragment() {
                 selectedCurrencies = mPickedCurrencies.joinToString(separator = ", "),
                 date = mDate
             )
+            mObserveResponse.start()
+        }
 
+    private val mObserveResponse: Job
+        get() = viewLifecycleOwner.lifecycleScope.launch(start = CoroutineStart.LAZY) {
             mViewModel.historicalData.observe(viewLifecycleOwner, Observer { dataObj ->
                 when (dataObj) {
                     is DataWrapper.Success -> {
@@ -114,7 +117,9 @@ class HistoricalRates : Fragment() {
                             mBinding.historicalRv.adapter = mHistoricalAdapter
                             mHistoricalAdapter.setData(it.rates)
                         }
+                        mBinding.historicalProgressBar.visibility = View.GONE
                         mBinding.historicalProgressBar.visibility = View.INVISIBLE
+                        mBinding.historicalRv.visibility = View.VISIBLE
                         mBinding.historicalBaseTv.visibility = View.VISIBLE
                         mBinding.historicalDateTv.visibility = View.VISIBLE
                     }
@@ -127,6 +132,8 @@ class HistoricalRates : Fragment() {
                         ).show()
                         Log.e(TAG, "Couldn't perform an api call: ${dataObj.message}")
                     }
+
+                    else -> {}
                 }
 
             })
@@ -142,6 +149,7 @@ class HistoricalRates : Fragment() {
                             is DataWrapper.Success -> {
                                 if (state.data.toString() == "Available") {
                                     mIsInternetProvided = true
+                                    mBinding.historicalNoNetwork.visibility = View.GONE
                                     mBinding.historicalNoNetwork.visibility = View.INVISIBLE
                                     mBinding.historicalInfo.visibility = View.VISIBLE
                                     mBinding.historicalDt.visibility = View.VISIBLE
@@ -180,6 +188,7 @@ class HistoricalRates : Fragment() {
 
         // After refreshing layout, reset UI to the default state, and observe the base currency once again, so user will see "default" base currency
         mBinding.historicalRefreshContainer.setOnRefreshListener {
+            mViewModel.clearResponse()
 
             /** If user refreshed layout uncheck every position in ListView */
             for (i in 0 until mBinding.historicalSymbolsLv.size) {
@@ -327,33 +336,45 @@ class HistoricalRates : Fragment() {
                 }
             }
             prepareViewsForRv()
-            historicalData.start()
-            Log.i(TAG, "setupListView: ${mBinding.historicalRefreshContainer.isEnabled}")
+            mApiCall.start()
         }
     }
 
     //  Prepare views to display RecyclerView. Delete unneeded views
     private fun prepareViewsForRv() {
+        mBinding.historicalSelectInfo.visibility = View.GONE
         mBinding.historicalSelectInfo.visibility = View.INVISIBLE
+        mBinding.historicalSymbolsLv.visibility = View.GONE
         mBinding.historicalSymbolsLv.visibility = View.INVISIBLE
+        mBinding.historicalSaveSymbols.visibility = View.GONE
         mBinding.historicalSaveSymbols.visibility = View.INVISIBLE
+        mBinding.historicalChangeInfo.visibility = View.GONE
         mBinding.historicalChangeInfo.visibility = View.INVISIBLE
+        mBinding.historicalChangeBase.visibility = View.GONE
         mBinding.historicalChangeBase.visibility = View.INVISIBLE
+        mBinding.historicalBaseTv.visibility = View.GONE
         mBinding.historicalBaseTv.visibility = View.INVISIBLE
+        mBinding.historicalDateTv.visibility = View.GONE
         mBinding.historicalDateTv.visibility = View.INVISIBLE
+        mBinding.historicalNoNetwork.visibility = View.GONE
         mBinding.historicalNoNetwork.visibility = View.INVISIBLE
+        mBinding.historicalInfo.visibility = View.GONE
         mBinding.historicalInfo.visibility = View.INVISIBLE
+        mBinding.historicalDt.visibility = View.GONE
         mBinding.historicalDt.visibility = View.INVISIBLE
+        mBinding.historicalSaveDate.visibility = View.GONE
         mBinding.historicalSaveDate.visibility = View.INVISIBLE
 
         mBinding.historicalProgressBar.visibility = View.VISIBLE
-        mBinding.historicalRv.visibility = View.VISIBLE
-        mBinding.historicalRefreshContainer.isEnabled = true
     }
+
     //  Prepare views to display ListView. Make unneeded views invisible
     private fun setVisibilityToLv() {
+        mBinding.historicalInfo.visibility = View.GONE
         mBinding.historicalInfo.visibility = View.INVISIBLE
+        mBinding.historicalDt.visibility = View.GONE
         mBinding.historicalDt.visibility = View.INVISIBLE
+        mBinding.historicalSaveDate.visibility = View.GONE
         mBinding.historicalSaveDate.visibility = View.INVISIBLE
 
         mBinding.historicalSelectInfo.visibility = View.VISIBLE
@@ -363,6 +384,7 @@ class HistoricalRates : Fragment() {
         mBinding.historicalChangeBase.visibility = View.VISIBLE
         mBinding.historicalBaseTv.visibility = View.VISIBLE
         mBinding.historicalDateTv.visibility = View.VISIBLE
+        mBinding.historicalNoNetwork.visibility = View.GONE
         mBinding.historicalNoNetwork.visibility = View.INVISIBLE
 
         mBinding.historicalDateTv.text = String.format(getString(R.string.formatted_date), mDate)
@@ -383,34 +405,57 @@ class HistoricalRates : Fragment() {
         mBinding.historicalDt.visibility = View.VISIBLE
         mBinding.historicalSaveDate.visibility = View.VISIBLE
 
+        mBinding.historicalSelectInfo.visibility = View.GONE
         mBinding.historicalSelectInfo.visibility = View.INVISIBLE
+        mBinding.historicalSymbolsLv.visibility = View.GONE
         mBinding.historicalSymbolsLv.visibility = View.INVISIBLE
+        mBinding.historicalSaveSymbols.visibility = View.GONE
         mBinding.historicalSaveSymbols.visibility = View.INVISIBLE
+        mBinding.historicalChangeInfo.visibility = View.GONE
         mBinding.historicalChangeInfo.visibility = View.INVISIBLE
+        mBinding.historicalChangeBase.visibility = View.GONE
         mBinding.historicalChangeBase.visibility = View.INVISIBLE
+        mBinding.historicalBaseTv.visibility = View.GONE
         mBinding.historicalBaseTv.visibility = View.INVISIBLE
+        mBinding.historicalDateTv.visibility = View.GONE
         mBinding.historicalDateTv.visibility = View.INVISIBLE
+        mBinding.historicalDateTv.visibility = View.GONE
         mBinding.historicalDateTv.visibility = View.INVISIBLE
+        mBinding.historicalRv.visibility = View.GONE
         mBinding.historicalRv.visibility = View.INVISIBLE
+        mBinding.historicalNoNetwork.visibility = View.GONE
         mBinding.historicalNoNetwork.visibility = View.INVISIBLE
 
         mPickedCurrencies.clear()
         mCurrencyList.clear()
+        internetState.start()
     }
 
     // display in case there is no internet connection, or as a default (when there's no data about network services)
     private fun noInternetViews() {
         mBinding.historicalNoNetwork.visibility = View.VISIBLE
+
+        mBinding.historicalInfo.visibility = View.GONE
         mBinding.historicalInfo.visibility = View.INVISIBLE
+        mBinding.historicalDt.visibility = View.GONE
         mBinding.historicalDt.visibility = View.INVISIBLE
+        mBinding.historicalSaveDate.visibility = View.GONE
         mBinding.historicalSaveDate.visibility = View.INVISIBLE
+        mBinding.historicalRv.visibility = View.GONE
         mBinding.historicalRv.visibility = View.INVISIBLE
+        mBinding.historicalSelectInfo.visibility = View.GONE
         mBinding.historicalSelectInfo.visibility = View.INVISIBLE
+        mBinding.historicalSymbolsLv.visibility = View.GONE
         mBinding.historicalSymbolsLv.visibility = View.INVISIBLE
+        mBinding.historicalSaveSymbols.visibility = View.GONE
         mBinding.historicalSaveSymbols.visibility = View.INVISIBLE
+        mBinding.historicalChangeInfo.visibility = View.GONE
         mBinding.historicalChangeInfo.visibility = View.INVISIBLE
+        mBinding.historicalChangeBase.visibility = View.GONE
         mBinding.historicalChangeBase.visibility = View.INVISIBLE
+        mBinding.historicalBaseTv.visibility = View.GONE
         mBinding.historicalBaseTv.visibility = View.INVISIBLE
+        mBinding.historicalDateTv.visibility = View.GONE
         mBinding.historicalDateTv.visibility = View.INVISIBLE
     }
 }
