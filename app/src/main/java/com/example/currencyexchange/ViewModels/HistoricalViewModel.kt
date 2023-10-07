@@ -29,8 +29,12 @@ class HistoricalViewModel @Inject constructor(
     private val networkStatus: NetworkObserverImplementation
 ) : ViewModel() {
 
-    private val _historical = MutableLiveData<DataWrapper<HistoricalRatesModel?>>()
-    val historicalData: LiveData<DataWrapper<HistoricalRatesModel?>> get() = _historical
+    private val _historical = MutableLiveData<DataWrapper<HistoricalRatesModel?>?>()
+    val historicalData: LiveData<DataWrapper<HistoricalRatesModel?>?> get() = _historical
+
+    fun clearResponse(){
+        _historical.value = null
+    }
 
     val baseCurrency: SharedFlow<DataWrapper<CurrenciesDatabaseMain>> =
         databaseRepository.baseCurrency
@@ -76,4 +80,3 @@ class HistoricalViewModel @Inject constructor(
         }
     }
 }
-
