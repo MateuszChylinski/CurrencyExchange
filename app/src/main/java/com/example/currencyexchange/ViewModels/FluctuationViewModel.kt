@@ -27,10 +27,10 @@ class FluctuationViewModel @Inject constructor(
     private val databaseRepository: DatabaseRepositoryImplementation,
     private val networkStatus: NetworkObserverImplementation
 ) : ViewModel() {
-    private val _fluctuation = MutableLiveData<DataWrapper<FluctuationModel>?>()
-    val fluctuationResponse: LiveData<DataWrapper<FluctuationModel>?> get() = _fluctuation
+    private val _fluctuation = MutableLiveData<DataWrapper<FluctuationModel?>?>()
+    val fluctuationResponse: LiveData<DataWrapper<FluctuationModel?>?> get() = _fluctuation
 
-    fun clearApiResponse(){
+    fun clearApiResponse() {
         _fluctuation.value = null
     }
 
@@ -67,14 +67,16 @@ class FluctuationViewModel @Inject constructor(
                     endDate = endDate,
                     apiKey = BuildConfig.API_KEY
                 )
-                if (response.isSuccessful) {
-                    response.body()?.let { _fluctuation.postValue(DataWrapper.Success(it)) }
-
-                } else {
-                    Log.e(
-                        TAG,
-                        "fetchFluctuation: response from the server was not successful. Response code: ${response.code()}"
-                    )
+                // to avoid forcing the response with '!!', use 'let' instead
+                response.let {
+                    if (it.isSuccessful) {
+                        _fluctuation.postValue(DataWrapper.Success(it.body()))
+                    } else {
+                        Log.e(
+                            TAG,
+                            "fetchFluctuation: response from the server was not successful. Response code: ${response.code()}"
+                        )
+                    }
                 }
             } catch (exception: java.net.SocketTimeoutException) {
                 _fluctuation.postValue(DataWrapper.Error(data = null, error = exception.message))

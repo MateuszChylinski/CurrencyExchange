@@ -29,8 +29,8 @@ class ConversionViewModel @Inject constructor(
     private val networkObserver: NetworkObserverImplementation
 ) : ViewModel() {
 
-    private val _exchangeState = MutableLiveData<DataWrapper<ConversionModel>?>()
-    val conversionCall: LiveData<DataWrapper<ConversionModel>?> get() = _exchangeState
+    private val _exchangeState = MutableLiveData<DataWrapper<ConversionModel?>?>()
+    val conversionCall: LiveData<DataWrapper<ConversionModel?>?> get() = _exchangeState
 
     private val _convertTo = MutableLiveData<String?>()
     val convertTo: LiveData<String?> get() = _convertTo
@@ -95,20 +95,20 @@ class ConversionViewModel @Inject constructor(
                     amount = amount,
                     apiKey = BuildConfig.API_KEY
                 )
-
-                if (response.isSuccessful) {
-                    Log.i(TAG, "exchangeCurrency: ${response.body()}")
-                    _exchangeState.postValue(DataWrapper.Success(response.body()!!))
-                } else {
-                    Log.e(
-                        TAG,
-                        "exchangeCurrency ViewModel: Response is NOT successful. Code: ${response.code()}"
-                    )
+                // to avoid forcing the response with '!!', use 'let' instead
+                response.let {
+                    if (it.isSuccessful) {
+                        _exchangeState.postValue(DataWrapper.Success(it.body()))
+                    } else {
+                        Log.e(
+                            TAG,
+                            "exchangeCurrency ViewModel: Response is NOT successful. Code: ${response.code()}"
+                        )
+                    }
                 }
             } catch (exception: Exception) {
                 _exchangeState.postValue(DataWrapper.Error(data = null, error = exception.message))
             }
         }
     }
-
 }

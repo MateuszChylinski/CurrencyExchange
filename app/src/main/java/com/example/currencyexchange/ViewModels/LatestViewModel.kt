@@ -64,6 +64,7 @@ class LatestViewModel @Inject constructor(
                     baseCurrency = baseCurrency,
                     apiKey = BuildConfig.API_KEY
                 )
+                // to avoid forcing the response with '!!', use 'let' instead
                 response.let {
                     if (it.isSuccessful) _latestRatesCall.postValue(DataWrapper.Success(it.body()))
                 }
