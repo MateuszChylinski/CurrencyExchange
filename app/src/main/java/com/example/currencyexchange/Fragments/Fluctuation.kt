@@ -162,6 +162,8 @@ class Fluctuation : Fragment() {
                                 }
 
                                 is DataWrapper.Error -> {
+                                    mBinding.fluctuationProgress.visibility = View.GONE
+                                    mBinding.fluctuationProgress.visibility = View.INVISIBLE
                                     Toast.makeText(
                                         requireContext(),
                                         getString(R.string.timeout_explanation),

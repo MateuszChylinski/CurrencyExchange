@@ -78,6 +78,8 @@ class Conversion : Fragment() {
                     }
 
                     is DataWrapper.Error -> {
+                        mBinding.conversionProgressBar.visibility = View.GONE
+                        mBinding.conversionProgressBar.visibility = View.INVISIBLE
                         Toast.makeText(
                             requireContext(),
                             getString(R.string.timeout_explanation),

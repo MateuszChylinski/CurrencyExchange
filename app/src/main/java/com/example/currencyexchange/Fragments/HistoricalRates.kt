@@ -125,6 +125,8 @@ class HistoricalRates : Fragment() {
                     }
 
                     is DataWrapper.Error -> {
+                        mBinding.historicalProgressBar.visibility = View.GONE
+                        mBinding.historicalProgressBar.visibility = View.INVISIBLE
                         Toast.makeText(
                             requireContext(),
                             getString(R.string.timeout_explanation),
