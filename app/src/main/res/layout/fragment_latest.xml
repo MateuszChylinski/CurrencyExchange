@@ -25,7 +25,7 @@
                 android:text="@string/latest_fragment_name"
                 android:textAlignment="center"
                 android:textSize="20sp"
-                android:textStyle="bold"/>
+                android:textStyle="bold" />
 
             <TextView
                 android:layout_width="wrap_content"
@@ -33,10 +33,7 @@
                 android:layout_marginStart="40dp"
                 android:text="@string/toolbar_info"
                 android:textAlignment="center"
-                android:textSize="15sp"
-                />
-
-            <!--                android:fontFamily="sans-serif-light"-->
+                android:textSize="15sp" />
 
             <ImageView
                 android:id="@+id/latest_change_base"
@@ -85,7 +82,7 @@
                 android:padding="10dp"
                 android:text="@string/base_currency_unk"
                 android:textSize="20sp"
-                android:visibility="invisible"/>
+                android:visibility="invisible" />
 
 
             <TextView
@@ -98,7 +95,7 @@
                 android:padding="10dp"
                 android:text="@string/rates_from_date"
                 android:textSize="20sp"
-                android:visibility="invisible"/>
+                android:visibility="invisible" />
         </LinearLayout>
 
         <TextView

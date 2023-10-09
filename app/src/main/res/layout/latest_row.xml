@@ -2,14 +2,8 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="horizontal"
-    android:padding="5dp"
-    >
-    <!--        android:background="#EEB501"-->
-
-<!--            android:background="#E9AD03"-->
-
+    android:padding="5dp">
     <TextView
         android:id="@+id/latest_currency_origin"
         android:layout_width="0dp"
@@ -18,8 +12,7 @@
         android:padding="20dp"
         android:text="@string/currency_item_name"
         android:textSize="17sp"
-        android:background="@drawable/round_currency"
-        />
+        android:background="@drawable/round_currency"/>
 
     <TextView
         android:id="@+id/latest_currency_value"
@@ -29,7 +22,5 @@
         android:padding="20dp"
         android:text="@string/currency_item_value"
         android:textSize="17sp"
-        android:background="@drawable/round_amount"
-
-        />
+        android:background="@drawable/round_amount"/>
 </LinearLayout>
