@@ -4,13 +4,14 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="#FBD66B"
     tools:context=".Fragments.Latest">
 
     <com.google.android.material.appbar.AppBarLayout
         android:id="@+id/appBarLayout"
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
-        android:background="#ff44">
+        android:background="#F3B90D">
 
         <com.google.android.material.appbar.MaterialToolbar
             android:id="@+id/toolbar"
@@ -23,7 +24,8 @@
                 android:layout_height="wrap_content"
                 android:text="@string/latest_fragment_name"
                 android:textAlignment="center"
-                android:textSize="20sp" />
+                android:textSize="20sp"
+                android:textStyle="bold"/>
 
             <TextView
                 android:layout_width="wrap_content"
@@ -31,7 +33,10 @@
                 android:layout_marginStart="40dp"
                 android:text="@string/toolbar_info"
                 android:textAlignment="center"
-                android:textSize="15sp" />
+                android:textSize="15sp"
+                />
+
+            <!--                android:fontFamily="sans-serif-light"-->
 
             <ImageView
                 android:id="@+id/latest_change_base"
@@ -52,42 +57,49 @@
 
         <com.google.android.material.progressindicator.CircularProgressIndicator
             android:id="@+id/latest_progress_bar"
-            android:indeterminate="true"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:indeterminate="true"
+            app:indicatorColor="#996618"
             app:indicatorSize="50dp"
-            app:indicatorColor="@color/design_default_color_primary"
-            app:trackColor="#f2f2"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"/>
-        <TextView
-            android:id="@+id/latest_base"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="0.5"
-            android:gravity="center"
-            android:padding="15dp"
-            android:text="@string/base_currency_unk"
-            android:textSize="20sp"
-            android:visibility="invisible"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/appBarLayout"
-            tools:ignore="NotSibling" />
+            app:layout_constraintTop_toTopOf="parent"
+            app:trackColor="#F3C70D" />
 
-
-        <TextView
-            android:id="@+id/latest_date"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="0.5"
-            android:gravity="center"
-            android:padding="14dp"
-            android:text="@string/rates_from_date"
-            android:textSize="20sp"
-            android:visibility="invisible"
+        <LinearLayout
+            android:id="@+id/latest_info_row"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
             app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/appBarLayout"
-            tools:ignore="NotSibling" />
+            tools:ignore="NotSibling">
+
+            <TextView
+                android:id="@+id/latest_base"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="0.5"
+                android:background="#EEB501"
+                android:gravity="center"
+                android:padding="10dp"
+                android:text="@string/base_currency_unk"
+                android:textSize="20sp"
+                android:visibility="invisible"/>
+
+
+            <TextView
+                android:id="@+id/latest_date"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="0.5"
+                android:background="#EEB501"
+                android:gravity="center"
+                android:padding="10dp"
+                android:text="@string/rates_from_date"
+                android:textSize="20sp"
+                android:visibility="invisible"/>
+        </LinearLayout>
 
         <TextView
             android:id="@+id/latest_no_internet_sign"
@@ -100,7 +112,7 @@
             android:visibility="invisible"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/latest_base" />
+            app:layout_constraintTop_toBottomOf="@id/latest_info_row" />
 
         <TextView
             android:id="@+id/latest_no_internet_explanation"
@@ -118,12 +130,12 @@
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/latest_rv"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
             android:layout_marginTop="15dp"
             android:layout_marginBottom="58dp"
             android:visibility="invisible"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/latest_base" />
+            app:layout_constraintTop_toBottomOf="@id/latest_info_row" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
