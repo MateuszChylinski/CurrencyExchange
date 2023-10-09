@@ -63,9 +63,6 @@ class TimeSeries : Fragment(), OnChartValueSelectedListener {
     private var mEndDate: String = "default"
     private var currencyChain = ""
 
-    private val mStartingDateInMs = 946684800000
-    private val mDayInMs = 86400000
-
     private var isClicked: Boolean = true
     private var internetStatus = false
 
@@ -171,12 +168,10 @@ class TimeSeries : Fragment(), OnChartValueSelectedListener {
         return view
     }
 
-    override fun onStop() {
-        super.onStop()
-        defaultViews()
-    }
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        val mStartingDateInMs = 946684800000
+        val mDayInMs = 86400000
+
         mBinding.timeSeriesStartDp.minDate = mStartingDateInMs
         mBinding.timeSeriesStartDp.maxDate = mCalendar.timeInMillis.minus(mDayInMs)
 
@@ -234,21 +229,27 @@ class TimeSeries : Fragment(), OnChartValueSelectedListener {
     /** Depending on the current network state (it is provided, or not) let the user work with this fragment, or display notification about internet need in order to let user work with this fragment **/
     private fun setViewsToGetStartDate(status: Boolean) {
         if (status) {
+            mBinding.timeSeriesNoInternet.visibility = View.GONE
             mBinding.timeSeriesNoInternet.visibility = View.INVISIBLE
             mBinding.timeSeriesInfo.visibility = View.VISIBLE
             mBinding.timeSeriesStartDp.visibility = View.VISIBLE
             mBinding.timeSeriesStartBtn.visibility = View.VISIBLE
         } else {
             mBinding.timeSeriesNoInternet.visibility = View.VISIBLE
+            mBinding.timeSeriesInfo.visibility = View.GONE
             mBinding.timeSeriesInfo.visibility = View.INVISIBLE
+            mBinding.timeSeriesStartDp.visibility = View.GONE
             mBinding.timeSeriesStartDp.visibility = View.INVISIBLE
+            mBinding.timeSeriesStartBtn.visibility = View.GONE
             mBinding.timeSeriesStartBtn.visibility = View.INVISIBLE
         }
     }
 
     /** Manipulate views to let user pick end date. Hide "start date" views **/
     private fun setViewsToGetEndDate() {
+        mBinding.timeSeriesStartDp.visibility = View.GONE
         mBinding.timeSeriesStartDp.visibility = View.INVISIBLE
+        mBinding.timeSeriesStartBtn.visibility = View.GONE
         mBinding.timeSeriesStartBtn.visibility = View.INVISIBLE
 
         mBinding.timeSeriesEndDp.visibility = View.VISIBLE
@@ -264,8 +265,11 @@ class TimeSeries : Fragment(), OnChartValueSelectedListener {
         mBinding.timeSeriesEndDate.text = getString(R.string.formatted_to, mEndDate)
 
         mBinding.timeSeriesProgressBar.visibility = View.VISIBLE
+        mBinding.timeSeriesInfo.visibility = View.GONE
         mBinding.timeSeriesInfo.visibility = View.INVISIBLE
+        mBinding.timeSeriesEndDp.visibility = View.GONE
         mBinding.timeSeriesEndDp.visibility = View.INVISIBLE
+        mBinding.timeSeriesEndBtn.visibility = View.GONE
         mBinding.timeSeriesEndBtn.visibility = View.INVISIBLE
 
         mBinding.timeSeriesSelectSymbolsLv.visibility = View.VISIBLE
@@ -275,17 +279,24 @@ class TimeSeries : Fragment(), OnChartValueSelectedListener {
         mBinding.timeSeriesStartDate.visibility = View.VISIBLE
         mBinding.timeSeriesEndDate.visibility = View.VISIBLE
 
+        mBinding.timeSeriesProgressBar.visibility = View.GONE
         mBinding.timeSeriesProgressBar.visibility = View.INVISIBLE
     }
 
     /** Setup views to display chart with data, that came from api call. **/
     private fun setViewsToDisplayChart() {
         mBinding.timeSeriesProgressBar.visibility = View.VISIBLE
+        mBinding.timeSeriesSelectSymbolsLv.visibility = View.GONE
         mBinding.timeSeriesSelectSymbolsLv.visibility = View.INVISIBLE
+        mBinding.timeSeriesSaveSymbols.visibility = View.GONE
         mBinding.timeSeriesSaveSymbols.visibility = View.INVISIBLE
+        mBinding.timeSeriesBaseCurrencyTv.visibility = View.GONE
         mBinding.timeSeriesBaseCurrencyTv.visibility = View.INVISIBLE
+        mBinding.timeSeriesStartDate.visibility = View.GONE
         mBinding.timeSeriesStartDate.visibility = View.INVISIBLE
+        mBinding.timeSeriesEndDate.visibility = View.GONE
         mBinding.timeSeriesEndDate.visibility = View.INVISIBLE
+        mBinding.timeSeriesSelectBaseCurrency.visibility = View.GONE
         mBinding.timeSeriesSelectBaseCurrency.visibility = View.INVISIBLE
     }
 
@@ -399,6 +410,7 @@ class TimeSeries : Fragment(), OnChartValueSelectedListener {
 
     /** After triggering the SwipeRefreshLayout, manipulate views, to the state when user enter the fragment for the first time **/
     private fun defaultViews() {
+        mViewModel.clearResponse()
 
         //Check if specific item in ListView was checked, and uncheck it.
         for (i in 0 until mCurrenciesList.size) {
@@ -408,15 +420,25 @@ class TimeSeries : Fragment(), OnChartValueSelectedListener {
             )
         }
 
+        mBinding.timeSeriesEndDp.visibility = View.GONE
         mBinding.timeSeriesEndDp.visibility = View.INVISIBLE
+        mBinding.timeSeriesEndBtn.visibility = View.GONE
         mBinding.timeSeriesEndBtn.visibility = View.INVISIBLE
+        mBinding.timeSeriesEndDate.visibility = View.GONE
         mBinding.timeSeriesEndDate.visibility = View.INVISIBLE
+        mBinding.timeSeriesBaseCurrencyTv.visibility = View.GONE
         mBinding.timeSeriesBaseCurrencyTv.visibility = View.INVISIBLE
+        mBinding.timeSeriesSelectBaseCurrency.visibility = View.GONE
         mBinding.timeSeriesSelectBaseCurrency.visibility = View.INVISIBLE
+        mBinding.timeSeriesStartDate.visibility = View.GONE
         mBinding.timeSeriesStartDate.visibility = View.INVISIBLE
+        mBinding.timeSeriesSelectSymbolsTv.visibility = View.GONE
         mBinding.timeSeriesSelectSymbolsTv.visibility = View.INVISIBLE
+        mBinding.timeSeriesSelectSymbolsLv.visibility = View.GONE
         mBinding.timeSeriesSelectSymbolsLv.visibility = View.INVISIBLE
+        mBinding.timeSeriesSaveSymbols.visibility = View.GONE
         mBinding.timeSeriesSaveSymbols.visibility = View.INVISIBLE
+        mBinding.timeSeriesChart.visibility = View.GONE
         mBinding.timeSeriesChart.visibility = View.INVISIBLE
 
         mBinding.timeSeriesInfo.visibility = View.VISIBLE
@@ -428,10 +450,12 @@ class TimeSeries : Fragment(), OnChartValueSelectedListener {
         mChartData.clear()
         colorsList.clear()
 
-        barData.clearValues()
-        set.clear()
-        legend.resetCustom()
+        if (::barData.isInitialized && ::set.isInitialized && ::legend.isInitialized) {
+            barData.clearValues()
+            set.clear()
+            legend.resetCustom()
 
+        }
         legendEntries.clear()
         currencyChain = String()
     }
@@ -474,18 +498,20 @@ class TimeSeries : Fragment(), OnChartValueSelectedListener {
                 }
 
                 is DataWrapper.Error -> {
-                    Log.e(TAG, "onCreateView: TEST API CALL FAILED ${status.message}")
+                    mBinding.timeSeriesProgressBar.visibility = View.GONE
+                    mBinding.timeSeriesProgressBar.visibility = View.INVISIBLE
                     Toast.makeText(
                         requireContext(),
                         getString(R.string.timeout_explanation),
                         Toast.LENGTH_SHORT
                     ).show()
                 }
+
+                else -> {}
             }
         })
     }
 
-    //TODO - adjust colors after changing UI. These colors are temporary.
     /** Prepare bar chart to display data from api call. **/
     private fun prepareChart(
         entries: MutableList<BarEntry>,
@@ -564,6 +590,7 @@ class TimeSeries : Fragment(), OnChartValueSelectedListener {
 
         setViewsToDisplayChart()
         mBinding.timeSeriesChart.visibility = View.VISIBLE
+        mBinding.timeSeriesProgressBar.visibility = View.GONE
         mBinding.timeSeriesProgressBar.visibility = View.INVISIBLE
     }
 

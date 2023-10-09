@@ -64,10 +64,11 @@ class LatestViewModel @Inject constructor(
                     baseCurrency = baseCurrency,
                     apiKey = BuildConfig.API_KEY
                 )
+                // to avoid forcing the response with '!!', use 'let' instead
                 response.let {
                     if (it.isSuccessful) _latestRatesCall.postValue(DataWrapper.Success(it.body()))
                 }
-            } catch (exception: java.net.SocketTimeoutException) {
+            } catch (exception: Exception) {
                 _latestRatesCall.postValue(
                     DataWrapper.Error(
                         error = exception.message,
@@ -80,7 +81,7 @@ class LatestViewModel @Inject constructor(
     fun insertCurrencies(currencyData: CurrenciesDatabaseDetailed) = viewModelScope.launch {
         try {
             databaseRepository.insertCurrencies(currencyData)
-        } catch (exception: IOException) {
+        } catch (exception: Exception) {
             Log.e(TAG, "insertCurrencies: couldn't insert currencies in view model. $exception")
         }
     }

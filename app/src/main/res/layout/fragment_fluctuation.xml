@@ -64,7 +64,7 @@
                 app:trackColor="#f2f2"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
-                android:visibility="invisible"/>
+                android:visibility="gone"/>
 
             <TextView
                 android:id="@+id/fluctuation_no_internet"
@@ -76,7 +76,7 @@
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
-                android:visibility="invisible"/>
+                android:visibility="gone"/>
 
 
             <!--First section of the layout-->
@@ -122,7 +122,7 @@
                 android:text="@string/to"
                 android:textAlignment="center"
                 android:textSize="25sp"
-                android:visibility="invisible"
+                android:visibility="gone"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
@@ -134,7 +134,7 @@
                 android:layout_marginTop="15dp"
                 android:calendarViewShown="false"
                 android:datePickerMode="spinner"
-                android:visibility="invisible"
+                android:visibility="gone"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/fluctuation_to_center_tv" />
@@ -146,7 +146,7 @@
                 android:layout_marginTop="10dp"
                 android:layout_marginEnd="50dp"
                 android:text="@string/ok"
-                android:visibility="invisible"
+                android:visibility="gone"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/fluctuation_to_dt" />
 
@@ -161,7 +161,7 @@
                 android:text="@string/currency_name"
                 android:textAlignment="center"
                 android:textSize="20sp"
-                android:visibility="invisible"
+                android:visibility="gone"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
 
@@ -171,7 +171,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="38dp"
                 android:layout_marginTop="17dp"
-                android:visibility="invisible"
+                android:visibility="gone"
                 app:layout_constraintStart_toEndOf="@id/fluctuation_base_currency_tv"
                 app:layout_constraintTop_toTopOf="parent" />
 
@@ -185,7 +185,7 @@
                 android:text="@string/from"
                 android:textAlignment="center"
                 android:textSize="20sp"
-                android:visibility="invisible"
+                android:visibility="gone"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/fluctuation_base_currency_tv" />
 
@@ -198,7 +198,7 @@
                 android:text="@string/to"
                 android:textAlignment="center"
                 android:textSize="20sp"
-                android:visibility="invisible"
+                android:visibility="gone"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/fluctuation_from_date" />
 
@@ -210,7 +210,7 @@
                 android:text="@string/select_currencies_to_display_fluctuation"
                 android:textAlignment="center"
                 android:textSize="20sp"
-                android:visibility="invisible"
+                android:visibility="gone"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/fluctuation_to_date" />
 
@@ -221,7 +221,7 @@
                 android:layout_height="0dp"
                 android:layout_marginTop="15dp"
                 android:layout_marginBottom="5dp"
-                android:visibility="invisible"
+                android:visibility="gone"
                 app:layout_constraintBottom_toTopOf="@id/fluctuation_save_symbols"
                 app:layout_constraintTop_toBottomOf="@id/fluctuation_select_symbols_tv" />
 
@@ -231,7 +231,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="58dp"
                 android:text="@string/save"
-                android:visibility="invisible"
+                android:visibility="gone"
                 app:layout_constraintBottom_toBottomOf="parent" />
 
             <!--Fourth section of the layout-->
@@ -243,7 +243,7 @@
                 android:text="@string/currency_name"
                 android:textAlignment="center"
                 android:textSize="18sp"
-                android:visibility="invisible"
+                android:visibility="gone"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
@@ -254,7 +254,7 @@
                 android:layout_height="0dp"
                 android:layout_marginTop="10dp"
                 android:layout_marginBottom="58dp"
-                android:visibility="invisible"
+                android:visibility="gone"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"

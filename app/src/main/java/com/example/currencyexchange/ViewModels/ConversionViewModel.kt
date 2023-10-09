@@ -29,8 +29,32 @@ class ConversionViewModel @Inject constructor(
     private val networkObserver: NetworkObserverImplementation
 ) : ViewModel() {
 
-    private val _exchangeState = MutableLiveData<DataWrapper<ConversionModel>>()
-    val conversionCall: LiveData<DataWrapper<ConversionModel>> get() = _exchangeState
+    private val _exchangeState = MutableLiveData<DataWrapper<ConversionModel?>?>()
+    val conversionCall: LiveData<DataWrapper<ConversionModel?>?> get() = _exchangeState
+
+    private val _convertTo = MutableLiveData<String?>()
+    val convertTo: LiveData<String?> get() = _convertTo
+
+    private val _convertedAmount = MutableLiveData<Double?>()
+    val convertedAmount: LiveData<Double?> get() = _convertedAmount
+
+
+    fun clearResponse() {
+        _exchangeState.value = null
+    }
+
+    fun assignConvertedAmount(convertedAmount: Double) {
+        _convertedAmount.value = convertedAmount
+    }
+
+    fun assignDesiredCurrency(desiredCurrency: String) {
+        _convertTo.value = desiredCurrency
+    }
+
+    fun clearDesiredAndAmount() {
+        _convertedAmount.value = null
+        _convertTo.value = null
+    }
 
     val baseCurrency: SharedFlow<DataWrapper<CurrenciesDatabaseMain>> =
         databaseRepository.baseCurrency
@@ -71,19 +95,20 @@ class ConversionViewModel @Inject constructor(
                     amount = amount,
                     apiKey = BuildConfig.API_KEY
                 )
-
-                if (response.isSuccessful) {
-                    _exchangeState.postValue(DataWrapper.Success(response.body()!!))
-                } else {
-                    Log.e(
-                        TAG,
-                        "exchangeCurrency ViewModel: Response is NOT successful. Code: ${response.code()}"
-                    )
+                // to avoid forcing the response with '!!', use 'let' instead
+                response.let {
+                    if (it.isSuccessful) {
+                        _exchangeState.postValue(DataWrapper.Success(it.body()))
+                    } else {
+                        Log.e(
+                            TAG,
+                            "exchangeCurrency ViewModel: Response is NOT successful. Code: ${response.code()}"
+                        )
+                    }
                 }
-            } catch (exception: java.net.SocketTimeoutException) {
+            } catch (exception: Exception) {
                 _exchangeState.postValue(DataWrapper.Error(data = null, error = exception.message))
             }
         }
     }
-
 }

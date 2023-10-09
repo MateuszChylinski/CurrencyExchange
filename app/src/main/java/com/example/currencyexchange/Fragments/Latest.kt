@@ -92,6 +92,8 @@ class Latest : Fragment() {
                         }
 
                         is DataWrapper.Error -> {
+                            mBinding.latestProgressBar.visibility = View.INVISIBLE
+                            mBinding.latestProgressBar.visibility = View.GONE
                             Toast.makeText(
                                 requireContext(),
                                 getString(R.string.timeout_explanation),
