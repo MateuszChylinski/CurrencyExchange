@@ -46,6 +46,7 @@ android {
 }
 
 dependencies {
+    testImplementation 'junit:junit:4.12'
     apply plugin: 'kotlin-kapt'
 
     implementation 'androidx.appcompat:appcompat:1.6.1'
@@ -111,6 +112,8 @@ dependencies {
     testImplementation "org.jetbrains.kotlinx:kotlinx-coroutines-test:1.7.1"
     testImplementation "com.google.truth:truth:1.1.4"
     testImplementation "org.mockito:mockito-core:5.7.0"
+    testImplementation("com.squareup.okhttp3:mockwebserver:4.11.0")
+
     debugImplementation "androidx.test:monitor:1.6.1"
 
     // Instrumented Unit Tests
