@@ -2,38 +2,46 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="vertical"
-    android:layout_marginTop="25dp">
+    android:layout_marginTop="25dp"
+    android:orientation="vertical">
 
     <TextView
         android:id="@+id/fluctuation_rv_foreign_currency"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-       android:text="@string/currency_name"
-        android:textSize="18sp"/>
+        android:text="@string/currency_name"
+        android:textColor="#302E2A"
+        android:textSize="18sp" />
+
     <TextView
         android:id="@+id/fluctuation_rv_start_rate"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/start_rate"
-        android:textSize="18sp"/>
+        android:textColor="#302E2A"
+        android:textSize="18sp" />
+
     <TextView
         android:id="@+id/fluctuation_rv_end_rate"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/end_rate"
-        android:textSize="18sp"/>
+        android:textColor="#302E2A"
+        android:textSize="18sp" />
+
     <TextView
         android:id="@+id/fluctuation_rv_change"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textSize="18sp"
-        android:text="@string/change_rate"/>
+        android:text="@string/change_rate"
+        android:textColor="#302E2A"
+        android:textSize="18sp" />
+
     <TextView
         android:id="@+id/fluctuation_rv_change_pct"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textSize="18sp"
-        android:text="@string/change_pct_rate"/>
-
+        android:text="@string/change_pct_rate"
+        android:textColor="#302E2A"
+        android:textSize="18sp" />
 </LinearLayout>

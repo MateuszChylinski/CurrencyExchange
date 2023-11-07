@@ -56,4 +56,7 @@
     <string name="no_network_explanation_historical_fluctuation">This mode can\'t be used without internet connection.</string>
     <string name="time_series">Time\nSeries</string>
     <string name="timeout_explanation">App couldn\'t connect with the server this time. Please, restart the app</string>
+    <string name="conversion_enter_amount">Enter amount to convert</string>
+    <string name="conversion_from">From: UNK</string>
+    <string name="conversion_to">To: UNK</string>
 </resources>

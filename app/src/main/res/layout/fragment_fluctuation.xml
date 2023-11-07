@@ -4,13 +4,14 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".Fragments.Fluctuation">
+    tools:context=".Fragments.Fluctuation"
+    android:background="#F9F5E7">
 
     <com.google.android.material.appbar.AppBarLayout
         android:id="@+id/fluctuation_appbar"
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
-        android:background="#ff44">
+        android:background="#EDDBC7">
 
         <com.google.android.material.appbar.MaterialToolbar
             android:id="@+id/fluctuation_toolbar"
@@ -23,7 +24,8 @@
                 android:layout_height="wrap_content"
                 android:text="@string/fluctuation_fragment_name"
                 android:textAlignment="center"
-                android:textSize="22sp" />
+                android:textSize="20sp"
+                android:textColor="#605C54"/>
 
             <TextView
                 android:layout_width="wrap_content"
@@ -31,7 +33,8 @@
                 android:layout_marginStart="25dp"
                 android:text="@string/toolbar_info"
                 android:textAlignment="center"
-                android:textSize="15sp" />
+                android:textSize="15sp"
+                android:textColor="#605C54"/>
 
             <ImageView
                 android:id="@+id/fluctuation_change_base_currency"
@@ -60,11 +63,14 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 app:indicatorSize="50dp"
-                app:indicatorColor="@color/design_default_color_primary"
-                app:trackColor="#f2f2"
+                app:indicatorColor="#EDDBC7"
+                app:trackColor="#F8EAD8"
                 app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
                 android:visibility="gone"/>
+
 
             <TextView
                 android:id="@+id/fluctuation_no_internet"
@@ -76,7 +82,9 @@
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
-                android:visibility="gone"/>
+                android:visibility="gone"
+                android:textColor="#302E2A"
+                />
 
 
             <!--First section of the layout-->
@@ -88,6 +96,7 @@
                 android:text="@string/from"
                 android:textAlignment="center"
                 android:textSize="25sp"
+                android:textColor="#302E2A"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
@@ -111,7 +120,9 @@
                 android:layout_marginEnd="50dp"
                 android:text="@string/ok"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/fluctuation_from_dt" />
+                app:layout_constraintTop_toBottomOf="@+id/fluctuation_from_dt"
+                android:background="@drawable/rounded_view"
+                android:textColor="#302E2A"/>
 
             <!--Second section of the layout-->
             <TextView
@@ -125,7 +136,8 @@
                 android:visibility="gone"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
+                app:layout_constraintTop_toTopOf="parent"
+                android:textColor="#302E2A"/>
 
             <DatePicker
                 android:id="@+id/fluctuation_to_dt"
@@ -148,7 +160,9 @@
                 android:text="@string/ok"
                 android:visibility="gone"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/fluctuation_to_dt" />
+                app:layout_constraintTop_toBottomOf="@+id/fluctuation_to_dt"
+                android:background="@drawable/rounded_view"
+                android:textColor="#302E2A"/>
 
             <!--Third section of the layout-->
 
@@ -163,7 +177,8 @@
                 android:textSize="20sp"
                 android:visibility="gone"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
+                app:layout_constraintTop_toTopOf="parent"
+                android:textColor="#302E2A"/>
 
             <Spinner
                 android:id="@+id/fluctuation_select_base_currency"
@@ -187,7 +202,8 @@
                 android:textSize="20sp"
                 android:visibility="gone"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/fluctuation_base_currency_tv" />
+                app:layout_constraintTop_toBottomOf="@id/fluctuation_base_currency_tv"
+                android:textColor="#302E2A"/>
 
             <TextView
                 android:id="@+id/fluctuation_to_date"
@@ -200,7 +216,8 @@
                 android:textSize="20sp"
                 android:visibility="gone"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/fluctuation_from_date" />
+                app:layout_constraintTop_toBottomOf="@id/fluctuation_from_date"
+                android:textColor="#302E2A"/>
 
             <TextView
                 android:id="@+id/fluctuation_select_symbols_tv"
@@ -212,7 +229,8 @@
                 android:textSize="20sp"
                 android:visibility="gone"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/fluctuation_to_date" />
+                app:layout_constraintTop_toBottomOf="@+id/fluctuation_to_date"
+                android:textColor="#302E2A"/>
 
 
             <ListView
@@ -223,7 +241,8 @@
                 android:layout_marginBottom="5dp"
                 android:visibility="gone"
                 app:layout_constraintBottom_toTopOf="@id/fluctuation_save_symbols"
-                app:layout_constraintTop_toBottomOf="@id/fluctuation_select_symbols_tv" />
+                app:layout_constraintTop_toBottomOf="@id/fluctuation_select_symbols_tv"
+                android:background="#F9F5E7"/>
 
             <Button
                 android:id="@+id/fluctuation_save_symbols"
@@ -232,7 +251,9 @@
                 android:layout_marginBottom="58dp"
                 android:text="@string/save"
                 android:visibility="gone"
-                app:layout_constraintBottom_toBottomOf="parent" />
+                app:layout_constraintBottom_toBottomOf="parent"
+                android:background="@drawable/rounded_view"
+                android:textColor="#302E2A"/>
 
             <!--Fourth section of the layout-->
             <TextView
@@ -246,7 +267,8 @@
                 android:visibility="gone"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
+                app:layout_constraintTop_toTopOf="parent"
+                android:textColor="#302E2A"/>
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/fluctuation_rv"

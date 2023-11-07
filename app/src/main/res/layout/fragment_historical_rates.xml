@@ -4,15 +4,17 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".Fragments.HistoricalRates">
+    tools:context=".Fragments.HistoricalRates"
+    android:background="#F9F5E7"
+    >
 
     <com.google.android.material.appbar.AppBarLayout
         android:id="@+id/historical_appbar"
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
-        android:background="#ff44">
+        android:background="#EDDBC7">
 
-        <com.google.android.material.appbar.MaterialToolbar
+    <com.google.android.material.appbar.MaterialToolbar
             android:id="@+id/historical_toolbar"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
@@ -23,7 +25,8 @@
                 android:layout_height="wrap_content"
                 android:text="@string/historical_fragment_name"
                 android:textSize="22sp"
-                android:textAlignment="center"/>
+                android:textAlignment="center"
+                android:textColor="#605C54"/>
 
             <TextView
                 android:layout_width="wrap_content"
@@ -31,7 +34,8 @@
                 android:text="@string/toolbar_info"
                 android:textSize="15sp"
                 android:layout_marginStart="28dp"
-                android:textAlignment="center"/>
+                android:textAlignment="center"
+                android:textColor="#605C54"/>
 
             <ImageView
                 android:id="@+id/historical_change_base_icon"
@@ -58,14 +62,16 @@
 
             <com.google.android.material.progressindicator.CircularProgressIndicator
                 android:id="@+id/historical_progress_bar"
-                android:indeterminate="true"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:indeterminate="true"
+                app:indicatorColor="#EDDBC7"
                 app:indicatorSize="50dp"
-                app:indicatorColor="@color/design_default_color_primary"
-                app:trackColor="#f2f2"
                 app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
+                app:trackColor="#F8EAD8"
                 android:visibility="gone"/>
 
             <TextView
@@ -78,7 +84,8 @@
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
-                android:visibility="gone" />
+                android:visibility="gone"
+                android:textColor="#605C54"/>
 
             <!--    First layout pick date-->
             <TextView
@@ -91,7 +98,9 @@
                 android:textSize="25sp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
+                app:layout_constraintTop_toTopOf="parent"
+                android:textColor="#302E2A"
+                />
 
             <DatePicker
                 android:id="@+id/historical_dt"
@@ -112,7 +121,9 @@
                 android:layout_marginEnd="35dp"
                 android:text="@string/save_date"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/historical_dt" />
+                app:layout_constraintTop_toBottomOf="@+id/historical_dt"
+                android:background="@drawable/rounded_view"
+                android:textColor="#302E2A"/>
 
 
 <!--            Second layout (select symbols)-->
@@ -126,6 +137,7 @@
                     android:textAlignment="center"
                     android:textSize="20sp"
                     android:visibility="gone"
+                    android:textColor="#302E2A"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent"/>
 
@@ -140,26 +152,27 @@
                     android:visibility="gone"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toEndOf="@+id/historical_base_tv"
-                    app:layout_constraintTop_toTopOf="parent" />
+                    app:layout_constraintTop_toTopOf="parent"
+                    android:textColor="#302E2A"/>
 
                 <TextView
                     android:id="@+id/historical_change_info"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="15dp"
-                    android:layout_marginTop="10dp"
+                    android:layout_margin="15dp"
                     android:text="@string/change_base_currency"
                     android:textAlignment="center"
-                    android:textSize="20sp"
+                    android:textSize="18sp"
                     android:visibility="gone"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/historical_base_tv" />
+                    app:layout_constraintTop_toBottomOf="@+id/historical_base_tv"
+                    android:textColor="#302E2A"/>
 
                 <Spinner
                     android:id="@+id/historical_change_base"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="13dp"
+                    android:layout_marginTop="17dp"
                     android:layout_marginEnd="22dp"
                     android:visibility="gone"
                     app:layout_constraintEnd_toEndOf="parent"
@@ -169,21 +182,22 @@
                     android:id="@+id/historical_select_info"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="50dp"
+                    android:layout_marginTop="45dp"
                     android:text="@string/select_currencies"
                     android:textAlignment="center"
                     android:textSize="25sp"
                     android:visibility="gone"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@id/historical_change_info" />
+                    app:layout_constraintTop_toBottomOf="@id/historical_change_info"
+                    android:textColor="#302E2A"/>
 
 
                 <ListView
                     android:id="@+id/historical_symbols_lv"
                     android:layout_width="match_parent"
                     android:layout_height="0dp"
-                    android:layout_marginTop="15dp"
+                    android:layout_marginTop="25dp"
                     android:layout_marginBottom="15dp"
                     android:visibility="gone"
                     app:layout_constraintBottom_toTopOf="@+id/historical_save_symbols"
@@ -200,7 +214,9 @@
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
-                    android:layout_marginBottom="56dp"/>
+                    android:layout_marginBottom="56dp"
+                    android:background="@drawable/rounded_view"
+                    android:textColor="#302E2A"/>
 
                 <!--  Third layout  RecyclerView-->
                 <androidx.recyclerview.widget.RecyclerView
