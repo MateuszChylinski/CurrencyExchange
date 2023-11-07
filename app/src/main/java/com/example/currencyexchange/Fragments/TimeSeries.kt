@@ -101,8 +101,10 @@ class TimeSeries : Fragment(), OnChartValueSelectedListener {
 
                     when (currencies) {
                         is DataWrapper.Success -> {
-                            currencies.data?.currencyData?.forEach {
-                                mCurrenciesList.add(it.key)
+                            currencies.data?.let {
+                                it[0].currencyData.keys.forEach { currency ->
+                                    mCurrenciesList.add(currency)
+                                }
                             }
                             // Reason for doing that, is because in spinner, there'll be always something picked, so this is kind a work around way, to let user know, that he wasn't picked currently displayed currency in spinner
                             if (!mCurrenciesList.contains("Select currency")) {

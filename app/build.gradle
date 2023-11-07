@@ -49,22 +49,18 @@ dependencies {
     apply plugin: 'kotlin-kapt'
 
     implementation 'androidx.appcompat:appcompat:1.6.1'
-    implementation 'com.google.android.material:material:1.9.0'
+    implementation 'com.google.android.material:material:1.10.0'
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
     implementation 'androidx.fragment:fragment-ktx:1.6.1'
-    implementation 'androidx.activity:activity-ktx:1.7.2'
-    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4'
-    implementation "androidx.lifecycle:lifecycle-livedata-ktx:2.6.1"
-    testImplementation 'junit:junit:4.13.2'
-    androidTestImplementation 'androidx.test.ext:junit:1.1.5'
-    androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
+    implementation 'androidx.activity:activity-ktx:1.8.0'
+    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.1'
+    implementation "androidx.lifecycle:lifecycle-livedata-ktx:2.6.2"
 
 
     //Room
-    def room_version = "2.5.2"
-    kapt ("androidx.room:room-compiler:$room_version")
-    kapt("androidx.room:room-compiler:$room_version")
+    def room_version = "2.6.0"
+    kapt "androidx.room:room-compiler:$room_version"
     implementation "androidx.room:room-ktx:$room_version"
 
     //Hilt
@@ -81,16 +77,16 @@ dependencies {
     implementation ("com.google.code.gson:gson:$gson_version")
 
     //OkHttp
-    def okHttp_version = "4.10.0"
+    def okHttp_version = "4.11.0"
     implementation("com.squareup.okhttp3:okhttp:$okHttp_version")
 
     //Navigation Component
-    def nav_version = "2.7.1"
+    def nav_version = "2.7.4"
     implementation("androidx.navigation:navigation-fragment-ktx:$nav_version")
     implementation("androidx.navigation:navigation-ui-ktx:$nav_version")
 
     //RecyclerView
-    def recyclerView_version = "1.3.1"
+    def recyclerView_version = "1.3.2"
     implementation ("androidx.recyclerview:recyclerview:$recyclerView_version")
 
     //SwiperRefreshLayout
@@ -99,10 +95,34 @@ dependencies {
 
     //MVVM
     implementation ("androidx.lifecycle:lifecycle-extensions:2.2.0")
-    implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:2.6.1"
+    implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:2.6.2"
 
     //MPPAndroidChart
     implementation 'com.github.PhilJay:MPAndroidChart:v3.1.0'
+
+    //Testing
+
+    //Local Unit Tests
+    implementation "androidx.test:core:1.5.0"
+    testImplementation "junit:junit:4.13.2"
+    testImplementation "org.hamcrest:hamcrest-all:1.3"
+    testImplementation "androidx.arch.core:core-testing:2.2.0"
+    testImplementation "org.robolectric:robolectric:4.3.1"
+    testImplementation "org.jetbrains.kotlinx:kotlinx-coroutines-test:1.7.1"
+    testImplementation "com.google.truth:truth:1.1.4"
+    testImplementation "org.mockito:mockito-core:5.7.0"
+    debugImplementation "androidx.test:monitor:1.6.1"
+
+    // Instrumented Unit Tests
+    androidTestImplementation "androidx.test:core:1.5.0"
+    androidTestImplementation "junit:junit:4.13.2"
+    androidTestImplementation "com.linkedin.dexmaker:dexmaker-mockito:2.28.3"
+    androidTestImplementation "org.jetbrains.kotlinx:kotlinx-coroutines-test:1.7.1"
+    androidTestImplementation "androidx.arch.core:core-testing:2.2.0"
+    androidTestImplementation "com.google.truth:truth:1.1.4"
+    androidTestImplementation 'androidx.test.ext:junit:1.1.5'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
+    androidTestImplementation "org.mockito:mockito-core:5.7.0"
 }
 
 kapt {

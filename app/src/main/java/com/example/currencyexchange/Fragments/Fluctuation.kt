@@ -112,8 +112,10 @@ class Fluctuation : Fragment() {
             mViewModel.allCurrencies.collect { currencies ->
                 when (currencies) {
                     is DataWrapper.Success -> {
-                        currencies.data?.currencyData?.forEach {
-                            mCurrencies.add(it.key)
+                        currencies.data?.let {
+                            it[0].currencyData.keys.forEach { currency ->
+                                mCurrencies.add(currency)
+                            }
                         }
                         if (!mCurrencies.contains("Select currency")) {
                             mCurrencies.add(0, "Select currency")

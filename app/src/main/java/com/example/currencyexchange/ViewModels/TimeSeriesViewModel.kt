@@ -1,7 +1,5 @@
 package com.example.currencyexchange.ViewModels
 
-import android.content.ContentValues.TAG
-import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -11,10 +9,8 @@ import com.example.currencyexchange.DataWrapper.DataWrapper
 import com.example.currencyexchange.Models.CurrenciesDatabaseDetailed
 import com.example.currencyexchange.Models.CurrenciesDatabaseMain
 import com.example.currencyexchange.Models.TimeSeriesModel
-import com.example.currencyexchange.NetworkDetection.NetworkObserver
-import com.example.currencyexchange.NetworkDetection.NetworkObserverImplementation
-import com.example.currencyexchange.Repository.Implementation.DatabaseRepositoryImplementation
-import com.example.currencyexchange.Repository.Implementation.RetrofitRepositoryImplementation
+import com.example.currencyexchange.Repository.CurrencyRepository
+import com.example.currencyexchange.Repository.NetworkStatus
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -22,37 +18,34 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.launch
-import java.lang.Exception
 import javax.inject.Inject
 
 @HiltViewModel
 class TimeSeriesViewModel @Inject constructor(
-    private val databaseRepository: DatabaseRepositoryImplementation,
-    private val retrofitRepository: RetrofitRepositoryImplementation,
-    private val networkObserver: NetworkObserverImplementation,
+    private val currencyRepository: CurrencyRepository
 ) : ViewModel() {
 
-    private val _TimeSeriesData = MutableLiveData<DataWrapper<TimeSeriesModel?>?>()
-    val timeSeriesData: LiveData<DataWrapper<TimeSeriesModel?>?> get() = _TimeSeriesData
+    private val _TimeSeriesData = MutableLiveData<DataWrapper<TimeSeriesModel>?>()
+    val timeSeriesData: LiveData<DataWrapper<TimeSeriesModel>?> get() = _TimeSeriesData
 
     fun clearResponse() {
         _TimeSeriesData.value = null
     }
 
     val baseCurrency: SharedFlow<DataWrapper<CurrenciesDatabaseMain>> =
-        databaseRepository.baseCurrency
+        currencyRepository.baseCurrency
             .map { DataWrapper.Success(it) }
             .catch { DataWrapper.Error(it.message) }
             .shareIn(viewModelScope, SharingStarted.WhileSubscribed(), replay = 1)
 
-    val allCurrencies: SharedFlow<DataWrapper<CurrenciesDatabaseDetailed>> =
-        databaseRepository.currencyData
+    val allCurrencies: SharedFlow<DataWrapper<List<CurrenciesDatabaseDetailed>>> =
+        currencyRepository.currencyListData
             .map { DataWrapper.Success(it) }
             .catch { DataWrapper.Error(it.message) }
             .shareIn(viewModelScope, SharingStarted.WhileSubscribed(), replay = 1)
 
-    val networkStatus: SharedFlow<DataWrapper<NetworkObserver.NetworkStatus>> =
-        networkObserver.observeStatus()
+    val networkStatus: SharedFlow<DataWrapper<NetworkStatus>> =
+        currencyRepository.observeNetworkStatus()
             .map { DataWrapper.Success(it) }
             .catch { DataWrapper.Error(it.message) }
             .shareIn(viewModelScope, SharingStarted.WhileSubscribed(), replay = 1)
@@ -63,36 +56,20 @@ class TimeSeriesViewModel @Inject constructor(
         startDate: String,
         endDate: String
     ) {
+        if (basCurrency.isEmpty() || selectedCurrencies.isEmpty() || startDate.isEmpty() || endDate.isEmpty()) return
+
         viewModelScope.launch {
-            try {
-                val response = retrofitRepository.getTimeSeriesData(
-                    baseCurrency = basCurrency,
-                    currencies = selectedCurrencies,
-                    startDate = startDate,
-                    endDate = endDate,
-                    apiKey = BuildConfig.API_KEY
-                )
-                // to avoid forcing the response with '!!', use 'let' instead
-                response.let {
-                    if (it.isSuccessful) {
-                        _TimeSeriesData.postValue(DataWrapper.Success(it.body()))
-                    } else {
-                        Log.e(
-                            TAG,
-                            "fetchTimeSeriesData: Couldn't get response from api ${response.code()}",
-                        )
-                    }
-                }
-            } catch (exception: Exception) {
-                _TimeSeriesData.postValue(
-                    DataWrapper.Error(
-                        data = null,
-                        error = exception.message
-                    )
-                )
+            val response = currencyRepository.getTimeSeriesData(
+                baseCurrency = basCurrency,
+                currencies = selectedCurrencies,
+                startDate = startDate,
+                endDate = endDate,
+                apiKey = BuildConfig.API_KEY
+            )
+            // to avoid forcing the response with '!!', use 'let' instead
+            response.let {
+                _TimeSeriesData.postValue(it)
             }
         }
     }
 }
-
-
