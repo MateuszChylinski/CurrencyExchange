@@ -4,17 +4,19 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="#F9F5E7"
     tools:context=".Fragments.TimeSeries">
+
 
     <!--Custom toolbar-->
     <com.google.android.material.appbar.AppBarLayout
         android:id="@+id/time_series_appbar"
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
+        android:background="#EDDBC7"
         app:layout_constraintEnd_toEndOf="parent"
-        android:background="#ff44">
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
 
         <com.google.android.material.appbar.MaterialToolbar
             android:id="@+id/time_series_toolbar"
@@ -27,6 +29,7 @@
                 android:layout_height="wrap_content"
                 android:text="@string/time_series"
                 android:textAlignment="center"
+                android:textColor="#605C54"
                 android:textSize="22sp" />
 
             <TextView
@@ -35,6 +38,7 @@
                 android:layout_marginStart="30dp"
                 android:text="@string/toolbar_info"
                 android:textAlignment="center"
+                android:textColor="#605C54"
                 android:textSize="15sp" />
 
             <ImageView
@@ -52,193 +56,205 @@
         android:id="@+id/time_series_refresh_container"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:layout_constraintTop_toBottomOf="@id/time_series_appbar"
-        app:layout_constraintStart_toStartOf="parent"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
 
-        app:layout_behavior="@string/appbar_scrolling_view_behavior">
+        app:layout_constraintTop_toBottomOf="@id/time_series_appbar">
 
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent">
-
-        <com.google.android.material.progressindicator.CircularProgressIndicator
-            android:id="@+id/time_series_progress_bar"
-            android:indeterminate="true"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            app:indicatorSize="50dp"
-            app:indicatorColor="@color/design_default_color_primary"
-            app:trackColor="#f2f2"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            android:visibility="gone"
-            />
-
-        <TextView
-            android:id="@+id/time_series_no_internet"
+        <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/no_network_explanation_historical_fluctuation"
-            android:textAlignment="center"
-            android:textSize="30sp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            />
+            android:layout_height="match_parent">
 
-        <!--First part (picking start/end date)-->
-        <TextView
-            android:id="@+id/time_series_info"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/timeseries_info"
-            android:textAlignment="center"
-            android:textSize="20sp"
-            android:layout_marginTop="20dp"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            android:visibility="gone"/>
+            <com.google.android.material.progressindicator.CircularProgressIndicator
+                android:id="@+id/time_series_progress_bar"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:indeterminate="true"
+                android:visibility="gone"
+                app:indicatorColor="#EDDBC7"
+                app:indicatorSize="50dp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:trackColor="#F8EAD8" />
 
-                    <DatePicker
-                        android:id="@+id/time_series_start_dp"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="10dp"
-                        android:calendarViewShown="false"
-                        android:datePickerMode="spinner"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toBottomOf="@id/time_series_info"
-                        android:visibility="gone"/>
+            <TextView
+                android:id="@+id/time_series_no_internet"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/no_network_explanation_historical_fluctuation"
+                android:textAlignment="center"
+                android:textColor="#302E2A"
+                android:textSize="30sp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
 
-                    <Button
-                        android:id="@+id/time_series_start_btn"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="10dp"
-                        android:text="@string/proceed"
-                        android:textAlignment="center"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toBottomOf="@id/time_series_start_dp"
-                        android:visibility="gone"/>
+                />
 
-                    <DatePicker
-                        android:id="@+id/time_series_end_dp"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="10dp"
-                        android:calendarViewShown="false"
-                        android:datePickerMode="spinner"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toBottomOf="@id/time_series_info"
-                        android:visibility="gone"/>
+            <!--First part (picking start/end date)-->
+            <TextView
+                android:id="@+id/time_series_info"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:text="@string/timeseries_info"
+                android:textAlignment="center"
+                android:textColor="#302E2A"
+                android:textSize="20sp"
+                android:visibility="gone"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
 
-                    <Button
-                        android:id="@+id/time_series_end_btn"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="10dp"
-                        android:text="@string/proceed"
-                        android:textAlignment="center"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toBottomOf="@id/time_series_end_dp"
-                        android:visibility="gone"/>
+            <DatePicker
+                android:id="@+id/time_series_start_dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:calendarViewShown="false"
+                android:datePickerMode="spinner"
+                android:visibility="gone"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/time_series_info" />
 
-                    <!--Second part (picking currencies/changing the base currency)-->
-                    <TextView
-                        android:id="@+id/time_series_base_currency_tv"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="15dp"
-                        android:layout_marginTop="15dp"
-                        android:text="@string/currency_name"
-                        android:textAlignment="center"
-                        android:textSize="20sp"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toTopOf="parent"
-                        android:visibility="gone"/>
+            <Button
+                android:id="@+id/time_series_start_btn"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:background="@drawable/rounded_view"
+                android:text="@string/proceed"
+                android:textAlignment="center"
+                android:textColor="#302E2A"
+                android:visibility="gone"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/time_series_start_dp" />
 
-                    <Spinner
-                        android:id="@+id/time_series_select_base_currency"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="38dp"
-                        android:layout_marginTop="17dp"
-                        app:layout_constraintStart_toEndOf="@id/time_series_base_currency_tv"
-                        app:layout_constraintTop_toTopOf="parent"
-                        android:visibility="gone"/>
+            <DatePicker
+                android:id="@+id/time_series_end_dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:calendarViewShown="false"
+                android:datePickerMode="spinner"
+                android:visibility="gone"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/time_series_info" />
 
+            <Button
+                android:id="@+id/time_series_end_btn"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:background="@drawable/rounded_view"
+                android:text="@string/proceed"
+                android:textAlignment="center"
+                android:textColor="#302E2A"
+                android:visibility="gone"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/time_series_end_dp" />
 
-                    <TextView
-                        android:id="@+id/time_series_start_date"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="15dp"
-                        android:layout_marginTop="15dp"
-                        android:text="@string/from"
-                        android:textAlignment="center"
-                        android:textSize="20sp"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toBottomOf="@id/time_series_base_currency_tv"
-                        android:visibility="gone"/>
+            <!--Second part (picking currencies/changing the base currency)-->
+            <TextView
+                android:id="@+id/time_series_base_currency_tv"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="15dp"
+                android:layout_marginTop="15dp"
+                android:text="@string/currency_name"
+                android:textAlignment="center"
+                android:textColor="#302E2A"
+                android:textSize="20sp"
+                android:visibility="gone"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
 
-                    <TextView
-                        android:id="@+id/time_series_end_date"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="15dp"
-                        android:layout_marginTop="15dp"
-                        android:text="@string/to"
-                        android:textAlignment="center"
-                        android:textSize="20sp"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toBottomOf="@id/time_series_start_date"
-                        android:visibility="gone"/>
-
-                    <TextView
-                        android:id="@+id/time_series_select_symbols_tv"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="30dp"
-                        android:text="@string/select_currencies_to_display_fluctuation"
-                        android:textAlignment="center"
-                        android:textSize="20sp"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toBottomOf="@+id/time_series_end_date"
-                        android:visibility="gone"/>
+            <Spinner
+                android:id="@+id/time_series_select_base_currency"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="38dp"
+                android:layout_marginTop="17dp"
+                android:visibility="gone"
+                app:layout_constraintStart_toEndOf="@id/time_series_base_currency_tv"
+                app:layout_constraintTop_toTopOf="parent" />
 
 
-                    <ListView
-                        android:id="@+id/time_series_select_symbols_lv"
-                        android:layout_width="match_parent"
-                        android:layout_height="0dp"
-                        android:layout_marginTop="15dp"
-                        android:layout_marginBottom="5dp"
-                        app:layout_constraintBottom_toTopOf="@id/time_series_save_symbols"
-                        app:layout_constraintTop_toBottomOf="@id/time_series_select_symbols_tv"
-                        android:visibility="gone"/>
+            <TextView
+                android:id="@+id/time_series_start_date"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="15dp"
+                android:layout_marginTop="15dp"
+                android:text="@string/from"
+                android:textAlignment="center"
+                android:textColor="#302E2A"
+                android:textSize="20sp"
+                android:visibility="gone"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/time_series_base_currency_tv" />
 
-                    <Button
-                        android:id="@+id/time_series_save_symbols"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginBottom="58dp"
-                        android:text="@string/save"
-                        app:layout_constraintBottom_toBottomOf="parent"
-                        android:visibility="gone"/>
+            <TextView
+                android:id="@+id/time_series_end_date"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="15dp"
+                android:layout_marginTop="15dp"
+                android:text="@string/to"
+                android:textAlignment="center"
+                android:textColor="#302E2A"
+                android:textSize="20sp"
+                android:visibility="gone"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/time_series_start_date" />
+
+            <TextView
+                android:id="@+id/time_series_select_symbols_tv"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="30dp"
+                android:text="@string/select_currencies_to_display_fluctuation"
+                android:textAlignment="center"
+                android:textColor="#302E2A"
+                android:textSize="20sp"
+                android:visibility="gone"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/time_series_end_date" />
 
 
-                    <com.github.mikephil.charting.charts.BarChart
-                        android:id="@+id/time_series_chart"
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:visibility="gone"
-                        android:layout_marginBottom="58dp"
-                        app:layout_constraintTop_toBottomOf="@id/time_series_start_date"
-                        />
-    </androidx.constraintlayout.widget.ConstraintLayout>
-        </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+            <ListView
+                android:id="@+id/time_series_select_symbols_lv"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_marginTop="15dp"
+                android:layout_marginBottom="5dp"
+                android:visibility="gone"
+                app:layout_constraintBottom_toTopOf="@id/time_series_save_symbols"
+                app:layout_constraintTop_toBottomOf="@id/time_series_select_symbols_tv" />
+
+            <Button
+                android:id="@+id/time_series_save_symbols"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="58dp"
+                android:text="@string/save"
+                android:background="@drawable/rounded_view"
+                android:textColor="#302E2A"
+                android:visibility="gone"
+                app:layout_constraintBottom_toBottomOf="parent" />
+
+            <com.github.mikephil.charting.charts.BarChart
+                android:id="@+id/time_series_chart"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginBottom="58dp"
+                android:visibility="gone"
+                app:layout_constraintTop_toBottomOf="@id/time_series_start_date" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

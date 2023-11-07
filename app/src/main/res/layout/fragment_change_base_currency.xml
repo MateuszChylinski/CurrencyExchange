@@ -4,19 +4,21 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".Fragments.ChangeBaseCurrency">
+    tools:context=".Fragments.ChangeBaseCurrency"
+    android:background="#F9F5E7">
 
     <TextView
         android:id="@+id/change_base_current_base"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="24dp"
+        android:padding="24dp"
         android:textAlignment="center"
         android:textSize="25sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.18"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        android:background="#EDDBC7"/>
 
     <TextView
         android:id="@+id/change_base_select_new"
@@ -25,9 +27,10 @@
         android:gravity="center"
         android:text="@string/select_new_base_currency"
         android:textSize="20sp"
-        android:layout_marginTop="20dp"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/change_base_current_base" />
+        app:layout_constraintTop_toBottomOf="@+id/change_base_current_base"
+        android:padding="20dp"
+        android:background="#F8EAD8"/>
 
     <ListView
         android:id="@+id/change_base_select_currency"

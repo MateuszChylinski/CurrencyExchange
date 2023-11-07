@@ -12,7 +12,8 @@
         android:padding="20dp"
         android:text="@string/currency_item_name"
         android:textSize="17sp"
-        android:background="@drawable/round_currency"/>
+        android:background="@drawable/round_currency"
+        android:textColor="#302E2A"/>
 
     <TextView
         android:id="@+id/latest_currency_value"
@@ -22,5 +23,7 @@
         android:padding="20dp"
         android:text="@string/currency_item_value"
         android:textSize="17sp"
-        android:background="@drawable/round_amount"/>
+        android:background="@drawable/round_amount"
+        android:textColor="#605C54"
+        android:layout_marginStart="5dp"/>
 </LinearLayout>
