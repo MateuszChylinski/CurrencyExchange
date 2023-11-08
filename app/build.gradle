@@ -47,6 +47,11 @@ android {
 
 dependencies {
     testImplementation 'junit:junit:4.12'
+    testImplementation 'junit:junit:4.12'
+    testImplementation 'junit:junit:4.12'
+    testImplementation 'junit:junit:4.12'
+    testImplementation 'junit:junit:4.12'
+    testImplementation 'junit:junit:4.12'
     apply plugin: 'kotlin-kapt'
 
     implementation 'androidx.appcompat:appcompat:1.6.1'

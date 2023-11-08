@@ -6,15 +6,15 @@ import kotlin.collections.HashMap
 
 data class HistoricalRatesModel(
     @SerializedName("success")
-    val success: String,
+    val success: Boolean,
     @SerializedName("timestamp")
-    val timestamp: String,
+    val timestamp: Int,
     @SerializedName("historical")
-    val historical: String,
+    val historical: Boolean,
     @SerializedName("base")
     val base: String,
     @SerializedName("date")
     val date: String,
     @SerializedName("rates")
-    val rates: HashMap<String, Double>
+    val rates: Map<String, Double>
 )

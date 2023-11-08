@@ -60,7 +60,7 @@ class Conversion : Fragment() {
 
     private val mObserveResponse: Job
         get() = viewLifecycleOwner.lifecycleScope.launch(start = CoroutineStart.LAZY) {
-            mViewModel.conversionCall.observe(viewLifecycleOwner, Observer
+            mViewModel.exchangeResult.observe(viewLifecycleOwner, Observer
             { conversion ->
                 when (conversion) {
                     is DataWrapper.Success -> {

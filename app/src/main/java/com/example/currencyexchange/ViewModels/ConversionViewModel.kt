@@ -26,7 +26,7 @@ class ConversionViewModel @Inject constructor(
 ) : ViewModel() {
 
     private val _exchangeState = MutableLiveData<DataWrapper<ConversionModel>?>()
-    val conversionCall: MutableLiveData<DataWrapper<ConversionModel>?> get() = _exchangeState
+    val exchangeResult: MutableLiveData<DataWrapper<ConversionModel>?> get() = _exchangeState
 
     private val _convertTo = MutableLiveData<String?>()
     val convertTo: LiveData<String?> get() = _convertTo

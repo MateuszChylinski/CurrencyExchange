@@ -51,16 +51,16 @@ class TimeSeriesViewModel @Inject constructor(
             .shareIn(viewModelScope, SharingStarted.WhileSubscribed(), replay = 1)
 
     fun fetchTimeSeriesData(
-        basCurrency: String,
+        baseCurrency: String,
         selectedCurrencies: String,
         startDate: String,
         endDate: String
     ) {
-        if (basCurrency.isEmpty() || selectedCurrencies.isEmpty() || startDate.isEmpty() || endDate.isEmpty()) return
+        if (baseCurrency.isEmpty() || selectedCurrencies.isEmpty() || startDate.isEmpty() || endDate.isEmpty()) return
 
         viewModelScope.launch {
             val response = currencyRepository.getTimeSeriesData(
-                baseCurrency = basCurrency,
+                baseCurrency = baseCurrency,
                 currencies = selectedCurrencies,
                 startDate = startDate,
                 endDate = endDate,
