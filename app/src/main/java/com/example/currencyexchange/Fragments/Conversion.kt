@@ -60,15 +60,16 @@ class Conversion : Fragment() {
 
     private val mObserveResponse: Job
         get() = viewLifecycleOwner.lifecycleScope.launch(start = CoroutineStart.LAZY) {
-            mViewModel.conversionCall.observe(viewLifecycleOwner, Observer
+            mViewModel.exchangeResult.observe(viewLifecycleOwner, Observer
             { conversion ->
                 when (conversion) {
                     is DataWrapper.Success -> {
                         conversion.data?.result.let {
+
                             mResult = it.toString().toDouble()
+                            mBinding.conversionConvertedData.text = String.format(getString(R.string.formatted_you_will_receive), mResult, mDesiredCurrency)
 
                             //After every api call, assign value of conversion in the ViewModel property, so it can survive orientation changes, and clear response data.
-                            mViewModel.assignConvertedAmount(mResult)
                             mViewModel.clearResponse()
 
                         }
@@ -117,7 +118,6 @@ class Conversion : Fragment() {
                                     mResult =
                                         it[index - 1].currencyData[mDesiredCurrency].toString()
                                             .toDouble()
-                                    mViewModel.assignConvertedAmount(mResult)
                                 }
 
 
@@ -162,9 +162,12 @@ class Conversion : Fragment() {
             mViewModel.allCurrencies.collect { currencies ->
                 when (currencies) {
                     is DataWrapper.Success -> {
-                        currencies.data?.currencyData?.keys?.forEach {
-                            mCurrencyList.add(it)
+                        currencies.data?.let {
+                            it[0].currencyData.keys.forEach { currency ->
+                                mCurrencyList.add(currency)
+                            }
                         }
+
                         if (!mCurrencyList.contains("Select currency")) {
                             mCurrencyList.add(0, "Select currency")
                         }
@@ -400,8 +403,6 @@ class Conversion : Fragment() {
         /* Prepare layout to state as it was when user first entered it. Clear currency lists,
            and start one more time appropriate coroutines */
         mBinding.conversionRefreshContainer.setOnRefreshListener {
-            mViewModel.clearDesiredAndAmount()
-
             mBinding.conversionEnterValue.text.clear()
             mBinding.conversionConvertedData.text = ""
             mBinding.conversionConvertedData.visibility = View.GONE
@@ -521,7 +522,6 @@ class Conversion : Fragment() {
                     if (isTouched) {
                         isTouched = false
                         mDesiredCurrency = currencyList[position]
-                        mViewModel.assignDesiredCurrency(mDesiredCurrency)
                         mBinding.conversionEnterValue.text.clear()
                         mBinding.conversionToTv.text =
                             String.format(

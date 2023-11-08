@@ -3,8 +3,10 @@ package com.example.currencyexchange.Models
 import com.google.gson.annotations.SerializedName
 
 data class FluctuationModel(
+    @SerializedName("message")
+    val message: String,
     @SerializedName("success")
-    val success: String,
+    val success: Boolean,
     @SerializedName("fluctuation")
     val fluctuation: String,
     @SerializedName("start_date")

@@ -72,8 +72,10 @@ class HistoricalRates : Fragment() {
             mViewModel.allCurrencies.collect { currencies ->
                 when (currencies) {
                     is DataWrapper.Success -> {
-                        currencies.data?.currencyData?.keys?.forEach {
-                            mCurrencyList.add(it)
+                        currencies.data?.let {
+                            it[0].currencyData.keys.forEach { currency ->
+                                mCurrencyList.add(currency)
+                            }
                         }
 
                         /** Add to the currency list a value called 'Currency' as a row, since spinners by default are picking values when initiated.

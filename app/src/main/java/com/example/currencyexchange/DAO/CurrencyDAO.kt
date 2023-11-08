@@ -16,8 +16,11 @@ interface CurrencyDAO {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertCurrencyData(detailed: CurrenciesDatabaseDetailed)
 
-    @Query("UPDATE currency_detailed SET for_base = :baseW, rates_date = :dateW, currency_data =:data WHERE id = :id")
-    suspend fun updatesCurrencyData(id: Int, baseW: String, dateW: String, data: Map<String, Double>)
+//    @Query("UPDATE currency_detailed SET for_base = :baseW, rates_date = :dateW, currency_data =:data WHERE id = :id")
+//    suspend fun updatesCurrencyData(id: Int, baseW: String, dateW: String, data: Map<String, Double>)
+
+    @Update(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun updateCurrenciesData(currencies: CurrenciesDatabaseDetailed)
 
     /** Get id, base currency, and date of rates from database  */
     @Query("SELECT * FROM currency_main")

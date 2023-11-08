@@ -62,19 +62,21 @@ class ChangeBaseCurrency : Fragment() {
         viewLifecycleOwner.lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
 
-                mViewModel.currencyNames.collect { currency ->
-                    when (currency) {
+                mViewModel.currencyNames.collect { currencies ->
+                    when (currencies) {
                         is DataWrapper.Success -> {
                             val currencyList: MutableList<String> = mutableListOf()
-                            currency.data?.currencyData?.keys?.map {
-                                currencyList.add(it)
+                            currencies.data?.let {
+                                it[0].currencyData.keys.forEach { currency ->
+                                    currencyList.add(currency)
+                                }
                             }
                             deleteBaseFromList(currencyList)
                         }
                         is DataWrapper.Error -> {
                             Log.e(
                                 TAG,
-                                "onCreateView: Failed to get currency data from the ViewModel in $tag\n${currency.message}",
+                                "onCreateView: Failed to get currency data from the ViewModel in $tag\n${currencies.message}",
                             )
                         }
                     }

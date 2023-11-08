@@ -8,47 +8,42 @@ import com.example.currencyexchange.DataWrapper.DataWrapper
 import com.example.currencyexchange.Models.CurrenciesDatabaseDetailed
 import com.example.currencyexchange.Models.CurrenciesDatabaseMain
 import com.example.currencyexchange.Models.LatestRates
-import com.example.currencyexchange.NetworkDetection.NetworkObserver
-import com.example.currencyexchange.NetworkDetection.NetworkObserverImplementation
-import com.example.currencyexchange.Repository.Implementation.DatabaseRepositoryImplementation
-import com.example.currencyexchange.Repository.Implementation.RetrofitRepositoryImplementation
+import com.example.currencyexchange.Repository.CurrencyRepository
+import com.example.currencyexchange.Repository.NetworkStatus
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
-import java.io.IOException
 import java.lang.Exception
 import javax.inject.Inject
 
 @HiltViewModel
 class LatestViewModel @Inject constructor(
-    private val databaseRepository: DatabaseRepositoryImplementation,
-    private val retrofitRepository: RetrofitRepositoryImplementation,
-    private val networkObserver: NetworkObserverImplementation
+    private val currencyRepository: CurrencyRepository
 ) : ViewModel() {
 
-    private val _latestRatesCall = MutableLiveData<DataWrapper<LatestRates?>>()
-    val latestRates: LiveData<DataWrapper<LatestRates?>> get() = _latestRatesCall
+    private val _latestRatesCall = MutableLiveData<DataWrapper<LatestRates>>()
+    val latestRates: LiveData<DataWrapper<LatestRates>> get() = _latestRatesCall
 
     val baseCurrency: SharedFlow<DataWrapper<CurrenciesDatabaseMain>> =
-        databaseRepository.baseCurrency
+        currencyRepository.baseCurrency
             .map { DataWrapper.Success(it) }
             .catch { DataWrapper.Error(it.message) }
             .shareIn(viewModelScope, SharingStarted.WhileSubscribed())
 
     val currencyDataList: SharedFlow<DataWrapper<List<CurrenciesDatabaseDetailed>>> =
-        databaseRepository.currencyListData
+        currencyRepository.currencyListData
             .map { DataWrapper.Success(it) }
             .catch { DataWrapper.Error(it.message) }
             .shareIn(viewModelScope, SharingStarted.WhileSubscribed())
 
     val isDbInit: SharedFlow<DataWrapper<Boolean>> =
-        databaseRepository.isInit
+        currencyRepository.isInit
             .map { DataWrapper.Success(it) }
             .catch { DataWrapper.Error(it) }
             .shareIn(viewModelScope, SharingStarted.WhileSubscribed())
 
-    val internetConnection: SharedFlow<DataWrapper<NetworkObserver.NetworkStatus>> =
-        networkObserver.observeStatus()
+    val internetConnection: SharedFlow<DataWrapper<NetworkStatus>> =
+        currencyRepository.observeNetworkStatus()
             .map { DataWrapper.Success(it) }
             .catch { DataWrapper.Error(it.message) }
             .shareIn(viewModelScope, SharingStarted.WhileSubscribed())
@@ -57,16 +52,18 @@ class LatestViewModel @Inject constructor(
      * In case the call will be successfully, assign the response data to LiveData
      * In case the call will fail, display exception
      * Finally, insert/update map with currencies, and their rates in database, and update date, to let user know, from when the rates are  */
-    fun fetchData(baseCurrency: String) =
+    fun fetchData(baseCurrency: String) {
+        if (baseCurrency.isEmpty()) return
+
         viewModelScope.launch {
             try {
-                val response = retrofitRepository.getLatestRates(
+                val response = currencyRepository.getLatestRates(
                     baseCurrency = baseCurrency,
                     apiKey = BuildConfig.API_KEY
                 )
                 // to avoid forcing the response with '!!', use 'let' instead
                 response.let {
-                    if (it.isSuccessful) _latestRatesCall.postValue(DataWrapper.Success(it.body()))
+                     _latestRatesCall.postValue(it)
                 }
             } catch (exception: Exception) {
                 _latestRatesCall.postValue(
@@ -77,10 +74,11 @@ class LatestViewModel @Inject constructor(
                 )
             }
         }
+    }
 
     fun insertCurrencies(currencyData: CurrenciesDatabaseDetailed) = viewModelScope.launch {
         try {
-            databaseRepository.insertCurrencies(currencyData)
+            currencyRepository.insertCurrencies(currencyData)
         } catch (exception: Exception) {
             Log.e(TAG, "insertCurrencies: couldn't insert currencies in view model. $exception")
         }
@@ -88,7 +86,7 @@ class LatestViewModel @Inject constructor(
 
     fun updateCurrencies(currencyData: CurrenciesDatabaseDetailed) = viewModelScope.launch {
         try {
-            databaseRepository.updateRates(currencyData)
+            currencyRepository.updateRates(currencyData)
         } catch (exception: Exception) {
             Log.e(TAG, "updateCurrencies: couldn't update rates in view model. $exception")
         }

@@ -8,10 +8,8 @@ import com.example.currencyexchange.DataWrapper.DataWrapper
 import com.example.currencyexchange.Models.CurrenciesDatabaseDetailed
 import com.example.currencyexchange.Models.CurrenciesDatabaseMain
 import com.example.currencyexchange.Models.HistoricalRatesModel
-import com.example.currencyexchange.NetworkDetection.NetworkObserver
-import com.example.currencyexchange.NetworkDetection.NetworkObserverImplementation
-import com.example.currencyexchange.Repository.Implementation.DatabaseRepositoryImplementation
-import com.example.currencyexchange.Repository.Implementation.RetrofitRepositoryImplementation
+import com.example.currencyexchange.Repository.CurrencyRepository
+import com.example.currencyexchange.Repository.NetworkStatus
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -24,58 +22,47 @@ import javax.inject.Inject
 
 @HiltViewModel
 class HistoricalViewModel @Inject constructor(
-    private val retrofitRepository: RetrofitRepositoryImplementation,
-    private val databaseRepository: DatabaseRepositoryImplementation,
-    private val networkStatus: NetworkObserverImplementation
+    private val currencyRepository: CurrencyRepository
 ) : ViewModel() {
 
-    private val _historical = MutableLiveData<DataWrapper<HistoricalRatesModel?>?>()
-    val historicalData: LiveData<DataWrapper<HistoricalRatesModel?>?> get() = _historical
+    private val _historical = MutableLiveData<DataWrapper<HistoricalRatesModel>?>()
+    val historicalData: LiveData<DataWrapper<HistoricalRatesModel>?> get() = _historical
 
-    fun clearResponse(){
+    fun clearResponse() {
         _historical.value = null
     }
 
     val baseCurrency: SharedFlow<DataWrapper<CurrenciesDatabaseMain>> =
-        databaseRepository.baseCurrency
+        currencyRepository.baseCurrency
             .map { DataWrapper.Success(it) }
             .catch { DataWrapper.Error(it.message) }
             .shareIn(viewModelScope, SharingStarted.WhileSubscribed(), replay = 1)
 
-    val allCurrencies: SharedFlow<DataWrapper<CurrenciesDatabaseDetailed>> =
-        databaseRepository.currencyData
+    val allCurrencies: SharedFlow<DataWrapper<List<CurrenciesDatabaseDetailed>>> =
+        currencyRepository.currencyListData
             .map { DataWrapper.Success(it) }
             .catch { DataWrapper.Error(it.message) }
             .shareIn(viewModelScope, SharingStarted.WhileSubscribed(), replay = 1)
 
-    val networkState: SharedFlow<DataWrapper<NetworkObserver.NetworkStatus>> =
-        networkStatus.observeStatus()
+    val networkState: SharedFlow<DataWrapper<NetworkStatus>> =
+        currencyRepository.observeNetworkStatus()
             .map { DataWrapper.Success(it) }
             .catch { DataWrapper.Error(it.message) }
             .shareIn(viewModelScope, SharingStarted.WhileSubscribed(), replay = 1)
 
     fun fetchHistoricalData(baseCurrency: String, selectedCurrencies: String, date: String) {
+        if (baseCurrency.isEmpty() || selectedCurrencies.isEmpty() || date.isEmpty()) return
+
         viewModelScope.launch {
-            try {
-                val response = retrofitRepository.getHistorical(
-                    baseCurrency = baseCurrency,
-                    currencies = selectedCurrencies,
-                    date = date,
-                    apiKey = BuildConfig.API_KEY
-                )
-                // to avoid forcing the response with '!!', use 'let' instead
-                response.let {
-                    if (it.isSuccessful) {
-                        _historical.postValue(DataWrapper.Success(it.body()))
-                    } else {
-                        Log.e(
-                            TAG,
-                            "ViewModel: Response is NOT successful. Code: ${response.code()}"
-                        )
-                    }
-                }
-            } catch (exception: Exception) {
-                _historical.postValue(DataWrapper.Error(error = exception.message, data = null))
+            val response = currencyRepository.getHistorical(
+                baseCurrency = baseCurrency,
+                currencies = selectedCurrencies,
+                date = date,
+                apiKey = BuildConfig.API_KEY
+            )
+            // to avoid forcing the response with '!!', use 'let' instead
+            response.let {
+                _historical.postValue(it)
             }
         }
     }

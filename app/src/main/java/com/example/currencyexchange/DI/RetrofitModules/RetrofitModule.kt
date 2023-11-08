@@ -1,8 +1,8 @@
 package com.example.currencyexchange.DI.RetrofitModules
 
 import com.example.currencyexchange.API.ApiServices
-import com.example.currencyexchange.Repository.Implementation.RetrofitRepositoryImplementation
-import com.example.currencyexchange.Repository.Interfaces.RetrofitRepository
+import com.example.currencyexchange.Repository.CurrencyRepository
+import com.example.currencyexchange.Repository.CurrencyRepositoryImplementation
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -40,5 +40,5 @@ object RetrofitModule {
 
     @Singleton
     @Provides
-    fun provideServiceHelper(servicesHelper: RetrofitRepositoryImplementation): RetrofitRepository = servicesHelper
+    fun provideServiceHelper(servicesHelper: CurrencyRepositoryImplementation): CurrencyRepository = servicesHelper
 }
